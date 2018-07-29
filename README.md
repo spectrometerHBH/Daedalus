@@ -1,2 +1,2 @@
 # Daedalus
-ACM Class Compiler project
+ACM Class Compiler project by spectrometer
