@@ -1,4 +1,7 @@
-// Generated from Mxstar.g4 by ANTLR 4.5
+// Generated from Mxstar.g4 by ANTLR 4.7.1
+
+package Compiler.Parser;
+
 import org.antlr.v4.runtime.atn.*;
 import org.antlr.v4.runtime.dfa.DFA;
 import org.antlr.v4.runtime.*;
@@ -10,7 +13,7 @@ import java.util.ArrayList;
 
 @SuppressWarnings({"all", "warnings", "unchecked", "unused", "cast"})
 public class MxstarParser extends Parser {
-	static { RuntimeMetaData.checkVersion("4.5", RuntimeMetaData.VERSION); }
+	static { RuntimeMetaData.checkVersion("4.7.1", RuntimeMetaData.VERSION); }
 
 	protected static final DFA[] _decisionToDFA;
 	protected static final PredictionContextCache _sharedContextCache =
@@ -155,6 +158,7 @@ public class MxstarParser extends Parser {
 			while ((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << Bool) | (1L << Int) | (1L << String) | (1L << Void) | (1L << Class) | (1L << Identifier))) != 0)) {
 				{
 				setState(43);
+				_errHandler.sync(this);
 				switch ( getInterpreter().adaptivePredict(_input,0,_ctx) ) {
 				case 1:
 					{
@@ -231,6 +235,7 @@ public class MxstarParser extends Parser {
 			enterOuterAlt(_localctx, 1);
 			{
 			setState(49);
+			_errHandler.sync(this);
 			switch ( getInterpreter().adaptivePredict(_input,2,_ctx) ) {
 			case 1:
 				{
@@ -244,6 +249,7 @@ public class MxstarParser extends Parser {
 			setState(52);
 			match(T__0);
 			setState(54);
+			_errHandler.sync(this);
 			_la = _input.LA(1);
 			if ((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << Bool) | (1L << Int) | (1L << String) | (1L << Identifier))) != 0)) {
 				{
@@ -322,6 +328,7 @@ public class MxstarParser extends Parser {
 			while ((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << Bool) | (1L << Int) | (1L << String) | (1L << Void) | (1L << Identifier))) != 0)) {
 				{
 				setState(64);
+				_errHandler.sync(this);
 				switch ( getInterpreter().adaptivePredict(_input,4,_ctx) ) {
 				case 1:
 					{
@@ -505,6 +512,7 @@ public class MxstarParser extends Parser {
 			setState(83);
 			match(Identifier);
 			setState(86);
+			_errHandler.sync(this);
 			_la = _input.LA(1);
 			if (_la==T__6) {
 				{
@@ -751,6 +759,7 @@ public class MxstarParser extends Parser {
 		enterRule(_localctx, 18, RULE_typeForFunc);
 		try {
 			setState(112);
+			_errHandler.sync(this);
 			switch (_input.LA(1)) {
 			case Bool:
 			case Int:
@@ -819,7 +828,10 @@ public class MxstarParser extends Parser {
 			_la = _input.LA(1);
 			if ( !((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << Bool) | (1L << Int) | (1L << String) | (1L << Identifier))) != 0)) ) {
 			_errHandler.recoverInline(this);
-			} else {
+			}
+			else {
+				if ( _input.LA(1)==Token.EOF ) matchedEOF = true;
+				_errHandler.reportMatch(this);
 				consume();
 			}
 			}
@@ -878,6 +890,7 @@ public class MxstarParser extends Parser {
 		enterRule(_localctx, 22, RULE_statement);
 		try {
 			setState(125);
+			_errHandler.sync(this);
 			switch ( getInterpreter().adaptivePredict(_input,11,_ctx) ) {
 			case 1:
 				enterOuterAlt(_localctx, 1);
@@ -1057,6 +1070,7 @@ public class MxstarParser extends Parser {
 			setState(140);
 			((ConditionStatementContext)_localctx).thenStmt = statement();
 			setState(143);
+			_errHandler.sync(this);
 			switch ( getInterpreter().adaptivePredict(_input,13,_ctx) ) {
 			case 1:
 				{
@@ -1119,6 +1133,7 @@ public class MxstarParser extends Parser {
 		enterRule(_localctx, 28, RULE_loopStatement);
 		try {
 			setState(161);
+			_errHandler.sync(this);
 			switch (_input.LA(1)) {
 			case While:
 				enterOuterAlt(_localctx, 1);
@@ -1205,6 +1220,7 @@ public class MxstarParser extends Parser {
 		int _la;
 		try {
 			setState(172);
+			_errHandler.sync(this);
 			switch (_input.LA(1)) {
 			case Return:
 				enterOuterAlt(_localctx, 1);
@@ -1212,6 +1228,7 @@ public class MxstarParser extends Parser {
 				setState(163);
 				match(Return);
 				setState(165);
+				_errHandler.sync(this);
 				_la = _input.LA(1);
 				if ((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << T__0) | (1L << T__9) | (1L << T__10) | (1L << T__12) | (1L << T__13) | (1L << T__14) | (1L << T__15) | (1L << New) | (1L << This) | (1L << IntegerConstant) | (1L << StringConstant) | (1L << NullLiteral) | (1L << BoolConstant) | (1L << Identifier))) != 0)) {
 					{
@@ -1314,6 +1331,7 @@ public class MxstarParser extends Parser {
 			enterOuterAlt(_localctx, 1);
 			{
 			setState(190);
+			_errHandler.sync(this);
 			switch (_input.LA(1)) {
 			case T__9:
 			case T__10:
@@ -1323,7 +1341,10 @@ public class MxstarParser extends Parser {
 				_la = _input.LA(1);
 				if ( !(_la==T__9 || _la==T__10) ) {
 					((ExpressionContext)_localctx).op = (Token)_errHandler.recoverInline(this);
-				} else {
+				}
+				else {
+					if ( _input.LA(1)==Token.EOF ) matchedEOF = true;
+					_errHandler.reportMatch(this);
 					consume();
 				}
 				setState(176);
@@ -1338,7 +1359,10 @@ public class MxstarParser extends Parser {
 				_la = _input.LA(1);
 				if ( !(_la==T__12 || _la==T__13) ) {
 					((ExpressionContext)_localctx).op = (Token)_errHandler.recoverInline(this);
-				} else {
+				}
+				else {
+					if ( _input.LA(1)==Token.EOF ) matchedEOF = true;
+					_errHandler.reportMatch(this);
 					consume();
 				}
 				setState(178);
@@ -1353,7 +1377,10 @@ public class MxstarParser extends Parser {
 				_la = _input.LA(1);
 				if ( !(_la==T__14 || _la==T__15) ) {
 					((ExpressionContext)_localctx).op = (Token)_errHandler.recoverInline(this);
-				} else {
+				}
+				else {
+					if ( _input.LA(1)==Token.EOF ) matchedEOF = true;
+					_errHandler.reportMatch(this);
 					consume();
 				}
 				setState(180);
@@ -1412,6 +1439,7 @@ public class MxstarParser extends Parser {
 					_prevctx = _localctx;
 					{
 					setState(244);
+					_errHandler.sync(this);
 					switch ( getInterpreter().adaptivePredict(_input,19,_ctx) ) {
 					case 1:
 						{
@@ -1426,7 +1454,10 @@ public class MxstarParser extends Parser {
 						_la = _input.LA(1);
 						if ( !((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << T__16) | (1L << T__17) | (1L << T__18))) != 0)) ) {
 							((ExpressionContext)_localctx).op = (Token)_errHandler.recoverInline(this);
-						} else {
+						}
+						else {
+							if ( _input.LA(1)==Token.EOF ) matchedEOF = true;
+							_errHandler.reportMatch(this);
 							consume();
 						}
 						setState(194);
@@ -1446,7 +1477,10 @@ public class MxstarParser extends Parser {
 						_la = _input.LA(1);
 						if ( !(_la==T__12 || _la==T__13) ) {
 							((ExpressionContext)_localctx).op = (Token)_errHandler.recoverInline(this);
-						} else {
+						}
+						else {
+							if ( _input.LA(1)==Token.EOF ) matchedEOF = true;
+							_errHandler.reportMatch(this);
 							consume();
 						}
 						setState(197);
@@ -1466,7 +1500,10 @@ public class MxstarParser extends Parser {
 						_la = _input.LA(1);
 						if ( !(_la==T__19 || _la==T__20) ) {
 							((ExpressionContext)_localctx).op = (Token)_errHandler.recoverInline(this);
-						} else {
+						}
+						else {
+							if ( _input.LA(1)==Token.EOF ) matchedEOF = true;
+							_errHandler.reportMatch(this);
 							consume();
 						}
 						setState(200);
@@ -1486,7 +1523,10 @@ public class MxstarParser extends Parser {
 						_la = _input.LA(1);
 						if ( !(_la==T__21 || _la==T__22) ) {
 							((ExpressionContext)_localctx).op = (Token)_errHandler.recoverInline(this);
-						} else {
+						}
+						else {
+							if ( _input.LA(1)==Token.EOF ) matchedEOF = true;
+							_errHandler.reportMatch(this);
 							consume();
 						}
 						setState(203);
@@ -1506,7 +1546,10 @@ public class MxstarParser extends Parser {
 						_la = _input.LA(1);
 						if ( !(_la==T__23 || _la==T__24) ) {
 							((ExpressionContext)_localctx).op = (Token)_errHandler.recoverInline(this);
-						} else {
+						}
+						else {
+							if ( _input.LA(1)==Token.EOF ) matchedEOF = true;
+							_errHandler.reportMatch(this);
 							consume();
 						}
 						setState(206);
@@ -1526,7 +1569,10 @@ public class MxstarParser extends Parser {
 						_la = _input.LA(1);
 						if ( !(_la==T__25 || _la==T__26) ) {
 							((ExpressionContext)_localctx).op = (Token)_errHandler.recoverInline(this);
-						} else {
+						}
+						else {
+							if ( _input.LA(1)==Token.EOF ) matchedEOF = true;
+							_errHandler.reportMatch(this);
 							consume();
 						}
 						setState(209);
@@ -1628,7 +1674,10 @@ public class MxstarParser extends Parser {
 						_la = _input.LA(1);
 						if ( !(_la==T__9 || _la==T__10) ) {
 							((ExpressionContext)_localctx).op = (Token)_errHandler.recoverInline(this);
-						} else {
+						}
+						else {
+							if ( _input.LA(1)==Token.EOF ) matchedEOF = true;
+							_errHandler.reportMatch(this);
 							consume();
 						}
 						}
@@ -1642,6 +1691,7 @@ public class MxstarParser extends Parser {
 						setState(231);
 						match(T__0);
 						setState(233);
+						_errHandler.sync(this);
 						_la = _input.LA(1);
 						if ((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << T__0) | (1L << T__9) | (1L << T__10) | (1L << T__12) | (1L << T__13) | (1L << T__14) | (1L << T__15) | (1L << New) | (1L << This) | (1L << IntegerConstant) | (1L << StringConstant) | (1L << NullLiteral) | (1L << BoolConstant) | (1L << Identifier))) != 0)) {
 							{
@@ -1799,6 +1849,7 @@ public class MxstarParser extends Parser {
 		try {
 			int _alt;
 			setState(297);
+			_errHandler.sync(this);
 			switch ( getInterpreter().adaptivePredict(_input,27,_ctx) ) {
 			case 1:
 				enterOuterAlt(_localctx, 1);
@@ -1981,7 +2032,10 @@ public class MxstarParser extends Parser {
 			_la = _input.LA(1);
 			if ( !((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << IntegerConstant) | (1L << StringConstant) | (1L << NullLiteral) | (1L << BoolConstant))) != 0)) ) {
 			_errHandler.recoverInline(this);
-			} else {
+			}
+			else {
+				if ( _input.LA(1)==Token.EOF ) matchedEOF = true;
+				_errHandler.reportMatch(this);
 				consume();
 			}
 			}
@@ -2052,7 +2106,7 @@ public class MxstarParser extends Parser {
 	}
 
 	public static final String _serializedATN =
-		"\3\u0430\ud6d1\u8206\uad2d\u4417\uaef1\u8d80\uaadd\38\u0130\4\2\t\2\4"+
+		"\3\u608b\ua72a\u8133\ub9ed\u417c\u3be7\u7786\u5964\38\u0130\4\2\t\2\4"+
 		"\3\t\3\4\4\t\4\4\5\t\5\4\6\t\6\4\7\t\7\4\b\t\b\4\t\t\t\4\n\t\n\4\13\t"+
 		"\13\4\f\t\f\4\r\t\r\4\16\t\16\4\17\t\17\4\20\t\20\4\21\t\21\4\22\t\22"+
 		"\4\23\t\23\4\24\t\24\4\25\t\25\3\2\3\2\3\2\7\2.\n\2\f\2\16\2\61\13\2\3"+
@@ -2077,7 +2131,7 @@ public class MxstarParser extends Parser {
 		"\24\u0120\n\24\r\24\16\24\u0121\3\24\3\24\7\24\u0126\n\24\f\24\16\24\u0129"+
 		"\13\24\3\24\5\24\u012c\n\24\3\25\3\25\3\25\2\4\22\"\26\2\4\6\b\n\f\16"+
 		"\20\22\24\26\30\32\34\36 \"$&(\2\f\4\2#%\65\65\3\2\f\r\3\2\17\20\3\2\21"+
-		"\22\3\2\23\25\3\2\26\27\3\2\30\31\3\2\32\33\3\2\34\35\3\2\61\64\u0153"+
+		"\22\3\2\23\25\3\2\26\27\3\2\30\31\3\2\32\33\3\2\34\35\3\2\61\64\2\u0153"+
 		"\2/\3\2\2\2\4\63\3\2\2\2\6=\3\2\2\2\bI\3\2\2\2\nM\3\2\2\2\fU\3\2\2\2\16"+
 		"Z\3\2\2\2\20b\3\2\2\2\22e\3\2\2\2\24r\3\2\2\2\26t\3\2\2\2\30\177\3\2\2"+
 		"\2\32\u0081\3\2\2\2\34\u008a\3\2\2\2\36\u00a3\3\2\2\2 \u00ae\3\2\2\2\""+

@@ -1,5 +1,9 @@
 grammar Mxstar;
 
+@header {
+package Compiler.Parser;
+}
+
 program
     :   (functionDecl | classDecl | variableDecl)*
     ;

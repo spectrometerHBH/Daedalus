@@ -1,7 +1,9 @@
-// Generated from Mxstar.g4 by ANTLR 4.5
+// Generated from Mxstar.g4 by ANTLR 4.7.1
+
+package Compiler.Parser;
+
 
 import org.antlr.v4.runtime.ParserRuleContext;
-import org.antlr.v4.runtime.misc.NotNull;
 import org.antlr.v4.runtime.tree.ErrorNode;
 import org.antlr.v4.runtime.tree.TerminalNode;
 

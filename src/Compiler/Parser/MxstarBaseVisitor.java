@@ -1,5 +1,7 @@
-// Generated from Mxstar.g4 by ANTLR 4.5
-import org.antlr.v4.runtime.misc.NotNull;
+// Generated from Mxstar.g4 by ANTLR 4.7.1
+
+package Compiler.Parser;
+
 import org.antlr.v4.runtime.tree.AbstractParseTreeVisitor;
 
 /**
