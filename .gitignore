@@ -154,4 +154,4 @@ Temporary Items
 #Folders
 references
 testcases
-.antlr
+src/Compiler/Parser/.antlr
