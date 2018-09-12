@@ -2,6 +2,7 @@ package Compiler;
 
 import java.io.*;
 
+import org.antlr.v4.runtime.tree.*;
 import org.antlr.v4.runtime.ANTLRInputStream;
 import org.antlr.v4.runtime.CommonTokenStream;
 import Compiler.Parser.MxstarLexer;
@@ -15,7 +16,8 @@ public class Main{
                     new CommonTokenStream(
                             new MxstarLexer(
                                 new ANTLRInputStream(in))));
-        System.out.println("OK");
+        ParseTree tree = parser.program();
+        System.out.println(tree.toStringTree(parser));
     }
 
     public static void main(String args[]) throws IOException {

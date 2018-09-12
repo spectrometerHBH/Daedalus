@@ -1,3 +1,16 @@
+class A
+{
+	int a;
+	void f(int b)
+	{
+		a = b;
+	}
+}
+
 int main()
 {
+	int c = 10;
+	A a = new A;
+	return a.f(c);
+	return 0;
 }
