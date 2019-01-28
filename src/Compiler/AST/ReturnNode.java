@@ -1,4 +1,4 @@
-package Compiler.AST.Statement;
+package Compiler.AST;
 
 public class ReturnNode extends StmtNode {
 }

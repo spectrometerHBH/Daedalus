@@ -1,4 +1,4 @@
-package Compiler.AST.Expression;
+package Compiler.AST;
 
 public class FuncallExprNode extends ExprNode {
 }

@@ -1,4 +1,4 @@
-package Compiler.AST.Expression;
+package Compiler.AST;
 
 public class BinaryExprNode extends ExprNode {
 }

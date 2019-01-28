@@ -1,5 +1,10 @@
 package Compiler.AST;
 
-public class ProgramNode extends ASTNode {
+import java.util.List;
 
+public class ProgramNode extends ASTNode {
+    List<DeclNode> declNodeList;
+    public ProgramNode(){
+
+    }
 }

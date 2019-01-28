@@ -1,4 +1,4 @@
-package Compiler.AST.Type;
+package Compiler.AST;
 
 public class ClassTypeNode extends TypeNode {
 }

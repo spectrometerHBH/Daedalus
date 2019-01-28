@@ -5,9 +5,15 @@ package Compiler.Parser;
 }
 
 program
-    :   (functionDecl | classDecl | variableDecl)*
+    :   programSection*
     ;
 
+programSection
+    :   functionDecl
+    |   classDecl
+    |   variableDecl
+    ;
+    
 // --- Declaration
 functionDecl
     :   typeForFunc ? Identifier '(' parameterDeclarationList? ')' block
