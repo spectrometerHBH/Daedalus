@@ -67,11 +67,19 @@ public interface MxstarVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitParameterDeclaration(MxstarParser.ParameterDeclarationContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link MxstarParser#type}.
+	 * Visit a parse tree produced by the {@code arrayType}
+	 * labeled alternative in {@link MxstarParser#type}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitType(MxstarParser.TypeContext ctx);
+	T visitArrayType(MxstarParser.ArrayTypeContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code narrayType}
+	 * labeled alternative in {@link MxstarParser#type}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitNarrayType(MxstarParser.NarrayTypeContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link MxstarParser#typeForFunc}.
 	 * @param ctx the parse tree
@@ -79,11 +87,33 @@ public interface MxstarVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitTypeForFunc(MxstarParser.TypeForFuncContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link MxstarParser#nonArrayType}.
+	 * Visit a parse tree produced by the {@code narrayTypeInt}
+	 * labeled alternative in {@link MxstarParser#nonArrayType}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitNonArrayType(MxstarParser.NonArrayTypeContext ctx);
+	T visitNarrayTypeInt(MxstarParser.NarrayTypeIntContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code narrayTypeBool}
+	 * labeled alternative in {@link MxstarParser#nonArrayType}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitNarrayTypeBool(MxstarParser.NarrayTypeBoolContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code narrayTypeString}
+	 * labeled alternative in {@link MxstarParser#nonArrayType}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitNarrayTypeString(MxstarParser.NarrayTypeStringContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code narrayTypeIdentifier}
+	 * labeled alternative in {@link MxstarParser#nonArrayType}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitNarrayTypeIdentifier(MxstarParser.NarrayTypeIdentifierContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link MxstarParser#statement}.
 	 * @param ctx the parse tree

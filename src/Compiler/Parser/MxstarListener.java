@@ -100,15 +100,29 @@ public interface MxstarListener extends ParseTreeListener {
 	 */
 	void exitParameterDeclaration(MxstarParser.ParameterDeclarationContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link MxstarParser#type}.
+	 * Enter a parse tree produced by the {@code arrayType}
+	 * labeled alternative in {@link MxstarParser#type}.
 	 * @param ctx the parse tree
 	 */
-	void enterType(MxstarParser.TypeContext ctx);
+	void enterArrayType(MxstarParser.ArrayTypeContext ctx);
 	/**
-	 * Exit a parse tree produced by {@link MxstarParser#type}.
+	 * Exit a parse tree produced by the {@code arrayType}
+	 * labeled alternative in {@link MxstarParser#type}.
 	 * @param ctx the parse tree
 	 */
-	void exitType(MxstarParser.TypeContext ctx);
+	void exitArrayType(MxstarParser.ArrayTypeContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code narrayType}
+	 * labeled alternative in {@link MxstarParser#type}.
+	 * @param ctx the parse tree
+	 */
+	void enterNarrayType(MxstarParser.NarrayTypeContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code narrayType}
+	 * labeled alternative in {@link MxstarParser#type}.
+	 * @param ctx the parse tree
+	 */
+	void exitNarrayType(MxstarParser.NarrayTypeContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link MxstarParser#typeForFunc}.
 	 * @param ctx the parse tree
@@ -120,15 +134,53 @@ public interface MxstarListener extends ParseTreeListener {
 	 */
 	void exitTypeForFunc(MxstarParser.TypeForFuncContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link MxstarParser#nonArrayType}.
+	 * Enter a parse tree produced by the {@code narrayTypeInt}
+	 * labeled alternative in {@link MxstarParser#nonArrayType}.
 	 * @param ctx the parse tree
 	 */
-	void enterNonArrayType(MxstarParser.NonArrayTypeContext ctx);
+	void enterNarrayTypeInt(MxstarParser.NarrayTypeIntContext ctx);
 	/**
-	 * Exit a parse tree produced by {@link MxstarParser#nonArrayType}.
+	 * Exit a parse tree produced by the {@code narrayTypeInt}
+	 * labeled alternative in {@link MxstarParser#nonArrayType}.
 	 * @param ctx the parse tree
 	 */
-	void exitNonArrayType(MxstarParser.NonArrayTypeContext ctx);
+	void exitNarrayTypeInt(MxstarParser.NarrayTypeIntContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code narrayTypeBool}
+	 * labeled alternative in {@link MxstarParser#nonArrayType}.
+	 * @param ctx the parse tree
+	 */
+	void enterNarrayTypeBool(MxstarParser.NarrayTypeBoolContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code narrayTypeBool}
+	 * labeled alternative in {@link MxstarParser#nonArrayType}.
+	 * @param ctx the parse tree
+	 */
+	void exitNarrayTypeBool(MxstarParser.NarrayTypeBoolContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code narrayTypeString}
+	 * labeled alternative in {@link MxstarParser#nonArrayType}.
+	 * @param ctx the parse tree
+	 */
+	void enterNarrayTypeString(MxstarParser.NarrayTypeStringContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code narrayTypeString}
+	 * labeled alternative in {@link MxstarParser#nonArrayType}.
+	 * @param ctx the parse tree
+	 */
+	void exitNarrayTypeString(MxstarParser.NarrayTypeStringContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code narrayTypeIdentifier}
+	 * labeled alternative in {@link MxstarParser#nonArrayType}.
+	 * @param ctx the parse tree
+	 */
+	void enterNarrayTypeIdentifier(MxstarParser.NarrayTypeIdentifierContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code narrayTypeIdentifier}
+	 * labeled alternative in {@link MxstarParser#nonArrayType}.
+	 * @param ctx the parse tree
+	 */
+	void exitNarrayTypeIdentifier(MxstarParser.NarrayTypeIdentifierContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link MxstarParser#statement}.
 	 * @param ctx the parse tree

@@ -126,13 +126,25 @@ public class MxstarBaseListener implements MxstarListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterType(MxstarParser.TypeContext ctx) { }
+	@Override public void enterArrayType(MxstarParser.ArrayTypeContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitType(MxstarParser.TypeContext ctx) { }
+	@Override public void exitArrayType(MxstarParser.ArrayTypeContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterNarrayType(MxstarParser.NarrayTypeContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitNarrayType(MxstarParser.NarrayTypeContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
@@ -150,13 +162,49 @@ public class MxstarBaseListener implements MxstarListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterNonArrayType(MxstarParser.NonArrayTypeContext ctx) { }
+	@Override public void enterNarrayTypeInt(MxstarParser.NarrayTypeIntContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitNonArrayType(MxstarParser.NonArrayTypeContext ctx) { }
+	@Override public void exitNarrayTypeInt(MxstarParser.NarrayTypeIntContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterNarrayTypeBool(MxstarParser.NarrayTypeBoolContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitNarrayTypeBool(MxstarParser.NarrayTypeBoolContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterNarrayTypeString(MxstarParser.NarrayTypeStringContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitNarrayTypeString(MxstarParser.NarrayTypeStringContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterNarrayTypeIdentifier(MxstarParser.NarrayTypeIdentifierContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitNarrayTypeIdentifier(MxstarParser.NarrayTypeIdentifierContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *

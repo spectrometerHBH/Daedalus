@@ -44,20 +44,20 @@ parameterDeclaration
     ;
 
 type
-    :   type '[' ']'
-    |   nonArrayType
+    :   type '[' ']'    #arrayType
+    |   nonArrayType    #narrayType
     ;
 
 typeForFunc
-    :   type
+    :   type    
     |   Void
     ;
 
 nonArrayType
-    :   Int
-    |   Bool
-    |   String
-    |   Identifier
+    :   Int             #narrayTypeInt
+    |   Bool            #narrayTypeBool
+    |   String          #narrayTypeString
+    |   Identifier      #narrayTypeIdentifier
     ;
 
 // --- Statement
