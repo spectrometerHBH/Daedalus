@@ -92,30 +92,30 @@ jumpStatement
 
 // --- Expression
 expression
-    :   expression op=('++' | '--')
-    |   expression '(' parameterList? ')'
-    |   expression '[' expression ']'
-    |   expression '.' Identifier
-    |   <assoc=right> op=('++' | '--') expression
-    |   <assoc=right> op=('+' | '-') expression
-    |   <assoc=right> op=('!' | '~') expression
-    |   <assoc=right> 'new' creator
-    |   lhs = expression op=('*' | '/' | '%') rhs = expression
-    |   lhs = expression op=('+' | '-') rhs = expression
-    |   lhs = expression op=('<<' | '>>') rhs = expression
-    |   lhs = expression op=('<' | '>') rhs = expression
-    |   lhs = expression op=('<=' | '>=') rhs = expression
-    |   lhs = expression op=('==' | '!=') rhs = expression
-    |   lhs = expression op='&' rhs = expression
-    |   lhs = expression op='^' rhs = expression
-    |   lhs = expression op='|' rhs = expression
-    |   lhs = expression op='&&' rhs = expression
-    |   lhs = expression op='||' rhs = expression
-    |   <assoc=right> lhs = expression op='=' rhs = expression
-    |   Identifier
-    |   This
-    |   constant
-    |   '(' expression ')'
+    :   expression op=('++' | '--')                                 #PostfixIncDec
+    |   expression '(' parameterList? ')'                           #FunctionCall    
+    |   expression '[' expression ']'                               #Subscript
+    |   expression '.' Identifier                                   #MemberAccess
+    |   <assoc=right> op=('++' | '--') expression                   #UnaryExpr
+    |   <assoc=right> op=('+' | '-') expression                     #UnaryExpr
+    |   <assoc=right> op=('!' | '~') expression                     #UnaryExpr
+    |   <assoc=right> 'new' creator                                 #NewExpr    
+    |   lhs = expression op=('*' | '/' | '%') rhs = expression      #BinaryExpr
+    |   lhs = expression op=('+' | '-') rhs = expression            #BinaryExpr
+    |   lhs = expression op=('<<' | '>>') rhs = expression          #BinaryExpr
+    |   lhs = expression op=('<' | '>') rhs = expression            #BinaryExpr
+    |   lhs = expression op=('<=' | '>=') rhs = expression          #BinaryExpr
+    |   lhs = expression op=('==' | '!=') rhs = expression          #BinaryExpr   
+    |   lhs = expression op='&' rhs = expression                    #BinaryExpr
+    |   lhs = expression op='^' rhs = expression                    #BinaryExpr
+    |   lhs = expression op='|' rhs = expression                    #BinaryExpr
+    |   lhs = expression op='&&' rhs = expression                   #BinaryExpr
+    |   lhs = expression op='||' rhs = expression                   #BinaryExpr
+    |   <assoc=right> lhs = expression op='=' rhs = expression      #BinaryExpr
+    |   Identifier                                                  #Identifier
+    |   This                                                        #ThisExpr
+    |   constant                                                    #Literal
+    |   '(' expression ')'                                          #SubExpression
     ;
 
 parameterList

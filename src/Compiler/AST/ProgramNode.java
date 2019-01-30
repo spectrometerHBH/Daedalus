@@ -1,10 +1,15 @@
 package Compiler.AST;
 
+import Compiler.Utils.Position;
+
 import java.util.List;
 
 public class ProgramNode extends ASTNode {
-    List<DeclNode> declNodeList;
-    public ProgramNode(){
+    private List<DeclNode> declNodeList;
+    private Position position;
 
+    public ProgramNode(List<DeclNode> declNodesList, Position position){
+        this.declNodeList = declNodesList;
+        this.position = position;
     }
 }
