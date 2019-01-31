@@ -1,5 +1,9 @@
 package Compiler.AST;
 
-public class FuncTypeNode extends TypeNode {
+import Compiler.Utils.Position;
 
+public class FuncTypeNode extends TypeNode {
+    public FuncTypeNode(Position position){
+        super(position);
+    }
 }

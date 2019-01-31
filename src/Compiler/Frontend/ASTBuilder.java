@@ -31,11 +31,26 @@ public class ASTBuilder extends MxstarBaseVisitor<ASTNode> {
     }
 
     @Override public ASTNode visitFunctionDecl(MxstarParser.FunctionDeclContext ctx) {
-
+        TypeNode type = ctx.typeForFunc() == null ? null : (TypeNode) visit(ctx.typeForFunc());
+        String identifier = ctx.Identifier().getText();
+        List<VarDeclNode> parameterList = new ArrayList<>();
+        if (ctx.parameterDeclarationList() != null) {
+            ASTNode decl = visit(ctx.parameterDeclarationList());
+            parameterList.addAll(((VarDeclListNode) decl).getList());
+        }
+        BlockStmtNode block = (BlockStmtNode) visit(ctx.block());
+        return new FuncDeclNode(type, identifier, parameterList, block, new Position(ctx.getStart()));
     }
 
     @Override public ASTNode visitClassDecl(MxstarParser.ClassDeclContext ctx) {
-
+        String identifier = ctx.Identifier().getText();
+        List<FuncDeclNode> functionDeclList = new ArrayList<>();
+        List<VarDeclNode> varDeclList = new ArrayList<>();
+        for (ParserRuleContext decl : ctx.functionDecl())
+            functionDeclList.add((FuncDeclNode) visit(decl));
+        for (ParserRuleContext decl : ctx.variableDecl())
+            varDeclList.add((VarDeclNode) visit(decl));
+        return new ClassDeclNode(identifier, functionDeclList, varDeclList, new Position(ctx.getStart()));
     }
 
     @Override public ASTNode visitVariableDecl(MxstarParser.VariableDeclContext ctx) {
@@ -49,6 +64,7 @@ public class ASTBuilder extends MxstarBaseVisitor<ASTNode> {
         VarDeclListNode varDeclListNode = new VarDeclListNode();
         for (ParserRuleContext singleVariableDecl : ctx.singleVariableDecl())
             varDeclListNode.addVar((VarDeclNode) visit(singleVariableDecl));
+        return varDeclListNode;
     }
 
     @Override public ASTNode visitSingleVariableDecl(MxstarParser.SingleVariableDeclContext ctx) {
@@ -58,11 +74,16 @@ public class ASTBuilder extends MxstarBaseVisitor<ASTNode> {
     }
 
     @Override public ASTNode visitParameterDeclarationList(MxstarParser.ParameterDeclarationListContext ctx) {
-
+        VarDeclListNode parameterDeclListNode = new VarDeclListNode();
+        for (ParserRuleContext parameterDecl : ctx.parameterDeclaration())
+            parameterDeclListNode.addVar((VarDeclNode) visit(parameterDecl));
+        return parameterDeclListNode;
     }
 
     @Override public ASTNode visitParameterDeclaration(MxstarParser.ParameterDeclarationContext ctx) {
-
+        TypeNode type = (TypeNode) visit(ctx.type());
+        String identifier = ctx.Identifier().getText();
+        return new VarDeclNode(type, null, identifier, new Position(ctx.getStart()));
     }
 
     @Override public ASTNode visitArrayType(MxstarParser.ArrayTypeContext ctx) {
