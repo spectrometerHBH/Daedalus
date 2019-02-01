@@ -62,13 +62,13 @@ nonArrayType
 
 // --- Statement
 statement 
-    :   block
-    |   variableDecl
-    |   expression ';'
-    |   conditionStatement
-    |   loopStatement
-    |   jumpStatement
-    |   ';' 
+    :   block               #blockStmt
+    |   variableDecl        #varDeclStmt
+    |   expression ';'      #exprStmt
+    |   conditionStatement  #conditionStmt
+    |   loopStatement       #loopStmt
+    |   jumpStatement       #jumpStmt
+    |   ';'                 #blankStmt
     ;
 
 block
@@ -80,14 +80,14 @@ conditionStatement
     ;
 
 loopStatement
-    :   While '(' expression ')' statement
-    |   For '(' init=expression ';' cond=expression ';' step=expression ')' statement
+    :   While '(' expression ')' statement  #whileStmt
+    |   For '(' init=expression ';' cond=expression ';' step=expression ')' statement #forStmt
     ;
 
 jumpStatement
-    :   Return expression? ';'
-    |   Break ';'
-    |   Continue ';'
+    :   Return expression? ';'  #returnStmt
+    |   Break ';'               #breakStmt
+    |   Continue ';'            #continueStmt
     ;
 
 // --- Expression
@@ -123,17 +123,17 @@ parameterList
     ;
 
 creator
-    :   nonArrayType ('[' expression ']')+ ('[' ']')+ ('[' expression ']')+  
-    |   nonArrayType ('[' expression ']')+ ('[' ']')*                        
-    |   nonArrayType                                                         
+    :   nonArrayType ('[' expression ']')+ ('[' ']')+ ('[' expression ']')+  #errorCreator
+    |   nonArrayType ('[' expression ']')+ ('[' ']')*                        #arrayCreator
+    |   nonArrayType                                                         #narrayCreator
     ;
 
 constant
-    :   IntegerConstant
-    |   StringConstant
-    |   NullLiteral
-    |   BoolConstant
-    ;
+    :   IntegerConstant     #integerLiteral
+    |   StringConstant      #stringLiteral
+    |   NullLiteral         #nullLiteral
+    |   BoolConstant        #boolLiteral
+    ;  
 
 // --- Reserved words
 Bool : 'bool';

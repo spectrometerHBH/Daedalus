@@ -115,79 +115,138 @@ public class ASTBuilder extends MxstarBaseVisitor<ASTNode> {
         return new ClassTypeNode(ctx.Identifier().getText(), new Position(ctx.getStart()));
     }
 
-    @Override public ASTNode visitStatement(MxstarParser.StatementContext ctx) {
+    @Override public ASTNode visitBlockStmt(MxstarParser.BlockStmtContext ctx) {
+        return visitChildren(ctx);
+    }
 
+    @Override public ASTNode visitVarDeclStmt(MxstarParser.VarDeclStmtContext ctx) {
+        return visitChildren(ctx);
+    }
+
+    @Override public ASTNode visitExprStmt(MxstarParser.ExprStmtContext ctx) {
+        return visitChildren(ctx);
+    }
+
+    @Override public ASTNode visitConditionStmt(MxstarParser.ConditionStmtContext ctx) {
+        return visitChildren(ctx);
+    }
+
+    @Override public ASTNode visitLoopStmt(MxstarParser.LoopStmtContext ctx) {
+        return visitChildren(ctx);
+    }
+
+    @Override public ASTNode visitJumpStmt(MxstarParser.JumpStmtContext ctx) {
+        return visitChildren(ctx);
+    }
+
+    @Override public ASTNode visitBlankStmt(MxstarParser.BlankStmtContext ctx) {
+        return visitChildren(ctx);
     }
 
     @Override public ASTNode visitBlock(MxstarParser.BlockContext ctx) {
-
+        List<StmtNode> stmtList = new ArrayList<>();
+        for (ParserRuleContext stmt = ctx.statement())
+            stmtList.add((StmtNode) visit(stmt));
+        return new BlockStmtNode(stmtList, new Position(ctx.start));
     }
 
     @Override public ASTNode visitConditionStatement(MxstarParser.ConditionStatementContext ctx) {
-
+        return visitChildren(ctx);
     }
 
-    @Override public ASTNode visitLoopStatement(MxstarParser.LoopStatementContext ctx) {
-
+    @Override public ASTNode visitWhileStmt(MxstarParser.WhileStmtContext ctx) {
+        return visitChildren(ctx);
     }
 
-    @Override public ASTNode visitJumpStatement(MxstarParser.JumpStatementContext ctx) {
+    @Override public ASTNode visitForStmt(MxstarParser.ForStmtContext ctx) {
+        return visitChildren(ctx);
+    }
 
+    @Override public ASTNode visitReturnStmt(MxstarParser.ReturnStmtContext ctx) {
+        return visitChildren(ctx);
+    }
+
+    @Override public ASTNode visitBreakStmt(MxstarParser.BreakStmtContext ctx) {
+        return visitChildren(ctx);
+    }
+
+    @Override public ASTNode visitContinueStmt(MxstarParser.ContinueStmtContext ctx) {
+        return visitChildren(ctx);
     }
 
     @Override public ASTNode visitIdentifier(MxstarParser.IdentifierContext ctx) {
-
+        return visitChildren(ctx);
     }
 
-    @Override public ASTNode visitMemberAccess(MxstarParser.MemberAccessContext ctx) { 
-        
+    @Override public ASTNode visitMemberAccess(MxstarParser.MemberAccessContext ctx) {
+        return visitChildren(ctx);
     }
 
-    @Override public ASTNode visitLiteral(MxstarParser.LiteralContext ctx) { 
-        
+    @Override public ASTNode visitLiteral(MxstarParser.LiteralContext ctx) {
+        return visitChildren(ctx);
     }
 
-    @Override public ASTNode visitBinaryExpr(MxstarParser.BinaryExprContext ctx) { 
-        
+    @Override public ASTNode visitBinaryExpr(MxstarParser.BinaryExprContext ctx) {
+        return visitChildren(ctx);
     }
 
-    @Override public ASTNode visitNewExpr(MxstarParser.NewExprContext ctx) { 
-        
+    @Override public ASTNode visitNewExpr(MxstarParser.NewExprContext ctx) {
+        return visitChildren(ctx);
     }
 
-    @Override public ASTNode visitSubscript(MxstarParser.SubscriptContext ctx) { 
-        
+    @Override public ASTNode visitSubscript(MxstarParser.SubscriptContext ctx) {
+        return visitChildren(ctx);
     }
 
-    @Override public ASTNode visitFunctionCall(MxstarParser.FunctionCallContext ctx) { 
-        
+    @Override public ASTNode visitFunctionCall(MxstarParser.FunctionCallContext ctx) {
+        return visitChildren(ctx);
     }
 
-    @Override public ASTNode visitPostfixIncDec(MxstarParser.PostfixIncDecContext ctx) { 
-        
+    @Override public ASTNode visitPostfixIncDec(MxstarParser.PostfixIncDecContext ctx) {
+        return visitChildren(ctx);
     }
 
-    @Override public ASTNode visitUnaryExpr(MxstarParser.UnaryExprContext ctx) { 
-        
+    @Override public ASTNode visitUnaryExpr(MxstarParser.UnaryExprContext ctx) {
+        return visitChildren(ctx);
     }
 
-    @Override public ASTNode visitSubExpression(MxstarParser.SubExpressionContext ctx) { 
-        
+    @Override public ASTNode visitSubExpression(MxstarParser.SubExpressionContext ctx) {
+        return visitChildren(ctx);
     }
 
-    @Override public ASTNode visitThisExpr(MxstarParser.ThisExprContext ctx) { 
-        
+    @Override public ASTNode visitThisExpr(MxstarParser.ThisExprContext ctx) {
+        return visitChildren(ctx);
     }
 
     @Override public ASTNode visitParameterList(MxstarParser.ParameterListContext ctx) {
-
+        return visitChildren(ctx);
     }
 
-    @Override public ASTNode visitCreator(MxstarParser.CreatorContext ctx) {
-
+    @Override public ASTNode visitErrorCreator(MxstarParser.ErrorCreatorContext ctx) {
+        return visitChildren(ctx);
     }
 
-    @Override public ASTNode visitConstant(MxstarParser.ConstantContext ctx) {
+    @Override public ASTNode visitArrayCreator(MxstarParser.ArrayCreatorContext ctx) {
+        return visitChildren(ctx);
+    }
 
+    @Override public ASTNode visitNarrayCreator(MxstarParser.NarrayCreatorContext ctx) {
+        return visitChildren(ctx);
+    }
+
+    @Override public ASTNode visitIntegerLiteral(MxstarParser.IntegerLiteralContext ctx) {
+        return visitChildren(ctx);
+    }
+
+    @Override public ASTNode visitStringLiteral(MxstarParser.StringLiteralContext ctx) {
+        return visitChildren(ctx);
+    }
+
+    @Override public ASTNode visitNullLiteral(MxstarParser.NullLiteralContext ctx) {
+        return visitChildren(ctx);
+    }
+
+    @Override public ASTNode visitBoolLiteral(MxstarParser.BoolLiteralContext ctx) {
+        return visitChildren(ctx);
     }
 }
