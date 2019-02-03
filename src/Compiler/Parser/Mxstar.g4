@@ -94,7 +94,7 @@ jumpStatement
 expression
     :   expression op=('++' | '--')                                 #PostfixIncDec
     |   expression '(' parameterList? ')'                           #FunctionCall    
-    |   expression '[' expression ']'                               #Subscript
+    |   array = expression '[' index = expression ']'               #Subscript
     |   expression '.' Identifier                                   #MemberAccess
     |   <assoc=right> op=('++' | '--') expression                   #UnaryExpr
     |   <assoc=right> op=('+' | '-') expression                     #UnaryExpr

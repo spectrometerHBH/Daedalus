@@ -12,10 +12,10 @@ public class VarDeclNode extends DeclNode {
     private Position position;
 
     public VarDeclNode(TypeNode type, ExprNode expr, String identifier, Position position){
+        super(position);
         this.type = type;
         this.expr = expr;
         this.identifier = identifier;
-        this.position = position;
     }
 
     public void setType(TypeNode type){

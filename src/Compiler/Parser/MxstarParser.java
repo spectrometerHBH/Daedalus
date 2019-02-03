@@ -1720,6 +1720,8 @@ public class MxstarParser extends Parser {
 		}
 	}
 	public static class SubscriptContext extends ExpressionContext {
+		public ExpressionContext array;
+		public ExpressionContext index;
 		public List<ExpressionContext> expression() {
 			return getRuleContexts(ExpressionContext.class);
 		}
@@ -2246,13 +2248,14 @@ public class MxstarParser extends Parser {
 					case 15:
 						{
 						_localctx = new SubscriptContext(new ExpressionContext(_parentctx, _parentState));
+						((SubscriptContext)_localctx).array = _prevctx;
 						pushNewRecursionContext(_localctx, _startState, RULE_expression);
 						setState(245);
 						if (!(precpred(_ctx, 22))) throw new FailedPredicateException(this, "precpred(_ctx, 22)");
 						setState(246);
 						match(T__7);
 						setState(247);
-						expression(0);
+						((SubscriptContext)_localctx).index = expression(0);
 						setState(248);
 						match(T__8);
 						}

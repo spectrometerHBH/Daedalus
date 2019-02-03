@@ -1,16 +1,20 @@
 package Compiler.AST;
 
+import Compiler.Utils.Position;
+
 import java.util.ArrayList;
 import java.util.List;
 
 public class VarDeclListNode extends DeclNode{
     private List<VarDeclNode> decls;
 
-    public VarDeclListNode(){
+    public VarDeclListNode(Position position){
+        super(position);
         this.decls = new ArrayList<>();
     }
 
-    public VarDeclListNode(List<VarDeclNode> decls){
+    public VarDeclListNode(List<VarDeclNode> decls, Position position){
+        super(position);
         this.decls = decls;
     }
 

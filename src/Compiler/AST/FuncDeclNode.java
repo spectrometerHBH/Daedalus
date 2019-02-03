@@ -9,13 +9,12 @@ public class FuncDeclNode extends DeclNode {
     private String identifier;
     private List<VarDeclNode> parameterList;
     private BlockStmtNode block;
-    private Position position;
 
     public FuncDeclNode(TypeNode type, String identifier, List<VarDeclNode> parameterList, BlockStmtNode block, Position position){
+        super(position);
         this.type = type;
         this.identifier = identifier;
         this.parameterList = parameterList;
         this.block = block;
-        this.position = position;
     }
 }
