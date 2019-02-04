@@ -4,6 +4,7 @@ import Compiler.AST.*;
 import Compiler.Parser.MxstarBaseVisitor;
 import Compiler.Parser.MxstarParser;
 import Compiler.Utils.Position;
+import Compiler.Utils.SyntaxError;
 import javafx.geometry.Pos;
 import org.antlr.v4.runtime.ParserRuleContext;
 
@@ -248,50 +249,64 @@ public class ASTBuilder extends MxstarBaseVisitor<ASTNode> {
     }
 
     @Override public ASTNode visitPostfixIncDec(MxstarParser.PostfixIncDecContext ctx) {
-        return new
+        return new UnaryExprNode((ExprNode) visit(ctx.expression()),
+                                 (ctx.op.getText() == "++") ? UnaryExprNode.Op.PRE_INC : UnaryExprNode.Op.PRE_DEC,
+                                 new Position(ctx.getStart()));
     }
 
     @Override public ASTNode visitUnaryExpr(MxstarParser.UnaryExprContext ctx) {
-        return visitChildren(ctx);
+        UnaryExprNode.Op op;
+        switch (ctx.op.getText()){
+            case "++" : op = UnaryExprNode.Op.SUF_INC; break;
+            case "--" : op = UnaryExprNode.Op.SUF_DEC; break;
+            case "+"  : op = UnaryExprNode.Op.POS;     break;
+            case "-"  : op = UnaryExprNode.Op.NEG;     break;
+            case "!"  : op = UnaryExprNode.Op.NOTL;    break;
+            case "~"  : op = UnaryExprNode.Op.NOT;     break;
+            default   : op = null;
+        }
+        return new UnaryExprNode((ExprNode) visit(ctx.expression()),
+                                 op,
+                                 new Position(ctx.getStart()));
     }
 
     @Override public ASTNode visitSubExpression(MxstarParser.SubExpressionContext ctx) {
-        return visitChildren(ctx);
+        return visit(ctx.expression());
     }
 
     @Override public ASTNode visitThisExpr(MxstarParser.ThisExprContext ctx) {
-        return visitChildren(ctx);
+        return new ThisExprNode(new Position(ctx.getStart()));
     }
 
     @Override public ASTNode visitParameterList(MxstarParser.ParameterListContext ctx) {
-        return visitChildren(ctx);
+        return null;
     }
 
-    @Override public ASTNode visitErrorCreator(MxstarParser.ErrorCreatorContext ctx) {
-        return visitChildren(ctx);
+    @Override public ASTNode visitErrorCreator(MxstarParser.ErrorCreatorContext ctx){
+        throw new SyntaxError("Invalid new expression", new Position(ctx.getStart()));
     }
 
     @Override public ASTNode visitArrayCreator(MxstarParser.ArrayCreatorContext ctx) {
-        return visitChildren(ctx);
+        return 
     }
 
     @Override public ASTNode visitNarrayCreator(MxstarParser.NarrayCreatorContext ctx) {
-        return visitChildren(ctx);
+        return ;
     }
 
     @Override public ASTNode visitIntegerLiteral(MxstarParser.IntegerLiteralContext ctx) {
-        return visitChildren(ctx);
+        return new IntLiteralNode(Integer.valueOf(ctx.IntegerConstant().getText()), new Position(ctx.getStart()));
     }
 
     @Override public ASTNode visitStringLiteral(MxstarParser.StringLiteralContext ctx) {
-        return visitChildren(ctx);
+        return new StringLiteralNode(ctx.StringConstant().getText(), new Position(ctx.getStart()));
     }
 
     @Override public ASTNode visitNullLiteral(MxstarParser.NullLiteralContext ctx) {
-        return visitChildren(ctx);
+        return new NullLiteralNode(new Position(ctx.getStart()));
     }
 
     @Override public ASTNode visitBoolLiteral(MxstarParser.BoolLiteralContext ctx) {
-        return visitChildren(ctx);
+        return new BoolLiteralNode(Boolean.valueOf(ctx.BoolConstant().getText()), new Position(ctx.getStart()));
     }
 }

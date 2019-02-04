@@ -9,7 +9,7 @@ public class BlockStmtNode extends StmtNode {
     private Position position;
 
     public BlockStmtNode(List<StmtNode> stmtList, Position position){
+        super(position);
         this.stmtList = stmtList;
-        this.position = position;
     }
 }
