@@ -5,10 +5,8 @@ import Compiler.Parser.MxstarBaseVisitor;
 import Compiler.Parser.MxstarParser;
 import Compiler.Utils.Position;
 import Compiler.Utils.SyntaxError;
-import javafx.geometry.Pos;
 import org.antlr.v4.runtime.ParserRuleContext;
 
-import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -51,7 +49,7 @@ public class ASTBuilder extends MxstarBaseVisitor<ASTNode> {
         for (ParserRuleContext decl : ctx.functionDecl())
             functionDeclList.add((FuncDeclNode) visit(decl));
         for (ParserRuleContext decl : ctx.variableDecl())
-            varDeclList.add((VarDeclNode) visit(decl));
+            varDeclList.addAll(((VarDeclListNode) visit(decl)).getList());
         return new ClassDeclNode(identifier, functionDeclList, varDeclList, new Position(ctx.getStart()));
     }
 
@@ -122,11 +120,11 @@ public class ASTBuilder extends MxstarBaseVisitor<ASTNode> {
     }
 
     @Override public ASTNode visitVarDeclStmt(MxstarParser.VarDeclStmtContext ctx) {
-        return visit(ctx.variableDecl());
+        return new VarDeclStmtNode((VarDeclListNode) visit(ctx.variableDecl()), new Position(ctx.getStart()));
     }
 
     @Override public ASTNode visitExprStmt(MxstarParser.ExprStmtContext ctx) {
-        return visit(ctx.expression());
+        return new ExprStmtNode((ExprNode) visit(ctx.expression()), new Position(ctx.getStart()));
     }
 
     @Override public ASTNode visitConditionStmt(MxstarParser.ConditionStmtContext ctx) {

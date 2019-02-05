@@ -20,6 +20,7 @@ public class Main {
         parser.removeErrorListeners();
         parser.addErrorListener(new MxstarErrorListener());
         ParseTree tree = parser.program();
+        //System.out.println(tree.toStringTree());
         ASTBuilder astBuilder = new ASTBuilder();
         ProgramNode ast = (ProgramNode) astBuilder.visit(tree);
     }

@@ -8,8 +8,8 @@ public class WhileStmtNode extends StmtNode {
     private Position position;
 
     public WhileStmtNode(ExprNode expression, StmtNode statement, Position position){
+        super(position);
         this.expression = expression;
         this.statement = statement;
-        this.position = position;
     }
 }
