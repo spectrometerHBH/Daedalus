@@ -13,4 +13,8 @@ public class FuncallExprNode extends ExprNode {
         this.function = function;
         this.parameterList = parameterList;
     }
+
+    @Override public void accept(ASTVisitor visitor){
+        visitor.visit(this);
+    }
 }

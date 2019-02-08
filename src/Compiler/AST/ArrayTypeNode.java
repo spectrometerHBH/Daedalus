@@ -18,4 +18,8 @@ public class ArrayTypeNode extends TypeNode {
             dims = 1;
         }
     }
+
+    @Override public void accept(ASTVisitor visitor){
+        visitor.visit(this);
+    }
 }

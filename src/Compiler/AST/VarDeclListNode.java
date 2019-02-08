@@ -30,4 +30,8 @@ public class VarDeclListNode extends DeclNode{
     public void addVar(VarDeclNode varDeclNode){
         decls.add(varDeclNode);
     }
+
+    @Override public void accept(ASTVisitor visitor){
+        visitor.visit(this);
+    }
 }

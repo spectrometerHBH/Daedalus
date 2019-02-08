@@ -9,4 +9,8 @@ public class BoolLiteralNode extends ConstExprNode {
         super(position);
         this.val = val;
     }
+
+    @Override public void accept(ASTVisitor visitor){
+        visitor.visit(this);
+    }
 }

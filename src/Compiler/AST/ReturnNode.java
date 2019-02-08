@@ -9,4 +9,8 @@ public class ReturnNode extends StmtNode {
         super(position);
         this.expression = expression;
     }
+
+    @Override public void accept(ASTVisitor visitor){
+        visitor.visit(this);
+    }
 }

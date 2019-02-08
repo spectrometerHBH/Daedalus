@@ -1,6 +1,9 @@
 class A
 {
 	int a;
+	A(){
+
+	}
 	void f(int b)
 	{
 		a = b;

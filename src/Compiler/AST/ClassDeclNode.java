@@ -15,4 +15,8 @@ public class ClassDeclNode extends DeclNode{
         this.funcDeclList = funcDeclList;
         this.varDecList = varDecList;
     }
+
+    @Override public void accept(ASTVisitor visitor){
+        visitor.visit(this);
+    }
 }

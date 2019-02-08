@@ -11,4 +11,8 @@ public class ClassMemberNode extends ExprNode {
         this.expression = expression;
         this.identifier = identifier;
     }
+
+    @Override public void accept(ASTVisitor visitor){
+        visitor.visit(this);
+    }
 }

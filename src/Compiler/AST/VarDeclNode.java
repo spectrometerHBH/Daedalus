@@ -21,4 +21,8 @@ public class VarDeclNode extends DeclNode {
     public void setType(TypeNode type){
         this.type = type;
     }
+
+    @Override public void accept(ASTVisitor visitor){
+        visitor.visit(this);
+    }
 }

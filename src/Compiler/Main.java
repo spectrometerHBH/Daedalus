@@ -20,7 +20,7 @@ public class Main {
         parser.removeErrorListeners();
         parser.addErrorListener(new MxstarErrorListener());
         ParseTree tree = parser.program();
-        //System.out.println(tree.toStringTree());
+        //System.out.println(tree.toStringTree(parser));
         ASTBuilder astBuilder = new ASTBuilder();
         ProgramNode ast = (ProgramNode) astBuilder.visit(tree);
     }
@@ -29,6 +29,7 @@ public class Main {
         InputStream in = new FileInputStream("test.txt");
         try {
             buildAST(in);
+
         }catch (SyntaxError e){
             System.out.println(e.getMessage());
         }

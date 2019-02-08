@@ -11,4 +11,8 @@ public class ProgramNode extends ASTNode {
         super(position);
         this.declNodeList = declNodesList;
     }
+
+    @Override public void accept(ASTVisitor visitor){
+        visitor.visit(this);
+    }
 }

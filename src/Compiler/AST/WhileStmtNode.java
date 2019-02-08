@@ -12,4 +12,8 @@ public class WhileStmtNode extends StmtNode {
         this.expression = expression;
         this.statement = statement;
     }
+
+    @Override public void accept(ASTVisitor visitor){
+        visitor.visit(this);
+    }
 }

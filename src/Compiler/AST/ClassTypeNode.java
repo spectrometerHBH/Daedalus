@@ -9,4 +9,8 @@ public class ClassTypeNode extends TypeNode {
         super(position);
         this.identifier = identifier;
     }
+
+    @Override public void accept(ASTVisitor visitor){
+        visitor.visit(this);
+    }
 }

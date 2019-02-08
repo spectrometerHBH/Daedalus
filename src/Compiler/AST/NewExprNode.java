@@ -11,4 +11,8 @@ public class NewExprNode extends ExprNode {
         this.type = type;
         this.numDims = numDims;
     }
+
+    @Override public void accept(ASTVisitor visitor){
+        visitor.visit(this);
+    }
 }
