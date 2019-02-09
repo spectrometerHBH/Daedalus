@@ -17,8 +17,8 @@ public abstract class BaseScope implements Scope {
         return enclosingScope;
     }
 
-    public abstract void defineVariable(Symbol sym);
-    public abstract void defineFunction(Symbol sym);
-    public abstract void defineClass(Symbol sym);
+    public abstract void defineVariable(VariableSymbol sym);
+    public abstract void defineFunction(FunctionSymbol sym);
+    public abstract void defineClass(ClassSymbol sym);
     public abstract Symbol resolve(String name);
 }

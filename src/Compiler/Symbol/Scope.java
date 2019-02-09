@@ -3,8 +3,8 @@ package Compiler.Symbol;
 public interface Scope {
     String getScopeName();
     Scope getEnclosingScope();
-    void defineVariable(Symbol sym);
-    void defineFunction(Symbol sym);
-    void defineClass(Symbol sym);
+    void defineVariable(VariableSymbol sym);
+    void defineFunction(FunctionSymbol sym);
+    void defineClass(ClassSymbol sym);
     Symbol resolve(String name);
 }
