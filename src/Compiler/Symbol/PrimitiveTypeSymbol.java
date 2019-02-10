@@ -2,7 +2,7 @@ package Compiler.Symbol;
 
 public class PrimitiveTypeSymbol extends Symbol implements Type {
     public PrimitiveTypeSymbol(String name) {
-        super(name, null);
+        super(name, null, null);
     }
 
     @Override

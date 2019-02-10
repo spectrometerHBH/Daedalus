@@ -4,10 +4,12 @@ import Compiler.AST.ASTNode;
 
 public class Symbol {
     private String name;
+    private Type type;
     private ASTNode def;
 
-    public Symbol(String name, ASTNode def) {
+    public Symbol(String name, Type type, ASTNode def) {
         this.name = name;
+        this.type = type;
         this.def = def;
     }
 

@@ -3,7 +3,7 @@ package Compiler.Symbol;
 import Compiler.AST.VarDeclNode;
 
 public class VariableSymbol extends Symbol {
-    public VariableSymbol(String name, VarDeclNode varDeclNode) {
-        super(name, varDeclNode);
+    public VariableSymbol(String name, Type type, VarDeclNode varDeclNode) {
+        super(name, type, varDeclNode);
     }
 }

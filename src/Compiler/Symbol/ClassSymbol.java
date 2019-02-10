@@ -1,37 +1,52 @@
 package Compiler.Symbol;
 
+import Compiler.AST.ClassDeclNode;
+import Compiler.Utils.SemanticError;
+
+import java.util.LinkedHashMap;
+import java.util.Map;
+
 public class ClassSymbol extends Symbol implements Scope, Type {
-    public ClassSymbol(String name) {
-        super(name);
+    private Scope enclosingScope;
+    private Map<String, VariableSymbol> variableSymbolMap = new LinkedHashMap<>();
+    private Map<String, FunctionSymbol> functionSymbolMap = new LinkedHashMap<>();
+
+    public ClassSymbol(String name, Type type, ClassDeclNode classDeclNode, Scope enclosingScope) {
+        super(name, null, classDeclNode);
+        this.enclosingScope = enclosingScope;
     }
 
     @Override
     public String getScopeName() {
-        return null;
+        return super.getSymbolName();
     }
 
     @Override
     public String getTypeName() {
-        return null;
+        return super.getSymbolName();
     }
 
     @Override
     public Scope getEnclosingScope() {
-        return null;
+        return enclosingScope;
     }
 
     @Override
-    public void defineVariable(VariableSymbol sym) {
-
+    public void defineVariable(VariableSymbol symbol) {
+        if (variableSymbolMap.containsKey(symbol.getSymbolName()) || functionSymbolMap.containsKey(symbol.getSymbolName()))
+            throw new SemanticError("Duplicate identifiers", symbol.getDef().getPosition());
+        variableSymbolMap.put(symbol.getSymbolName(), symbol);
     }
 
     @Override
-    public void defineFunction(FunctionSymbol sym) {
-
+    public void defineFunction(FunctionSymbol symbol) {
+        if (variableSymbolMap.containsKey(symbol.getSymbolName()) || functionSymbolMap.containsKey(symbol.getSymbolName()))
+            throw new SemanticError("Duplicate identifiers", symbol.getDef().getPosition());
+        functionSymbolMap.put(symbol.getSymbolName(), symbol);
     }
 
     @Override
-    public void defineClass(ClassSymbol sym) {
+    public void defineClass(ClassSymbol symbol) {
 
     }
 

@@ -6,16 +6,6 @@ public class LocalScope extends BaseScope {
     }
 
     @Override
-    public void defineVariable(VariableSymbol sym) {
-
-    }
-
-    @Override
-    public void defineFunction(FunctionSymbol sym) {
-
-    }
-
-    @Override
     public void defineClass(ClassSymbol sym) {
 
     }

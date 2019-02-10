@@ -9,8 +9,8 @@ public class FunctionSymbol extends Symbol implements Scope{
     private Scope enclosingScope;
     private Map<String, VariableSymbol> arguments;
 
-    public FunctionSymbol(String name, FuncDeclNode funcDeclNode, Scope enclosingScope) {
-        super(name, funcDeclNode);
+    public FunctionSymbol(String name, Type type, FuncDeclNode funcDeclNode, Scope enclosingScope) {
+        super(name, type, funcDeclNode);
         this.enclosingScope = enclosingScope;
     }
 
