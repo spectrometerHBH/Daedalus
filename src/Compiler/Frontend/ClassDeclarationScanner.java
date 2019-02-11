@@ -1,11 +1,18 @@
 package Compiler.Frontend;
 
 import Compiler.AST.*;
+import Compiler.Symbol.ClassSymbol;
+import Compiler.Symbol.GlobalScope;
 
 public class ClassDeclarationScanner implements ASTVisitor {
-    
-    @Override public void visit(ProgramNode node){
+    private GlobalScope globalScope;
 
+    public ClassDeclarationScanner(GlobalScope globalScope) {
+        this.globalScope = globalScope;
+    }
+
+    @Override public void visit(ProgramNode node){
+        node.getDeclNodeList().forEach(x -> x.accept(this));
     }
 
     @Override public void visit(VarDeclListNode node){
@@ -21,7 +28,10 @@ public class ClassDeclarationScanner implements ASTVisitor {
     }
 
     @Override public void visit(ClassDeclNode node){
-
+        globalScope.defineClass(new ClassSymbol(node.getIdentifier(),
+                                                null,
+                                                node,
+                                                globalScope));
     }
 
     @Override public void visit(ArrayTypeNode node){

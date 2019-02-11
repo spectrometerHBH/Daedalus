@@ -12,6 +12,10 @@ public class ProgramNode extends ASTNode {
         this.declNodeList = declNodesList;
     }
 
+    public List<DeclNode> getDeclNodeList(){
+        return this.declNodeList;
+    }
+
     @Override public void accept(ASTVisitor visitor){
         visitor.visit(this);
     }

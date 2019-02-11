@@ -7,10 +7,10 @@ import java.util.Map;
 
 public abstract class BaseScope implements Scope {
     private String name;
-    protected Scope enclosingScope;
-    protected Map<String, Symbol> symbolMap = new LinkedHashMap<>();
+    private Scope enclosingScope;
+    Map<String, Symbol> symbolMap = new LinkedHashMap<>();
 
-    public BaseScope(String name, Scope enclosingScope){
+    BaseScope(String name, Scope enclosingScope){
         this.name = name;
         this.enclosingScope = enclosingScope;
     }

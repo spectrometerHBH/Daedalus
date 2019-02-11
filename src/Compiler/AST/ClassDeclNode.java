@@ -19,4 +19,8 @@ public class ClassDeclNode extends DeclNode{
     @Override public void accept(ASTVisitor visitor){
         visitor.visit(this);
     }
+
+    public String getIdentifier() {
+        return identifier;
+    }
 }
