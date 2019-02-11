@@ -4,7 +4,7 @@ import Compiler.Symbol.*;
 
 public class BuiltinSymbolsInitializer {
     private final static GlobalScope globalScope = new GlobalScope("Global Scope");
-    private final static ClassSymbol string = new ClassSymbol("string",null, null, globalScope);
+    private final static ClassSymbol string = new ClassSymbol("string", null, globalScope);
     private final static PrimitiveTypeSymbol IntTypeSymbol = new PrimitiveTypeSymbol("int");
     private final static PrimitiveTypeSymbol BoolTypeSymbol = new PrimitiveTypeSymbol("bool");
     private final static PrimitiveTypeSymbol VoidTypeSymbol = new PrimitiveTypeSymbol("void");

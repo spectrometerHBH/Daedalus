@@ -5,7 +5,7 @@ import Compiler.Utils.Position;
 public abstract class TypeNode extends ASTNode {
     private String typeIdentifier;
 
-    public TypeNode(Position position, String typeIdentifier) {
+    public TypeNode(String typeIdentifier, Position position) {
         super(position);
         this.typeIdentifier = typeIdentifier;
     }

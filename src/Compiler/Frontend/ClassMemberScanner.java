@@ -1,21 +1,19 @@
 package Compiler.Frontend;
 
 import Compiler.AST.*;
-import Compiler.Symbol.FunctionSymbol;
-import Compiler.Symbol.GlobalScope;
-import Compiler.Symbol.Type;
-import Compiler.Symbol.VariableSymbol;
+import Compiler.Symbol.*;
 
-public class GlobalFunctionDeclarationScanner implements ASTVisitor {
+public class ClassMemberScanner implements ASTVisitor {
     private GlobalScope globalScope;
+    private Scope currentScope;
 
-    public GlobalFunctionDeclarationScanner(GlobalScope globalScope) {
+    public ClassMemberScanner(GlobalScope globalScope) {
         this.globalScope = globalScope;
     }
 
     @Override
     public void visit(ProgramNode node) {
-         node.getDeclNodeList().forEach(x -> x.accept(this));
+        node.getDeclNodeList().forEach(x -> x.accept(this));
     }
 
     @Override
@@ -25,23 +23,29 @@ public class GlobalFunctionDeclarationScanner implements ASTVisitor {
 
     @Override
     public void visit(VarDeclNode node) {
-
+        Type type = globalScope.resolveType(node.getType());
+        VariableSymbol variableSymbol = new VariableSymbol(node.getIdentifier(), type, node);
+        currentScope.defineVariable(variableSymbol);
     }
 
     @Override
     public void visit(FuncDeclNode node) {
         Type returnType = globalScope.resolveType(node.getType());
-        FunctionSymbol functionSymbol = new FunctionSymbol(node.getIdentifier(), returnType, node, globalScope);
-        for (VarDeclNode varDeclNode : node.getParameterList()){
-            Type parameterType = globalScope.resolveType(node.getType());
-            functionSymbol.defineVariable(new VariableSymbol(varDeclNode.getIdentifier(), parameterType, varDeclNode));
-        }
-        globalScope.defineFunction(functionSymbol);
+        FunctionSymbol functionSymbol = new FunctionSymbol(node.getIdentifier(), returnType, node, currentScope);
+        currentScope.defineFunction(functionSymbol);
+        currentScope = functionSymbol;
+        node.getParameterList().forEach(x -> x.accept(this));
     }
 
     @Override
     public void visit(ClassDeclNode node) {
-
+        ClassSymbol classSymbol = (ClassSymbol) globalScope.resolveSymbol(node);
+        currentScope = classSymbol;
+        node.getVarDecList().forEach(x -> x.accept(this));
+        node.getFuncDeclList().forEach(x -> {
+            x.accept(this);
+            currentScope = classSymbol;
+        });
     }
 
     @Override

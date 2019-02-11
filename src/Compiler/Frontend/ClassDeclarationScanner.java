@@ -28,10 +28,7 @@ public class ClassDeclarationScanner implements ASTVisitor {
     }
 
     @Override public void visit(ClassDeclNode node){
-        globalScope.defineClass(new ClassSymbol(node.getIdentifier(),
-                                                null,
-                                                node,
-                                                globalScope));
+        globalScope.defineClass(new ClassSymbol(node.getIdentifier(), node, globalScope));
     }
 
     @Override public void visit(ArrayTypeNode node){

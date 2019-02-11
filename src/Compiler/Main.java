@@ -1,10 +1,7 @@
 package Compiler;
 
 import Compiler.AST.ProgramNode;
-import Compiler.Frontend.ASTBuilder;
-import Compiler.Frontend.BuiltinSymbolsInitializer;
-import Compiler.Frontend.ClassDeclarationScanner;
-import Compiler.Frontend.GlobalFunctionDeclarationScanner;
+import Compiler.Frontend.*;
 import Compiler.Parser.MxstarErrorListener;
 import Compiler.Parser.MxstarLexer;
 import Compiler.Parser.MxstarParser;
@@ -35,6 +32,7 @@ public class Main {
             GlobalScope globalScope = (new BuiltinSymbolsInitializer()).getGlobalScope();
             new ClassDeclarationScanner(globalScope).visit(ast);
             new GlobalFunctionDeclarationScanner(globalScope).visit(ast);
+            new ClassMemberScanner(globalScope).visit(ast);
         }catch (SyntaxError e){
             System.out.println(e.getMessage());
         }

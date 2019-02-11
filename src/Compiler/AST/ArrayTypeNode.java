@@ -8,7 +8,7 @@ public class ArrayTypeNode extends TypeNode {
     private int dims;
 
     public ArrayTypeNode(TypeNode typeNode, ExprNode expr, Position position){
-        super(position, typeNode instanceof ArrayTypeNode ? ((ArrayTypeNode) typeNode).baseType.getTypeIdentifier() : typeNode.getTypeIdentifier());
+        super(typeNode instanceof ArrayTypeNode ? ((ArrayTypeNode) typeNode).baseType.getTypeIdentifier() : typeNode.getTypeIdentifier(), position);
         this.expr = expr;
         if (typeNode instanceof ArrayTypeNode){
             baseType = ((ArrayTypeNode) typeNode).baseType;

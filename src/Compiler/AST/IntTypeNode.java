@@ -4,7 +4,7 @@ import Compiler.Utils.Position;
 
 public class IntTypeNode extends PrimitiveTypeNode {
     public IntTypeNode(Position position){
-        super(position, "int");
+        super("int", position);
     }
 
     @Override public void accept(ASTVisitor visitor){

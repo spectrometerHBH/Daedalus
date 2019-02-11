@@ -1,5 +1,6 @@
 package Compiler.Symbol;
 
+import Compiler.AST.ASTNode;
 import Compiler.AST.ClassDeclNode;
 import Compiler.Utils.SemanticError;
 
@@ -11,7 +12,7 @@ public class ClassSymbol extends Symbol implements Scope, Type {
     private Map<String, VariableSymbol> variableSymbolMap = new LinkedHashMap<>();
     private Map<String, FunctionSymbol> functionSymbolMap = new LinkedHashMap<>();
 
-    public ClassSymbol(String name, Type type, ClassDeclNode classDeclNode, Scope enclosingScope) {
+    public ClassSymbol(String name, ClassDeclNode classDeclNode, Scope enclosingScope) {
         super(name, null, classDeclNode);
         this.enclosingScope = enclosingScope;
     }
@@ -51,7 +52,7 @@ public class ClassSymbol extends Symbol implements Scope, Type {
     }
 
     @Override
-    public Symbol resolve(String name) {
+    public Symbol resolveSymbol(ASTNode astNode) {
         return null;
     }
 }

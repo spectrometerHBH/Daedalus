@@ -5,8 +5,8 @@ import Compiler.Utils.Position;
 public class ClassTypeNode extends TypeNode {
     private String identifier;
 
-    public ClassTypeNode(Position position, String identifier) {
-        super(position, identifier);
+    public ClassTypeNode(String identifier, Position position) {
+        super(identifier, position);
         this.identifier = identifier;
     }
 

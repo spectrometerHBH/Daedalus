@@ -23,4 +23,12 @@ public class ClassDeclNode extends DeclNode{
     public String getIdentifier() {
         return identifier;
     }
+
+    public List<VarDeclNode> getVarDecList() {
+        return varDecList;
+    }
+
+    public List<FuncDeclNode> getFuncDeclList() {
+        return funcDeclList;
+    }
 }
