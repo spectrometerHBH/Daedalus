@@ -18,6 +18,18 @@ public class FuncDeclNode extends DeclNode {
         this.block = block;
     }
 
+    public String getIdentifier() {
+        return identifier;
+    }
+
+    public TypeNode getType() {
+        return type;
+    }
+
+    public List<VarDeclNode> getParameterList() {
+        return parameterList;
+    }
+
     @Override public void accept(ASTVisitor visitor){
         visitor.visit(this);
     }

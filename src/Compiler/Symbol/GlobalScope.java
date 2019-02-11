@@ -1,5 +1,7 @@
 package Compiler.Symbol;
 
+import Compiler.AST.ASTNode;
+import Compiler.AST.TypeNode;
 import Compiler.Utils.SemanticError;
 
 import java.util.LinkedHashMap;
@@ -23,7 +25,14 @@ public class GlobalScope extends BaseScope{
         symbolMap.put(symbol.getSymbolName(), symbol);
     }
 
-    @Override public Symbol resolve(String name){
+    @Override
+    public Symbol resolveSymbol(ASTNode astNode) {
         return null;
+    }
+
+    @Override
+    public Type resolveType(TypeNode typeNode) {
+        if (typeMap.containsKey(typeNode.getTypeIdentifier())) throw new SemanticError("Unknown type specifier", typeNode.getPosition());
+        return typeMap.get(typeNode.getTypeIdentifier());
     }
 }

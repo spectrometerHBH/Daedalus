@@ -2,9 +2,6 @@ package Compiler.AST;
 
 import Compiler.Utils.Position;
 
-import java.util.ArrayList;
-import java.util.List;
-
 public class VarDeclNode extends DeclNode {
     private TypeNode type;
     private ExprNode expr;
@@ -20,6 +17,14 @@ public class VarDeclNode extends DeclNode {
 
     public void setType(TypeNode type){
         this.type = type;
+    }
+
+    public TypeNode getType() {
+        return type;
+    }
+
+    public String getIdentifier() {
+        return identifier;
     }
 
     @Override public void accept(ASTVisitor visitor){

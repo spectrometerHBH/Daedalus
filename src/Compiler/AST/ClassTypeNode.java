@@ -3,10 +3,10 @@ package Compiler.AST;
 import Compiler.Utils.Position;
 
 public class ClassTypeNode extends TypeNode {
-    String identifier;
+    private String identifier;
 
-    public ClassTypeNode(String identifier, Position position){
-        super(position);
+    public ClassTypeNode(Position position, String identifier) {
+        super(position, identifier);
         this.identifier = identifier;
     }
 

@@ -1,6 +1,8 @@
 package Compiler.Symbol;
 
+import Compiler.AST.ASTNode;
 import Compiler.AST.FuncDeclNode;
+import Compiler.AST.TypeNode;
 import Compiler.Utils.SemanticError;
 
 import java.util.Map;
@@ -41,7 +43,12 @@ public class FunctionSymbol extends Symbol implements Scope{
     }
 
     @Override
-    public Symbol resolve(String name) {
+    public Symbol resolveSymbol(ASTNode astNode) {
+        return null;
+    }
+
+    @Override
+    public Type resolveType(TypeNode typeNode) {
         return null;
     }
 }
