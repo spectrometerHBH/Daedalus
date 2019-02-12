@@ -14,6 +14,14 @@ public class FuncallExprNode extends ExprNode {
         this.parameterList = parameterList;
     }
 
+    public ExprNode getFunction() {
+        return function;
+    }
+
+    public List<ExprNode> getParameterList() {
+        return parameterList;
+    }
+
     @Override public void accept(ASTVisitor visitor){
         visitor.visit(this);
     }

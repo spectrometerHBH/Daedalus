@@ -1,6 +1,6 @@
 package Compiler.Symbol;
 
-import Compiler.AST.ASTNode;
+import Compiler.Utils.Position;
 
 public interface Scope {
     String getScopeName();
@@ -8,5 +8,5 @@ public interface Scope {
     void defineVariable(VariableSymbol sym);
     void defineFunction(FunctionSymbol sym);
     void defineClass(ClassSymbol sym);
-    Symbol resolveSymbol(ASTNode astNode);
+    Symbol resolveSymbol(String identifier, Position position);
 }

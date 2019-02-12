@@ -25,10 +25,13 @@ public interface ASTVisitor {
     void visit(ArrayIndexNode node);
     void visit(BinaryExprNode node);
     void visit(ClassMemberNode node);
-    void visit(ConstExprNode node);
     void visit(FuncallExprNode node);
     void visit(IDExprNode node);
     void visit(NewExprNode node);
     void visit(ThisExprNode node);
     void visit(UnaryExprNode node);
+    void visit(IntLiteralNode node);
+    void visit(BoolLiteralNode node);
+    void visit(NullLiteralNode node);
+    void visit(StringLiteralNode node);
 }

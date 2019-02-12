@@ -81,7 +81,7 @@ conditionStatement
 
 loopStatement
     :   While '(' expression ')' statement  #whileStmt
-    |   For '(' init=expression ';' cond=expression ';' step=expression ')' statement #forStmt
+    |   For '(' init=expression? ';' cond=expression? ';' step=expression? ')' statement #forStmt
     ;
 
 jumpStatement

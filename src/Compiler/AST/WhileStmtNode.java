@@ -13,6 +13,14 @@ public class WhileStmtNode extends StmtNode {
         this.statement = statement;
     }
 
+    public ExprNode getExpression() {
+        return expression;
+    }
+
+    public StmtNode getStatement() {
+        return statement;
+    }
+
     @Override public void accept(ASTVisitor visitor){
         visitor.visit(this);
     }

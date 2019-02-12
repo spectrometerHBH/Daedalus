@@ -1,19 +1,21 @@
 package Compiler.Frontend;
 
 import Compiler.AST.*;
-import Compiler.Symbol.*;
+import Compiler.Symbol.GlobalScope;
+import Compiler.Symbol.Scope;
 
-public class ClassMemberScanner implements ASTVisitor {
+public class SemanticChecker implements ASTVisitor {
     private GlobalScope globalScope;
     private Scope currentScope;
 
-    public ClassMemberScanner(GlobalScope globalScope) {
+    public SemanticChecker(GlobalScope globalScope) {
         this.globalScope = globalScope;
+        currentScope = globalScope;
     }
 
     @Override
     public void visit(ProgramNode node) {
-        node.getDeclNodeList().forEach(x -> x.accept(this));
+
     }
 
     @Override
@@ -23,29 +25,17 @@ public class ClassMemberScanner implements ASTVisitor {
 
     @Override
     public void visit(VarDeclNode node) {
-        Type type = globalScope.resolveType(node.getType());
-        VariableSymbol variableSymbol = new VariableSymbol(node.getIdentifier(), type, node);
-        currentScope.defineVariable(variableSymbol);
+
     }
 
     @Override
     public void visit(FuncDeclNode node) {
-        Type returnType = globalScope.resolveType(node.getType());
-        FunctionSymbol functionSymbol = new FunctionSymbol(node.getIdentifier(), returnType, node, currentScope);
-        currentScope.defineFunction(functionSymbol);
-        currentScope = functionSymbol;
-        node.getParameterList().forEach(x -> x.accept(this));
+
     }
 
     @Override
     public void visit(ClassDeclNode node) {
-        ClassSymbol classSymbol = (ClassSymbol) globalScope.resolveSymbol(node.getIdentifier(), node.getPosition());
-        currentScope = classSymbol;
-        node.getVarDecList().forEach(x -> x.accept(this));
-        node.getFuncDeclList().forEach(x -> {
-            x.accept(this);
-            currentScope = classSymbol;
-        });
+
     }
 
     @Override

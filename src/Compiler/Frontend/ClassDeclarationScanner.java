@@ -107,10 +107,6 @@ public class ClassDeclarationScanner implements ASTVisitor {
 
     }
     
-    @Override public void visit(ConstExprNode node){
-
-    }
-    
     @Override public void visit(FuncallExprNode node){
 
     }
@@ -130,5 +126,24 @@ public class ClassDeclarationScanner implements ASTVisitor {
     @Override public void visit(UnaryExprNode node){
 
     }
-    
+
+    @Override
+    public void visit(IntLiteralNode node) {
+
+    }
+
+    @Override
+    public void visit(BoolLiteralNode node) {
+
+    }
+
+    @Override
+    public void visit(NullLiteralNode node) {
+
+    }
+
+    @Override
+    public void visit(StringLiteralNode node) {
+
+    }
 }

@@ -12,6 +12,14 @@ public class ClassMemberNode extends ExprNode {
         this.identifier = identifier;
     }
 
+    public ExprNode getExpression() {
+        return expression;
+    }
+
+    public String getIdentifier() {
+        return identifier;
+    }
+
     @Override public void accept(ASTVisitor visitor){
         visitor.visit(this);
     }

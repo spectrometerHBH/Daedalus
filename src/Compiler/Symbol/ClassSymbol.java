@@ -1,7 +1,7 @@
 package Compiler.Symbol;
 
-import Compiler.AST.ASTNode;
 import Compiler.AST.ClassDeclNode;
+import Compiler.Utils.Position;
 import Compiler.Utils.SemanticError;
 
 import java.util.LinkedHashMap;
@@ -52,7 +52,7 @@ public class ClassSymbol extends Symbol implements Scope, Type {
     }
 
     @Override
-    public Symbol resolveSymbol(ASTNode astNode) {
+    public Symbol resolveSymbol(String identifier, Position position) {
         return null;
     }
 }

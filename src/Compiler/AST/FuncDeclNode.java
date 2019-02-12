@@ -30,6 +30,10 @@ public class FuncDeclNode extends DeclNode {
         return parameterList;
     }
 
+    public BlockStmtNode getBlock() {
+        return block;
+    }
+
     @Override public void accept(ASTVisitor visitor){
         visitor.visit(this);
     }

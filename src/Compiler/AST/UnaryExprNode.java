@@ -16,6 +16,10 @@ public class UnaryExprNode extends ExprNode {
         this.op = op;
     }
 
+    public ExprNode getExpression() {
+        return expression;
+    }
+
     @Override public void accept(ASTVisitor visitor){
         visitor.visit(this);
     }

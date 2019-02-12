@@ -16,6 +16,22 @@ public class ForStmtNode extends StmtNode {
         this.statement = statement;
     }
 
+    public ExprNode getInit() {
+        return init;
+    }
+
+    public ExprNode getCond() {
+        return cond;
+    }
+
+    public ExprNode getStep() {
+        return step;
+    }
+
+    public StmtNode getStatement() {
+        return statement;
+    }
+
     @Override public void accept(ASTVisitor visitor){
         visitor.visit(this);
     }

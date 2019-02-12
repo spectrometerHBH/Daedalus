@@ -3,45 +3,44 @@ package Compiler.Frontend;
 import Compiler.AST.*;
 import Compiler.Symbol.*;
 
-public class ClassMemberScanner implements ASTVisitor {
+public class SymbolTableBuilder implements ASTVisitor {
     private GlobalScope globalScope;
     private Scope currentScope;
 
-    public ClassMemberScanner(GlobalScope globalScope) {
+    public SymbolTableBuilder(GlobalScope globalScope) {
         this.globalScope = globalScope;
+        currentScope = globalScope;
     }
 
     @Override
     public void visit(ProgramNode node) {
-        node.getDeclNodeList().forEach(x -> x.accept(this));
+        node.getDeclNodeList().forEach(x -> {
+            x.accept(this);
+            currentScope = globalScope;
+        });
     }
 
     @Override
     public void visit(VarDeclListNode node) {
-
+        //Not present in AST
     }
 
     @Override
     public void visit(VarDeclNode node) {
         Type type = globalScope.resolveType(node.getType());
-        VariableSymbol variableSymbol = new VariableSymbol(node.getIdentifier(), type, node);
-        currentScope.defineVariable(variableSymbol);
+        currentScope.defineVariable(new VariableSymbol(node.getIdentifier(), type, node));
     }
 
     @Override
     public void visit(FuncDeclNode node) {
-        Type returnType = globalScope.resolveType(node.getType());
-        FunctionSymbol functionSymbol = new FunctionSymbol(node.getIdentifier(), returnType, node, currentScope);
-        currentScope.defineFunction(functionSymbol);
-        currentScope = functionSymbol;
-        node.getParameterList().forEach(x -> x.accept(this));
+        currentScope = (FunctionSymbol) globalScope.resolveSymbol(node.getIdentifier(), node.getPosition());
+        visit(node.getBlock());
     }
 
     @Override
     public void visit(ClassDeclNode node) {
         ClassSymbol classSymbol = (ClassSymbol) globalScope.resolveSymbol(node.getIdentifier(), node.getPosition());
         currentScope = classSymbol;
-        node.getVarDecList().forEach(x -> x.accept(this));
         node.getFuncDeclList().forEach(x -> {
             x.accept(this);
             currentScope = classSymbol;
@@ -50,107 +49,124 @@ public class ClassMemberScanner implements ASTVisitor {
 
     @Override
     public void visit(ArrayTypeNode node) {
-
+        //need doing nothing
     }
 
     @Override
     public void visit(ClassTypeNode node) {
-
+        //need doing nothing
     }
 
     @Override
     public void visit(FuncTypeNode node) {
-
+        //need doing nothing
     }
 
     @Override
     public void visit(BoolTypeNode node) {
-
+        //need doing nothing
     }
 
     @Override
     public void visit(IntTypeNode node) {
-
+        //need doing nothing
     }
 
     @Override
     public void visit(VoidTypeNode node) {
-
+        //need doing nothing
     }
 
     @Override
     public void visit(StringTypeNode node) {
-
+        //need doing nothing
     }
 
     @Override
     public void visit(BlockStmtNode node) {
-
+        LocalScope localScope = new LocalScope("block local scope", currentScope);
+        currentScope = localScope;
+        node.getStmtList().forEach(x -> {
+            x.accept(this);
+            currentScope = localScope;
+        });
     }
 
     @Override
     public void visit(VarDeclStmtNode node) {
-
+        node.getVarDeclList().getList().forEach(x -> {
+            Type type = globalScope.resolveType(x.getType());
+            currentScope.defineVariable(new VariableSymbol(x.getIdentifier(), type, x));
+        });
     }
 
     @Override
     public void visit(ExprStmtNode node) {
-
+        node.getExpr().accept(this);
     }
 
     @Override
     public void visit(IfStmtNode node) {
-
+        node.getExpression().accept(this);
+        node.getThenStmt().accept(this);
+        if (node.getElseStmt() != null) node.getElseStmt().accept(this);
     }
 
     @Override
     public void visit(WhileStmtNode node) {
-
+        node.getExpression().accept(this);
+        if (node.getStatement() != null) node.getStatement().accept(this);
     }
 
     @Override
     public void visit(ForStmtNode node) {
-
+        if (node.getInit() != null) node.getInit().accept(this);
+        if (node.getCond() != null) node.getCond().accept(this);
+        if (node.getStep() != null) node.getStep().accept(this);
+        if (node.getStatement() != null) node.getStatement().accept(this);
     }
 
     @Override
     public void visit(ReturnNode node) {
-
+        if (node.getExpression() != null) node.getExpression().accept(this);
     }
 
     @Override
     public void visit(BreakNode node) {
-
+        //need doing nothing
     }
 
     @Override
     public void visit(ContinueNode node) {
-
+        //need doing nothing
     }
 
     @Override
     public void visit(ArrayIndexNode node) {
-
+        node.getArray().accept(this);
+        node.getIndex().accept(this);
     }
 
     @Override
     public void visit(BinaryExprNode node) {
-
+        node.getLhs().accept(this);
+        node.getRhs().accept(this);
     }
 
     @Override
     public void visit(ClassMemberNode node) {
-
+        node.getExpression().accept(this);
     }
 
     @Override
     public void visit(FuncallExprNode node) {
-
+        node.getFunction().accept(this);
+        node.getParameterList().forEach(x -> x.accept(this));
     }
 
     @Override
     public void visit(IDExprNode node) {
-
+        node.setSymbol(currentScope.resolveSymbol(node.getIdentifier(), node.getPosition()));
     }
 
     @Override
@@ -160,31 +176,31 @@ public class ClassMemberScanner implements ASTVisitor {
 
     @Override
     public void visit(ThisExprNode node) {
-
+        //need doing nothing
     }
 
     @Override
     public void visit(UnaryExprNode node) {
-
+        node.getExpression().accept(this);
     }
 
     @Override
     public void visit(IntLiteralNode node) {
-
+        //need doing nothing
     }
 
     @Override
     public void visit(BoolLiteralNode node) {
-
+        //need doing nothing
     }
 
     @Override
     public void visit(NullLiteralNode node) {
-
+        //need doing nothing
     }
 
     @Override
     public void visit(StringLiteralNode node) {
-
+        //need doing nothing
     }
 }

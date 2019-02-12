@@ -28,11 +28,16 @@ public class Main {
     public static void main(String... args) throws Exception {
         InputStream in = new FileInputStream("test.txt");
         try {
+            //Parser & Lexer
             ProgramNode ast = buildAST(in);
+            //Semantic Analysis
             GlobalScope globalScope = (new BuiltinSymbolsInitializer()).getGlobalScope();
             new ClassDeclarationScanner(globalScope).visit(ast);
             new GlobalFunctionDeclarationScanner(globalScope).visit(ast);
             new ClassMemberScanner(globalScope).visit(ast);
+            new SymbolTableBuilder(globalScope).visit(ast);
+            new SemanticChecker(globalScope).visit(ast);
+            //IR transform
         }catch (SyntaxError e){
             System.out.println(e.getMessage());
         }

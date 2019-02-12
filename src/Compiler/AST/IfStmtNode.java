@@ -14,6 +14,18 @@ public class IfStmtNode extends StmtNode {
         this.elseStmt = elseStmt;
     }
 
+    public ExprNode getExpression() {
+        return expression;
+    }
+
+    public StmtNode getThenStmt() {
+        return thenStmt;
+    }
+
+    public StmtNode getElseStmt() {
+        return elseStmt;
+    }
+
     @Override public void accept(ASTVisitor visitor){
         visitor.visit(this);
     }

@@ -1,5 +1,7 @@
 package Compiler.Symbol;
 
+import Compiler.Utils.Position;
+
 public class LocalScope extends BaseScope {
     public LocalScope(String name, Scope enclosingScope) {
         super(name, enclosingScope);
@@ -11,7 +13,7 @@ public class LocalScope extends BaseScope {
     }
 
     @Override
-    public Symbol resolve(String name) {
+    public Symbol resolveSymbol(String identifier, Position position) {
         return null;
     }
 }

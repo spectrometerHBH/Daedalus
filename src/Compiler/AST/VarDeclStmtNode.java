@@ -10,6 +10,10 @@ public class VarDeclStmtNode extends StmtNode {
         this.varDeclList = varDeclList;
     }
 
+    public VarDeclListNode getVarDeclList() {
+        return varDeclList;
+    }
+
     @Override public void accept(ASTVisitor visitor){
         visitor.visit(this);
     }
