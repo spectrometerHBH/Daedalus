@@ -4,12 +4,10 @@ import Compiler.Utils.Position;
 
 public class ArrayTypeNode extends TypeNode {
     private TypeNode baseType;
-    private ExprNode expr;
     private int dims;
 
-    public ArrayTypeNode(TypeNode typeNode, ExprNode expr, Position position){
-        super(typeNode instanceof ArrayTypeNode ? ((ArrayTypeNode) typeNode).baseType.getTypeIdentifier() : typeNode.getTypeIdentifier(), position);
-        this.expr = expr;
+    public ArrayTypeNode(TypeNode typeNode, Position position){
+        super(typeNode.getTypeIdentifier(), position);
         if (typeNode instanceof ArrayTypeNode){
             baseType = ((ArrayTypeNode) typeNode).baseType;
             dims = ((ArrayTypeNode) typeNode).dims + 1;

@@ -14,6 +14,7 @@ public class SymbolTableBuilder implements ASTVisitor {
 
     @Override
     public void visit(ProgramNode node) {
+        currentScope = globalScope;
         node.getDeclNodeList().forEach(x -> {
             x.accept(this);
             currentScope = globalScope;
@@ -171,7 +172,8 @@ public class SymbolTableBuilder implements ASTVisitor {
 
     @Override
     public void visit(NewExprNode node) {
-
+        Type type = globalScope.resolveType(node.getBaseType());
+        node.getExprNodeList().forEach(x -> x.accept(this));
     }
 
     @Override

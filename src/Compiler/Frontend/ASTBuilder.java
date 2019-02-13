@@ -87,7 +87,7 @@ public class ASTBuilder extends MxstarBaseVisitor<ASTNode> {
     }
 
     @Override public ASTNode visitArrayType(MxstarParser.ArrayTypeContext ctx) {
-        return new ArrayTypeNode((TypeNode) visit(ctx.type()), null, new Position(ctx.getStart()));
+        return new ArrayTypeNode((TypeNode) visit(ctx.type()), new Position(ctx.getStart()));
     }
 
     @Override public ASTNode visitNarrayType(MxstarParser.NarrayTypeContext ctx) {
@@ -152,15 +152,15 @@ public class ASTBuilder extends MxstarBaseVisitor<ASTNode> {
 
     @Override public ASTNode visitConditionStatement(MxstarParser.ConditionStatementContext ctx) {
         return new IfStmtNode((ExprNode) visit(ctx.expression()),
-                              (StmtNode) visit(ctx.thenStmt),
-                              ctx.elseStmt == null ? null : (StmtNode) visit(ctx.elseStmt),
-                              new Position(ctx.getStart()));
+                (StmtNode) visit(ctx.thenStmt),
+                ctx.elseStmt == null ? null : (StmtNode) visit(ctx.elseStmt),
+                new Position(ctx.getStart()));
     }
 
     @Override public ASTNode visitWhileStmt(MxstarParser.WhileStmtContext ctx) {
         return new WhileStmtNode((ExprNode) visit(ctx.expression()),
-                                 (StmtNode) visit(ctx.statement()),
-                                 new Position(ctx.getStart()));
+                (StmtNode) visit(ctx.statement()),
+                new Position(ctx.getStart()));
     }
 
     @Override public ASTNode visitForStmt(MxstarParser.ForStmtContext ctx) {
@@ -190,8 +190,8 @@ public class ASTBuilder extends MxstarBaseVisitor<ASTNode> {
 
     @Override public ASTNode visitMemberAccess(MxstarParser.MemberAccessContext ctx) {
         return new ClassMemberNode((ExprNode) visit(ctx.expression()),
-                                    ctx.Identifier().getText(),
-                                    new Position(ctx.getStart()));
+                ctx.Identifier().getText(),
+                new Position(ctx.getStart()));
     }
 
     @Override public ASTNode visitLiteral(MxstarParser.LiteralContext ctx) {
@@ -223,9 +223,9 @@ public class ASTBuilder extends MxstarBaseVisitor<ASTNode> {
             default   : op = null;
         }
         return new BinaryExprNode((ExprNode) visit(ctx.lhs),
-                                  (ExprNode) visit(ctx.rhs),
-                                  op,
-                                  new Position(ctx.getStart()));
+                (ExprNode) visit(ctx.rhs),
+                op,
+                new Position(ctx.getStart()));
     }
 
     @Override public ASTNode visitNewExpr(MxstarParser.NewExprContext ctx) {
@@ -234,8 +234,8 @@ public class ASTBuilder extends MxstarBaseVisitor<ASTNode> {
 
     @Override public ASTNode visitSubscript(MxstarParser.SubscriptContext ctx) {
         return new ArrayIndexNode((ExprNode) visit(ctx.array),
-                                  (ExprNode) visit(ctx.index),
-                                  new Position(ctx.getStart()));
+                (ExprNode) visit(ctx.index),
+                new Position(ctx.getStart()));
     }
 
     @Override public ASTNode visitFunctionCall(MxstarParser.FunctionCallContext ctx) {
@@ -243,14 +243,14 @@ public class ASTBuilder extends MxstarBaseVisitor<ASTNode> {
         for (ParserRuleContext parameter : ctx.parameterList().expression())
             parameterList.add((ExprNode) visit(parameter));
         return new FuncallExprNode((ExprNode) visit(ctx.expression()),
-                                   parameterList,
-                                   new Position(ctx.getStart()));
+                parameterList,
+                new Position(ctx.getStart()));
     }
 
     @Override public ASTNode visitPostfixIncDec(MxstarParser.PostfixIncDecContext ctx) {
         return new UnaryExprNode((ExprNode) visit(ctx.expression()),
-                                 (ctx.op.getText() == "++") ? UnaryExprNode.Op.PRE_INC : UnaryExprNode.Op.PRE_DEC,
-                                 new Position(ctx.getStart()));
+                (ctx.op.getText().equals("++")) ? UnaryExprNode.Op.PRE_INC : UnaryExprNode.Op.PRE_DEC,
+                new Position(ctx.getStart()));
     }
 
     @Override public ASTNode visitUnaryExpr(MxstarParser.UnaryExprContext ctx) {
@@ -265,8 +265,8 @@ public class ASTBuilder extends MxstarBaseVisitor<ASTNode> {
             default   : op = null;
         }
         return new UnaryExprNode((ExprNode) visit(ctx.expression()),
-                                 op,
-                                 new Position(ctx.getStart()));
+                op,
+                new Position(ctx.getStart()));
     }
 
     @Override public ASTNode visitSubExpression(MxstarParser.SubExpressionContext ctx) {
@@ -286,19 +286,20 @@ public class ASTBuilder extends MxstarBaseVisitor<ASTNode> {
     }
 
     @Override public ASTNode visitArrayCreator(MxstarParser.ArrayCreatorContext ctx) {
-        TypeNode baseType = (TypeNode) visit(ctx.nonArrayType());
-        int numDims = (ctx.getChildCount() - 1 - ctx.expression().size()) / 2;
-        for (int i = 0; i < numDims - ctx.expression().size(); i++)
-            baseType = new ArrayTypeNode(baseType, null, new Position(ctx.getStart()));
-        for (int i = ctx.expression().size() - 1; i >= 0; i--)
-            baseType = new ArrayTypeNode(baseType, (ExprNode) visit(ctx.expression().get(i)), new Position(ctx.getStart()));
-        return new NewExprNode(baseType, numDims, new Position(ctx.getStart()));
+        List<ExprNode> exprNodeList = new ArrayList<>();
+        for (ParserRuleContext expression : ctx.expression())
+            exprNodeList.add((ExprNode) visit(expression));
+        return new NewExprNode((TypeNode) visit(ctx.nonArrayType()),
+                (ctx.getChildCount() - ctx.expression().size() - 1) / 2,
+                exprNodeList,
+                new Position(ctx.getStart()));
     }
 
     @Override public ASTNode visitNarrayCreator(MxstarParser.NarrayCreatorContext ctx) {
-        return new NewExprNode(new ArrayTypeNode((TypeNode) visit(ctx.nonArrayType()), null, new Position(ctx.getStart())),
-                               0,
-                                new Position(ctx.getStart()));
+        return new NewExprNode((TypeNode) visit(ctx.nonArrayType()),
+                0,
+                null,
+                new Position(ctx.getStart()));
     }
 
     @Override public ASTNode visitIntegerLiteral(MxstarParser.IntegerLiteralContext ctx) {

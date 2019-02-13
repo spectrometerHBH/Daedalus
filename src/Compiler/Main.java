@@ -38,6 +38,10 @@ public class Main {
             new SymbolTableBuilder(globalScope).visit(ast);
             new SemanticChecker(globalScope).visit(ast);
             //IR transform
+
+            //Control Flow Analysis
+
+            //Data Flow Analysis
         }catch (SyntaxError e){
             System.out.println(e.getMessage());
         }
