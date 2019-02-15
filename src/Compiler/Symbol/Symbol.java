@@ -20,4 +20,8 @@ public class Symbol {
     public ASTNode getDef(){
         return define;
     }
+
+    public Type getType() {
+        return type;
+    }
 }

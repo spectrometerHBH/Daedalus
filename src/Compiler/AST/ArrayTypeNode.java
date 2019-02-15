@@ -1,6 +1,9 @@
 package Compiler.AST;
 
+import Compiler.Symbol.ArrayType;
+import Compiler.Symbol.Type;
 import Compiler.Utils.Position;
+import Compiler.Utils.SemanticError;
 
 public class ArrayTypeNode extends TypeNode {
     private TypeNode baseType;
@@ -15,6 +18,19 @@ public class ArrayTypeNode extends TypeNode {
             baseType = typeNode;
             dims = 1;
         }
+    }
+
+    @Override
+    public void compatible(ExprNode exprNode) {
+        Type type = exprNode.getType();
+        if (type instanceof ArrayType){
+            if (type.getTypeName().equals(baseType.getTypeIdentifier())){
+                if (dims >= ((ArrayType) type).getNewExprNode().getNumDims()) return;
+            }
+        }else if (type == null){
+            if (exprNode.getCategory() == ExprNode.category.NULL) return;
+        }
+        throw new SemanticError("Type " + baseType.getTypeIdentifier() + " array is not compatible with " + exprNode.getType().getTypeName(), getPosition());
     }
 
     @Override public void accept(ASTVisitor visitor){

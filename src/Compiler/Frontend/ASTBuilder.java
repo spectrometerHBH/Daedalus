@@ -147,7 +147,7 @@ public class ASTBuilder extends MxstarBaseVisitor<ASTNode> {
         List<StmtNode> stmtList = new ArrayList<>();
         for (ParserRuleContext stmt : ctx.statement())
             stmtList.add((StmtNode) visit(stmt));
-        return new BlockStmtNode(stmtList, new Position(ctx.start));
+        return stmtList.isEmpty() ? null : new BlockStmtNode(stmtList, new Position(ctx.start));
     }
 
     @Override public ASTNode visitConditionStatement(MxstarParser.ConditionStatementContext ctx) {
@@ -158,16 +158,20 @@ public class ASTBuilder extends MxstarBaseVisitor<ASTNode> {
     }
 
     @Override public ASTNode visitWhileStmt(MxstarParser.WhileStmtContext ctx) {
+        StmtNode stmtNode = (StmtNode) visit(ctx.statement());
+        if (stmtNode != null) stmtNode.setUnderLoop();
         return new WhileStmtNode((ExprNode) visit(ctx.expression()),
-                (StmtNode) visit(ctx.statement()),
+                stmtNode,
                 new Position(ctx.getStart()));
     }
 
     @Override public ASTNode visitForStmt(MxstarParser.ForStmtContext ctx) {
+        StmtNode stmtNode = (StmtNode) visit(ctx.statement());
+        if (stmtNode != null) stmtNode.setUnderLoop();
         return new ForStmtNode((ExprNode) visit(ctx.init),
                                (ExprNode) visit(ctx.cond),
                                (ExprNode) visit(ctx.step),
-                               (StmtNode) visit(ctx.statement()),
+                               stmtNode,
                                new Position(ctx.getStart()));
     }
 

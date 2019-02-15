@@ -20,6 +20,10 @@ public class UnaryExprNode extends ExprNode {
         return expression;
     }
 
+    public Op getOp() {
+        return op;
+    }
+
     @Override public void accept(ASTVisitor visitor){
         visitor.visit(this);
     }

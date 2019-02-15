@@ -15,10 +15,6 @@ public class ClassDeclarationScanner implements ASTVisitor {
         node.getDeclNodeList().forEach(x -> x.accept(this));
     }
 
-    @Override public void visit(VarDeclListNode node){
-
-    }
-
     @Override public void visit(VarDeclNode node){
 
     }
@@ -36,10 +32,6 @@ public class ClassDeclarationScanner implements ASTVisitor {
     }
 
     @Override public void visit(ClassTypeNode node){
-
-    }
-    
-    @Override public void visit(FuncTypeNode node){
 
     }
     

@@ -13,4 +13,6 @@ public abstract class TypeNode extends ASTNode {
     public String getTypeIdentifier(){
         return typeIdentifier;
     }
+
+    public abstract void compatible(ExprNode exprNode);
 }

@@ -32,4 +32,5 @@ public abstract class BaseScope implements Scope {
         if (symbolMap.containsKey(symbol.getSymbolName())) throw new SemanticError("Duplicate identifiers.", symbol.getDef().getPosition());
         symbolMap.put(symbol.getSymbolName(), symbol);
     }
+
 }

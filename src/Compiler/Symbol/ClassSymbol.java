@@ -53,6 +53,8 @@ public class ClassSymbol extends Symbol implements Scope, Type {
 
     @Override
     public Symbol resolveSymbol(String identifier, Position position) {
-        return null;
+        if (variableSymbolMap.containsKey(identifier)) return variableSymbolMap.get(identifier);
+        if (functionSymbolMap.containsKey(identifier)) return functionSymbolMap.get(identifier);
+        throw new SemanticError(identifier + " is not a member of " + getSymbolName(), position);
     }
 }

@@ -16,6 +16,10 @@ public class IDExprNode extends ExprNode {
         return identifier;
     }
 
+    public Symbol getSymbol() {
+        return symbol;
+    }
+
     public void setSymbol(Symbol symbol) {
         this.symbol = symbol;
     }

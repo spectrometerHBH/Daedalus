@@ -4,15 +4,20 @@ import Compiler.AST.FuncDeclNode;
 import Compiler.Utils.Position;
 import Compiler.Utils.SemanticError;
 
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class FunctionSymbol extends Symbol implements Scope{
     private Scope enclosingScope;
-    private Map<String, VariableSymbol> arguments;
+    private Map<String, VariableSymbol> arguments = new LinkedHashMap<>();
 
     public FunctionSymbol(String name, Type type, FuncDeclNode funcDeclNode, Scope enclosingScope) {
         super(name, type, funcDeclNode);
         this.enclosingScope = enclosingScope;
+    }
+
+    public Map<String, VariableSymbol> getArguments() {
+        return arguments;
     }
 
     @Override

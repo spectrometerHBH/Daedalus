@@ -1,10 +1,9 @@
 package Compiler.Frontend;
 
 import Compiler.AST.*;
-import Compiler.Symbol.FunctionSymbol;
-import Compiler.Symbol.GlobalScope;
-import Compiler.Symbol.Type;
-import Compiler.Symbol.VariableSymbol;
+import Compiler.Symbol.*;
+import Compiler.Utils.Position;
+import Compiler.Utils.SemanticError;
 
 public class GlobalFunctionDeclarationScanner implements ASTVisitor {
     private GlobalScope globalScope;
@@ -13,14 +12,17 @@ public class GlobalFunctionDeclarationScanner implements ASTVisitor {
         this.globalScope = globalScope;
     }
 
-    @Override
-    public void visit(ProgramNode node) {
-         node.getDeclNodeList().forEach(x -> x.accept(this));
+    private void MainFunctionChecker(Symbol main) {
+        if (main.getType() instanceof PrimitiveTypeSymbol){
+            if (!main.getType().getTypeName().equals("int")) throw new SemanticError("Return type of main function ought to be int", new Position(0, 0));
+            if (!(((FuncDeclNode)main.getDef()).getParameterList().isEmpty())) throw new SemanticError("Parameter list of main funciton ought to be empty", new Position(0, 0));
+        }else throw new SemanticError("Return Type of main Function ought to be int", new Position(0, 0));
     }
 
     @Override
-    public void visit(VarDeclListNode node) {
-
+    public void visit(ProgramNode node) {
+         node.getDeclNodeList().forEach(x -> x.accept(this));
+         MainFunctionChecker(globalScope.resolveMain());
     }
 
     @Override
@@ -51,11 +53,6 @@ public class GlobalFunctionDeclarationScanner implements ASTVisitor {
 
     @Override
     public void visit(ClassTypeNode node) {
-
-    }
-
-    @Override
-    public void visit(FuncTypeNode node) {
 
     }
 

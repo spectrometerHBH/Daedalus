@@ -2,13 +2,11 @@ package Compiler.AST;
 
 public interface ASTVisitor {
     void visit(ProgramNode node);
-    void visit(VarDeclListNode node);
     void visit(VarDeclNode node);
     void visit(FuncDeclNode node);
     void visit(ClassDeclNode node);
     void visit(ArrayTypeNode node);
     void visit(ClassTypeNode node);
-    void visit(FuncTypeNode node);
     void visit(BoolTypeNode node);
     void visit(IntTypeNode node);
     void visit(VoidTypeNode node);

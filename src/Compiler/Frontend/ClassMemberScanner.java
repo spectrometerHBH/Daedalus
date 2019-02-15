@@ -17,11 +17,6 @@ public class ClassMemberScanner implements ASTVisitor {
     }
 
     @Override
-    public void visit(VarDeclListNode node) {
-
-    }
-
-    @Override
     public void visit(VarDeclNode node) {
         Type type = globalScope.resolveType(node.getType());
         VariableSymbol variableSymbol = new VariableSymbol(node.getIdentifier(), type, node);
@@ -55,11 +50,6 @@ public class ClassMemberScanner implements ASTVisitor {
 
     @Override
     public void visit(ClassTypeNode node) {
-
-    }
-
-    @Override
-    public void visit(FuncTypeNode node) {
 
     }
 

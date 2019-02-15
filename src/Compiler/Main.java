@@ -5,7 +5,10 @@ import Compiler.Frontend.*;
 import Compiler.Parser.MxstarErrorListener;
 import Compiler.Parser.MxstarLexer;
 import Compiler.Parser.MxstarParser;
+import Compiler.Symbol.ClassSymbol;
 import Compiler.Symbol.GlobalScope;
+import Compiler.Symbol.PrimitiveTypeSymbol;
+import Compiler.Utils.Position;
 import Compiler.Utils.SyntaxError;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
@@ -36,7 +39,11 @@ public class Main {
             new GlobalFunctionDeclarationScanner(globalScope).visit(ast);
             new ClassMemberScanner(globalScope).visit(ast);
             new SymbolTableBuilder(globalScope).visit(ast);
-            new SemanticChecker(globalScope).visit(ast);
+            new SemanticChecker(globalScope,
+                    (PrimitiveTypeSymbol) globalScope.resolveSymbol("int",  new Position(0, 0)),
+                    (PrimitiveTypeSymbol) globalScope.resolveSymbol("bool", new Position(0, 0)),
+                    (ClassSymbol)         globalScope.resolveSymbol("string", new Position(0, 0)),
+                    (PrimitiveTypeSymbol) globalScope.resolveSymbol("void", new Position(0, 0))).visit(ast);
             //IR transform
 
             //Control Flow Analysis

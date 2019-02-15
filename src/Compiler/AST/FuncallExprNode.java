@@ -2,11 +2,12 @@ package Compiler.AST;
 
 import Compiler.Utils.Position;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class FuncallExprNode extends ExprNode {
     private ExprNode function;
-    private List<ExprNode> parameterList;
+    private List<ExprNode> parameterList = new ArrayList<>();
 
     public FuncallExprNode(ExprNode function, List<ExprNode> parameterList, Position position){
         super(position);

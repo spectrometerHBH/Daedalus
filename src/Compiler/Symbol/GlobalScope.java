@@ -35,4 +35,13 @@ public class GlobalScope extends BaseScope{
         if (!typeMap.containsKey(typeNode.getTypeIdentifier())) throw new SemanticError("Unknown type specifier", typeNode.getPosition());
         return typeMap.get(typeNode.getTypeIdentifier());
     }
+    public Type resolveType(String identifier, Position position) {
+        if (!typeMap.containsKey(identifier)) throw new SemanticError("Unknown type specifier", position);
+        return typeMap.get(identifier);
+    }
+
+    public Symbol resolveMain() {
+        if (!symbolMap.containsKey("main")) throw new SemanticError("Can't find main function", new Position(0, 0));
+        return symbolMap.get("main");
+    }
 }

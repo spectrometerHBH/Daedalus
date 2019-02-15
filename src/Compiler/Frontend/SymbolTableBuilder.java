@@ -2,10 +2,13 @@ package Compiler.Frontend;
 
 import Compiler.AST.*;
 import Compiler.Symbol.*;
+import Compiler.Utils.SemanticError;
 
 public class SymbolTableBuilder implements ASTVisitor {
     private GlobalScope globalScope;
     private Scope currentScope;
+    private ClassSymbol currentClassSymbol;
+    private FunctionSymbol currentFunctionSymbol;
 
     public SymbolTableBuilder(GlobalScope globalScope) {
         this.globalScope = globalScope;
@@ -15,26 +18,28 @@ public class SymbolTableBuilder implements ASTVisitor {
     @Override
     public void visit(ProgramNode node) {
         currentScope = globalScope;
+        currentClassSymbol = null;
+        currentFunctionSymbol = null;
         node.getDeclNodeList().forEach(x -> {
             x.accept(this);
             currentScope = globalScope;
+            currentClassSymbol = null;
+            currentFunctionSymbol = null;
         });
-    }
-
-    @Override
-    public void visit(VarDeclListNode node) {
-        //Not present in AST
     }
 
     @Override
     public void visit(VarDeclNode node) {
         Type type = globalScope.resolveType(node.getType());
+        if (node.getExpr() != null)
         currentScope.defineVariable(new VariableSymbol(node.getIdentifier(), type, node));
     }
 
     @Override
     public void visit(FuncDeclNode node) {
-        currentScope = (FunctionSymbol) globalScope.resolveSymbol(node.getIdentifier(), node.getPosition());
+        FunctionSymbol functionSymbol = (FunctionSymbol) globalScope.resolveSymbol(node.getIdentifier(), node.getPosition());
+        currentScope = functionSymbol;
+        currentFunctionSymbol = functionSymbol;
         visit(node.getBlock());
     }
 
@@ -42,6 +47,7 @@ public class SymbolTableBuilder implements ASTVisitor {
     public void visit(ClassDeclNode node) {
         ClassSymbol classSymbol = (ClassSymbol) globalScope.resolveSymbol(node.getIdentifier(), node.getPosition());
         currentScope = classSymbol;
+        currentClassSymbol = classSymbol;
         node.getFuncDeclList().forEach(x -> {
             x.accept(this);
             currentScope = classSymbol;
@@ -55,11 +61,6 @@ public class SymbolTableBuilder implements ASTVisitor {
 
     @Override
     public void visit(ClassTypeNode node) {
-        //need doing nothing
-    }
-
-    @Override
-    public void visit(FuncTypeNode node) {
         //need doing nothing
     }
 
@@ -86,6 +87,7 @@ public class SymbolTableBuilder implements ASTVisitor {
     @Override
     public void visit(BlockStmtNode node) {
         LocalScope localScope = new LocalScope("block local scope", currentScope);
+        if (node.isUnderLoop()) localScope.setUnderLoop();
         currentScope = localScope;
         node.getStmtList().forEach(x -> {
             x.accept(this);
@@ -116,7 +118,9 @@ public class SymbolTableBuilder implements ASTVisitor {
     @Override
     public void visit(WhileStmtNode node) {
         node.getExpression().accept(this);
-        if (node.getStatement() != null) node.getStatement().accept(this);
+        if (node.getStatement() != null){
+            node.getStatement().accept(this);
+        }
     }
 
     @Override
@@ -124,22 +128,28 @@ public class SymbolTableBuilder implements ASTVisitor {
         if (node.getInit() != null) node.getInit().accept(this);
         if (node.getCond() != null) node.getCond().accept(this);
         if (node.getStep() != null) node.getStep().accept(this);
-        if (node.getStatement() != null) node.getStatement().accept(this);
+        if (node.getStatement() != null){
+            node.getStatement().accept(this);
+        }
     }
 
     @Override
     public void visit(ReturnNode node) {
         if (node.getExpression() != null) node.getExpression().accept(this);
+        if (currentFunctionSymbol == null) throw new SemanticError("Return should be in a function", node.getPosition());
+        node.setFunctionSymbol(currentFunctionSymbol);
     }
 
     @Override
     public void visit(BreakNode node) {
-        //need doing nothing
+        if (!((LocalScope)currentScope).isUnderLoop() && !node.isUnderLoop())
+            throw new SemanticError("Break should be in a loop", node.getPosition());
     }
 
     @Override
     public void visit(ContinueNode node) {
-        //need doing nothing
+        if (!((LocalScope)currentScope).isUnderLoop() && !node.isUnderLoop())
+            throw new SemanticError("Continue should be in a loop", node.getPosition());
     }
 
     @Override
@@ -167,7 +177,8 @@ public class SymbolTableBuilder implements ASTVisitor {
 
     @Override
     public void visit(IDExprNode node) {
-        node.setSymbol(currentScope.resolveSymbol(node.getIdentifier(), node.getPosition()));
+        Symbol symbol = currentScope.resolveSymbol(node.getIdentifier(), node.getPosition());
+        node.setSymbol(symbol);
     }
 
     @Override
@@ -178,7 +189,8 @@ public class SymbolTableBuilder implements ASTVisitor {
 
     @Override
     public void visit(ThisExprNode node) {
-        //need doing nothing
+        if (currentClassSymbol == null) throw new SemanticError("No corresponding class for this", node.getPosition());
+        node.setScope(currentClassSymbol);
     }
 
     @Override

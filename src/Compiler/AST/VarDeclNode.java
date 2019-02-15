@@ -27,6 +27,10 @@ public class VarDeclNode extends DeclNode {
         return identifier;
     }
 
+    public ExprNode getExpr() {
+        return expr;
+    }
+
     @Override public void accept(ASTVisitor visitor){
         visitor.visit(this);
     }
