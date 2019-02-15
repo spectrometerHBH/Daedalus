@@ -19,7 +19,9 @@ public class LocalScope extends BaseScope {
     }
 
     public boolean isUnderLoop() {
-        return underLoop;
+        if (underLoop) return true;
+        if (getEnclosingScope() instanceof LocalScope) return ((LocalScope) getEnclosingScope()).isUnderLoop();
+        else return false;
     }
 
     @Override

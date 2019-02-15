@@ -25,7 +25,7 @@ public class ArrayTypeNode extends TypeNode {
         Type type = exprNode.getType();
         if (type instanceof ArrayType){
             if (type.getTypeName().equals(baseType.getTypeIdentifier())){
-                if (dims >= ((ArrayType) type).getNewExprNode().getNumDims()) return;
+                if (dims >= ((ArrayType) type).getDims()) return;
             }
         }else if (type == null){
             if (exprNode.getCategory() == ExprNode.category.NULL) return;

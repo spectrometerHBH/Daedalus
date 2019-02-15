@@ -1,24 +1,38 @@
 package Compiler.Symbol;
 
-import Compiler.AST.NewExprNode;
+import Compiler.AST.TypeNode;
 
 public class ArrayType implements Type {
-    NewExprNode newExprNode;
+    TypeNode typeNode;
+    int dims;
 
-    public ArrayType(NewExprNode newExprNode) {
-        this.newExprNode = newExprNode;
+    public ArrayType(TypeNode typeNode, int dims) {
+        this.typeNode = typeNode;
+        this.dims = dims;
     }
 
-    public NewExprNode getNewExprNode() {
-        return newExprNode;
+    public TypeNode getTypeNode() {
+        return typeNode;
+    }
+
+    public void setTypeNode(TypeNode typeNode) {
+        this.typeNode = typeNode;
+    }
+
+    public int getDims() {
+        return dims;
+    }
+
+    public void setDims(int dims) {
+        this.dims = dims;
     }
 
     @Override
     public String getTypeName() {
-        return newExprNode.getBaseType().getTypeIdentifier() + " array";
+        return typeNode.getTypeIdentifier() + " array";
     }
 
     public String getBaseTypeName(){
-        return newExprNode.getBaseType().getTypeIdentifier();
+        return typeNode.getTypeIdentifier();
     }
 }

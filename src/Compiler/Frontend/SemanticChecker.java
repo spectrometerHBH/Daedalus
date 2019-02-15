@@ -132,13 +132,17 @@ public class SemanticChecker implements ASTVisitor {
 
     @Override
     public void visit(ArrayIndexNode node) {
-        node.getArray().accept(this);
-        node.getIndex().accept(this);
-        if (node.getArray().getCategory() != ExprNode.category.VARIABLE){
-            if (node.getArray().getType() instanceof ArrayType){
-                if (node.getIndex().getType() != intTypeSymbol){
+        ExprNode array = node.getArray();
+        ExprNode index = node.getIndex();
+        array.accept(this);
+        index.accept(this);
+        if (array.getCategory() != ExprNode.category.VARIABLE){
+            if (array.getType() instanceof ArrayType){
+                if (index.getType() != intTypeSymbol){
                     node.setCategory(ExprNode.category.VARIABLE);
-                    node.setType(globalScope.resolveType(((ArrayType) node.getArray().getType()).getBaseTypeName(), node.getPosition()));
+                    node.setType(((ArrayType) array.getType()).getDims() == 1
+                                    ? globalScope.resolveType(((ArrayType) array.getType()).getTypeNode())
+                                    : new ArrayType(((ArrayType) array.getType()).getTypeNode(), ((ArrayType) array.getType()).getDims() - 1));
                 }else throw new SemanticError("Subscript ought to be int type", node.getPosition());
             }else throw new SemanticError("Array expression ought to be array type", node.getPosition());
         }else throw new SemanticError("Array expression ought to be lvalue", node.getPosition());
@@ -146,8 +150,10 @@ public class SemanticChecker implements ASTVisitor {
 
     @Override
     public void visit(BinaryExprNode node) {
-        node.getLhs().accept(this);
-        node.getRhs().accept(this);
+        ExprNode lhs = node.getLhs();
+        ExprNode rhs = node.getRhs();
+        lhs.accept(this);
+        rhs.accept(this);
         switch (node.getOp()){
             case MUL :
             case DIV :
@@ -158,17 +164,17 @@ public class SemanticChecker implements ASTVisitor {
             case AND :
             case XOR :
             case OR  : {
-                if (node.getLhs().getType() != intTypeSymbol || node.getRhs().getType() != intTypeSymbol){
+                if (lhs.getType() != intTypeSymbol || rhs.getType() != intTypeSymbol){
                     node.setCategory(ExprNode.category.NONLVALUE);
                     node.setType(intTypeSymbol);
                 }else throw new SemanticError("Operands ought to be integers", node.getPosition());
                 break;
             }
             case ADD : {
-                if (node.getLhs().getType() != stringTypeSymbol || node.getRhs().getType() != stringTypeSymbol){
+                if (lhs.getType() != stringTypeSymbol || rhs.getType() != stringTypeSymbol){
                     node.setCategory(ExprNode.category.NONLVALUE);
                     node.setType(stringTypeSymbol);
-                }else if (node.getLhs().getType() != intTypeSymbol || node.getRhs().getType() != intTypeSymbol){
+                }else if (lhs.getType() != intTypeSymbol || rhs.getType() != intTypeSymbol){
                     node.setCategory(ExprNode.category.NONLVALUE);
                     node.setType(intTypeSymbol);
                 }else throw new SemanticError("Operands ought to be both integers or strings", node.getPosition());
@@ -176,10 +182,10 @@ public class SemanticChecker implements ASTVisitor {
             }
             case LT   :
             case EQ   : {
-                if (node.getLhs().getType() != stringTypeSymbol || node.getRhs().getType() != stringTypeSymbol){
+                if (lhs.getType() != stringTypeSymbol || rhs.getType() != stringTypeSymbol){
                     node.setCategory(ExprNode.category.NONLVALUE);
                     node.setType(boolTypeSymbol);
-                }else if (node.getLhs().getType() != intTypeSymbol || node.getRhs().getType() != intTypeSymbol){
+                }else if (lhs.getType() != intTypeSymbol || rhs.getType() != intTypeSymbol){
                     node.setCategory(ExprNode.category.NONLVALUE);
                     node.setType(boolTypeSymbol);
                 }else throw new SemanticError("Operands ought to be both integers or strings", node.getPosition());
@@ -189,7 +195,7 @@ public class SemanticChecker implements ASTVisitor {
             case LEQ  :
             case GEQ  :
             case NEQ  : {
-                if (node.getLhs().getType() != intTypeSymbol || node.getRhs().getType() != intTypeSymbol){
+                if (lhs.getType() != intTypeSymbol || rhs.getType() != intTypeSymbol){
                     node.setCategory(ExprNode.category.NONLVALUE);
                     node.setType(boolTypeSymbol);
                 }else throw new SemanticError("Operands ought to be both integers", node.getPosition());
@@ -197,18 +203,30 @@ public class SemanticChecker implements ASTVisitor {
             }
             case ANDL :
             case ORL  : {
-                if (node.getLhs().getType() != boolTypeSymbol || node.getRhs().getType() != boolTypeSymbol){
+                if (lhs.getType() != boolTypeSymbol || rhs.getType() != boolTypeSymbol){
                     node.setCategory(ExprNode.category.NONLVALUE);
                     node.setType(boolTypeSymbol);
                 }else throw new SemanticError("Operands ought to be both booleans", node.getPosition());
                 break;
             }
             case ASSIGN : {
-                if (node.getLhs().getCategory() != ExprNode.category.VARIABLE
-                || (node.getRhs().getCategory() == ExprNode.category.CLASS || node.getRhs().getCategory() == ExprNode.category.FUNCTION)) {
-                    ((VarDeclNode)((VariableSymbol)node.getLhs().getType()).getDef()).getType().compatible(node.getRhs());
-                    node.setCategory(ExprNode.category.NONLVALUE);
-                    node.setType(voidTypeSymbol);
+                if (lhs.getCategory() != ExprNode.category.VARIABLE
+                        || rhs.getCategory() == ExprNode.category.CLASS
+                        || rhs.getCategory() == ExprNode.category.FUNCTION) {
+                    if (lhs.getType() instanceof VariableSymbol) {
+                        ((VarDeclNode) ((VariableSymbol) lhs.getType()).getDef()).getType().compatible(rhs);
+                        node.setCategory(ExprNode.category.NONLVALUE);
+                        node.setType(voidTypeSymbol);
+                    }else if (lhs.getType() instanceof ArrayType){
+                        if (rhs.getType() instanceof ArrayType){
+                            if (((ArrayType) lhs.getType()).getBaseTypeName().equals(((ArrayType) rhs.getType()).getBaseTypeName())) {
+                                if (((ArrayType) lhs.getType()).getDims() == ((ArrayType) rhs.getType()).getDims()) {
+                                    node.setCategory(ExprNode.category.NONLVALUE);
+                                    node.setType(voidTypeSymbol);
+                                } else throw new SemanticError("Array dimension not compatible", node.getPosition());
+                            }else throw new SemanticError("Array base type not compatible", node.getPosition());
+                        }else throw new SemanticError("Right hand side expression ought to be array type", node.getPosition());
+                    }
                 }else throw new SemanticError("Expression ought to be lvalue", node.getPosition());
             }
         }
@@ -268,7 +286,7 @@ public class SemanticChecker implements ASTVisitor {
     public void visit(NewExprNode node) {
         node.getExprNodeList().forEach(x -> x.accept(this));
         node.setCategory(ExprNode.category.NONLVALUE);
-        node.setType(new ArrayType(node));
+        node.setType(new ArrayType(node.getBaseType(), node.getNumDims()));
     }
 
     @Override
