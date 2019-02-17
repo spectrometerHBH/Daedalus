@@ -395,7 +395,7 @@ public class SemanticChecker implements ASTVisitor {
 
     @Override
     public void visit(StringLiteralNode node) {
-        node.setCategory(ExprNode.Category.VARIABLE);
+        node.setCategory(ExprNode.Category.NONLVALUE);
         node.setType(stringTypeSymbol);
     }
 }

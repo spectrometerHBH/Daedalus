@@ -68,7 +68,7 @@ public abstract class ExprNode extends ASTNode {
     }
 
     public boolean isAccessable() {
-        return (category == Category.VARIABLE && type instanceof ClassSymbol) || (category == Category.THIS);
+        return (isValue() && type instanceof ClassSymbol);
     }
 
     public boolean isAssignable() {
