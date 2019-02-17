@@ -10,15 +10,6 @@ public class BoolTypeNode extends PrimitiveTypeNode {
         super("bool", position);
     }
 
-    @Override
-    public void compatible(ExprNode exprNode) {
-        Type type = exprNode.getType();
-        if (type instanceof PrimitiveTypeSymbol){
-            if (type.getTypeName().equals("bool")) return;
-        }
-        throw new SemanticError("Type bool not compatible with " + type.getTypeName(), getPosition());
-    }
-
     @Override public void accept(ASTVisitor visitor){
         visitor.visit(this);
     }

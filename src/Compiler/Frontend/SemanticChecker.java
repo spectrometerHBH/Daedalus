@@ -3,6 +3,7 @@ package Compiler.Frontend;
 import Compiler.AST.*;
 import Compiler.Symbol.*;
 import Compiler.Utils.SemanticError;
+import Compiler.Utils.Util;
 
 import java.util.Iterator;
 
@@ -26,9 +27,10 @@ public class SemanticChecker implements ASTVisitor {
 
     @Override
     public void visit(VarDeclNode node) {
-        if (node.getType().getTypeIdentifier().equals("void")) throw new SemanticError("Type of variable can't be void", node.getPosition());
-        node.getExpr().accept(this);
-        node.getType().compatible(node.getExpr());
+        if (node.getExpr() != null) {
+            node.getExpr().accept(this);
+            Util.TypeNode2Type(node.getType(), globalScope).compatible(node.getExpr().getType(), node.getPosition());
+        }
     }
 
     @Override
@@ -80,6 +82,7 @@ public class SemanticChecker implements ASTVisitor {
     public void visit(VarDeclStmtNode node) {
         node.getVarDeclList().getList().forEach(x -> {
             x.accept(this);
+            if (x.getExpr() != null) Util.TypeNode2Type(x.getType(), globalScope).compatible(x.getExpr().getType(), node.getPosition());
         });
     }
 
@@ -91,6 +94,8 @@ public class SemanticChecker implements ASTVisitor {
     @Override
     public void visit(IfStmtNode node) {
         node.getExpression().accept(this);
+        if (!node.getExpression().isBoolean())
+            throw new SemanticError("Condition statement of if must be type bool", node.getPosition());
         node.getThenStmt().accept(this);
         if (node.getElseStmt() != null) node.getElseStmt().accept(this);
     }
@@ -98,25 +103,34 @@ public class SemanticChecker implements ASTVisitor {
     @Override
     public void visit(WhileStmtNode node) {
         node.getExpression().accept(this);
+        if (!node.getExpression().isBoolean())
+            throw new SemanticError("Condition statement of while must be type bool", node.getPosition());
         if (node.getStatement() != null) node.getStatement().accept(this);
     }
 
     @Override
     public void visit(ForStmtNode node) {
         if (node.getInit() != null) node.getInit().accept(this);
-        if (node.getCond() != null) node.getCond().accept(this);
+        if (node.getCond() != null) {
+            node.getCond().accept(this);
+            if (!node.getCond().isBoolean())
+                throw new SemanticError("Condition statement of for must be type bool", node.getPosition());
+        }
         if (node.getStep() != null) node.getStep().accept(this);
         if (node.getStatement() != null) node.getStatement().accept(this);
     }
 
     @Override
     public void visit(ReturnNode node) {
-        TypeNode returnType = ((FuncDeclNode)((FunctionSymbol)node.getFunctionSymbol()).getDef()).getType();
-        if (node.getExpression() != null){
+        if (((FuncDeclNode) node.getFunctionSymbol().getDef()).getType() == null)
+            throw new SemanticError("Constructor shouldn't have return statement", node.getPosition());
+        Type returnType = node.getFunctionSymbol().getType();
+        if (node.getExpression() != null) {
             node.getExpression().accept(this);
-           returnType.compatible(node.getExpression());
-        }else{
-            if (!(returnType instanceof VoidTypeNode)) throw new SemanticError("Function is void", node.getPosition());
+            returnType.compatible(node.getExpression().getType(), node.getPosition());
+        } else {
+            if (!(returnType.getTypeName().equals("void")))
+                throw new SemanticError("Return without expression", node.getPosition());
         }
     }
 
@@ -136,16 +150,16 @@ public class SemanticChecker implements ASTVisitor {
         ExprNode index = node.getIndex();
         array.accept(this);
         index.accept(this);
-        if (array.getCategory() != ExprNode.category.VARIABLE){
-            if (array.getType() instanceof ArrayType){
-                if (index.getType() != intTypeSymbol){
-                    node.setCategory(ExprNode.category.VARIABLE);
+        if (array.isAssignable()) {
+            if (array.getType() instanceof ArrayType) {
+                if (index.isInteger()) {
+                    node.setCategory(ExprNode.Category.VARIABLE);
                     node.setType(((ArrayType) array.getType()).getDims() == 1
-                                    ? globalScope.resolveType(((ArrayType) array.getType()).getTypeNode())
-                                    : new ArrayType(((ArrayType) array.getType()).getTypeNode(), ((ArrayType) array.getType()).getDims() - 1));
-                }else throw new SemanticError("Subscript ought to be int type", node.getPosition());
-            }else throw new SemanticError("Array expression ought to be array type", node.getPosition());
-        }else throw new SemanticError("Array expression ought to be lvalue", node.getPosition());
+                            ? ((ArrayType) array.getType()).getBaseType()
+                            : new ArrayType(((ArrayType) array.getType()).getBaseType(), ((ArrayType) array.getType()).getDims() - 1));
+                } else throw new SemanticError("Subscript ought to be int type", node.getPosition());
+            } else throw new SemanticError("Array expression ought to be array type", node.getPosition());
+        } else throw new SemanticError("Array expression ought to be lvalue", node.getPosition());
     }
 
     @Override
@@ -154,80 +168,72 @@ public class SemanticChecker implements ASTVisitor {
         ExprNode rhs = node.getRhs();
         lhs.accept(this);
         rhs.accept(this);
-        switch (node.getOp()){
-            case MUL :
-            case DIV :
-            case MOD :
-            case SUB :
-            case SHL :
-            case SHR :
-            case AND :
-            case XOR :
-            case OR  : {
-                if (lhs.getType() != intTypeSymbol || rhs.getType() != intTypeSymbol){
-                    node.setCategory(ExprNode.category.NONLVALUE);
+        switch (node.getOp()) {
+            case MUL:
+            case DIV:
+            case MOD:
+            case SUB:
+            case SHL:
+            case SHR:
+            case AND:
+            case XOR:
+            case OR: {
+                if (lhs.isInteger() && rhs.isInteger()) {
+                    node.setCategory(ExprNode.Category.NONLVALUE);
                     node.setType(intTypeSymbol);
-                }else throw new SemanticError("Operands ought to be integers", node.getPosition());
+                } else throw new SemanticError("Operands ought to be integers", node.getPosition());
                 break;
             }
-            case ADD : {
-                if (lhs.getType() != stringTypeSymbol || rhs.getType() != stringTypeSymbol){
-                    node.setCategory(ExprNode.category.NONLVALUE);
+            case ADD: {
+                if (lhs.isString() && rhs.isString()) {
+                    node.setCategory(ExprNode.Category.VARIABLE);
                     node.setType(stringTypeSymbol);
-                }else if (lhs.getType() != intTypeSymbol || rhs.getType() != intTypeSymbol){
-                    node.setCategory(ExprNode.category.NONLVALUE);
+                } else if (lhs.isInteger() && rhs.isInteger()) {
+                    node.setCategory(ExprNode.Category.NONLVALUE);
                     node.setType(intTypeSymbol);
-                }else throw new SemanticError("Operands ought to be both integers or strings", node.getPosition());
+                } else throw new SemanticError("Operands ought to be both integers or strings", node.getPosition());
                 break;
             }
-            case LT   :
-            case EQ   : {
-                if (lhs.getType() != stringTypeSymbol || rhs.getType() != stringTypeSymbol){
-                    node.setCategory(ExprNode.category.NONLVALUE);
+            case GT:
+            case LEQ:
+            case GEQ:
+            case LT: {
+                if (lhs.isString() && rhs.isString()) {
+                    node.setCategory(ExprNode.Category.VARIABLE);
                     node.setType(boolTypeSymbol);
-                }else if (lhs.getType() != intTypeSymbol || rhs.getType() != intTypeSymbol){
-                    node.setCategory(ExprNode.category.NONLVALUE);
+                } else if (lhs.isInteger() && rhs.isInteger()) {
+                    node.setCategory(ExprNode.Category.NONLVALUE);
                     node.setType(boolTypeSymbol);
-                }else throw new SemanticError("Operands ought to be both integers or strings", node.getPosition());
+                } else throw new SemanticError("Operands ought to be both integers or strings", node.getPosition());
                 break;
             }
-            case GT   :
-            case LEQ  :
-            case GEQ  :
-            case NEQ  : {
-                if (lhs.getType() != intTypeSymbol || rhs.getType() != intTypeSymbol){
-                    node.setCategory(ExprNode.category.NONLVALUE);
+            case NEQ:
+            case EQ: {
+                if ((lhs.isString() && rhs.isString())
+                        || (lhs.isInteger() && rhs.isInteger())
+                        || (lhs.isBoolean() && rhs.isBoolean())
+                        || (lhs.isNullable() && rhs.isNull())
+                        || (lhs.isNull() && rhs.isNullable())) {
+                    node.setCategory(ExprNode.Category.NONLVALUE);
                     node.setType(boolTypeSymbol);
-                }else throw new SemanticError("Operands ought to be both integers", node.getPosition());
+                } else
+                    throw new SemanticError("Operands ought to be both integers or strings", node.getPosition());
                 break;
             }
-            case ANDL :
-            case ORL  : {
-                if (lhs.getType() != boolTypeSymbol || rhs.getType() != boolTypeSymbol){
-                    node.setCategory(ExprNode.category.NONLVALUE);
+            case ANDL:
+            case ORL: {
+                if (lhs.isBoolean() && rhs.isBoolean()) {
+                    node.setCategory(ExprNode.Category.NONLVALUE);
                     node.setType(boolTypeSymbol);
-                }else throw new SemanticError("Operands ought to be both booleans", node.getPosition());
+                } else throw new SemanticError("Operands ought to be both booleans", node.getPosition());
                 break;
             }
-            case ASSIGN : {
-                if (lhs.getCategory() != ExprNode.category.VARIABLE
-                        || rhs.getCategory() == ExprNode.category.CLASS
-                        || rhs.getCategory() == ExprNode.category.FUNCTION) {
-                    if (lhs.getType() instanceof VariableSymbol) {
-                        ((VarDeclNode) ((VariableSymbol) lhs.getType()).getDef()).getType().compatible(rhs);
-                        node.setCategory(ExprNode.category.NONLVALUE);
-                        node.setType(voidTypeSymbol);
-                    }else if (lhs.getType() instanceof ArrayType){
-                        if (rhs.getType() instanceof ArrayType){
-                            if (((ArrayType) lhs.getType()).getBaseTypeName().equals(((ArrayType) rhs.getType()).getBaseTypeName())) {
-                                if (((ArrayType) lhs.getType()).getDims() == ((ArrayType) rhs.getType()).getDims()) {
-                                    node.setCategory(ExprNode.category.NONLVALUE);
-                                    node.setType(voidTypeSymbol);
-                                } else throw new SemanticError("Array dimension not compatible", node.getPosition());
-                            }else throw new SemanticError("Array base type not compatible", node.getPosition());
-                        }else throw new SemanticError("Right hand side expression ought to be array type", node.getPosition());
-                    }
-                }else throw new SemanticError("Expression ought to be lvalue", node.getPosition());
+            case ASSIGN: {
+                if (lhs.isAssignable() && rhs.isValue()) {
+                    lhs.getType().compatible(rhs.getType(), node.getPosition());
+                    node.setCategory(ExprNode.Category.NONLVALUE);
+                    node.setType(voidTypeSymbol);
+                } else throw new SemanticError("Expression ought to be lvalue", node.getPosition());
             }
         }
     }
@@ -235,124 +241,161 @@ public class SemanticChecker implements ASTVisitor {
     @Override
     public void visit(ClassMemberNode node) {
         node.getExpression().accept(this);
-        if (node.getExpression().getCategory() == ExprNode.category.CLASS){
+        if (node.getExpression().isAccessable()) {
             ClassSymbol classSymbol = (ClassSymbol) node.getExpression().getType();
-            Symbol memberSymbol = classSymbol.resolveSymbol(node.getIdentifier(), node.getPosition());
-            if (memberSymbol instanceof VariableSymbol){
-                node.setCategory(ExprNode.category.VARIABLE);
+            Symbol memberSymbol = classSymbol.resolveMember(node.getIdentifier(), node.getPosition());
+            if (memberSymbol instanceof VariableSymbol) {
+                node.setCategory(ExprNode.Category.VARIABLE);
                 node.setType(memberSymbol.getType());
-            }else if (memberSymbol instanceof FunctionSymbol){
-                node.setCategory(ExprNode.category.FUNCTION);
+            } else if (memberSymbol instanceof FunctionSymbol) {
+                node.setCategory(ExprNode.Category.FUNCTION);
                 node.setType(memberSymbol.getType());
                 node.setFunctionSymbol((FunctionSymbol) memberSymbol);
             }
-        }else throw new SemanticError("Member Access error, expression not a class", node.getPosition());
+        } else if (node.getExpression().getType() instanceof ArrayType) {
+            if (node.getIdentifier().equals("size")) {
+                node.setCategory(ExprNode.Category.FUNCTION);
+                node.setType(intTypeSymbol);
+                node.setFunctionSymbol(new FunctionSymbol("array.size", intTypeSymbol, null, globalScope));
+            } else throw new SemanticError("Type array builtin function call error", node.getPosition());
+        } else throw new SemanticError("Member Access error, expression not a class type variable", node.getPosition());
     }
 
     @Override
     public void visit(FuncallExprNode node) {
-        node.getFunction().accept(this);
+        ExprNode function = node.getFunction();
+        function.accept(this);
         node.getParameterList().forEach(x -> x.accept(this));
-        if (node.getFunction().getCategory() == ExprNode.category.FUNCTION){
-            if (node.getParameterList().size() == node.getFunction().getFunctionSymbol().getArguments().size()) {
-                FunctionSymbol functionSymbol = node.getFunction().getFunctionSymbol();
+        if (function.isCallable()) {
+            if (node.getParameterList().size() == function.getFunctionSymbol().getArguments().size()) {
+                FunctionSymbol functionSymbol = function.getFunctionSymbol();
                 Iterator<ExprNode> iterator = node.getParameterList().iterator();
                 functionSymbol.getArguments().forEach((identifier, variableSymbol) -> {
-                    ((VarDeclNode) variableSymbol.getDef()).getType().compatible(iterator.next());
+                    variableSymbol.getType().compatible(iterator.next().getType(), node.getPosition());
                 });
-                node.setCategory(ExprNode.category.NONLVALUE);
-                node.setType(node.getFunction().getFunctionSymbol().getType());
-            }else throw new SemanticError("Funcall expression error, parameter list error", node.getPosition());
-        }else throw new SemanticError("Funcall expression error, expression not a function", node.getPosition());
+                node.setCategory(function.getFunctionSymbol().getType() instanceof ClassSymbol ? ExprNode.Category.VARIABLE : ExprNode.Category.NONLVALUE);
+                node.setType(function.getFunctionSymbol().getType());
+            } else
+                throw new SemanticError("Function call expression error, parameter list length not match", node.getPosition());
+        } else throw new SemanticError("Function call expression error, expression not a function", node.getPosition());
     }
 
     @Override
     public void visit(IDExprNode node) {
         Symbol symbol = node.getSymbol();
-        if (symbol instanceof VariableSymbol){
-            node.setCategory(ExprNode.category.VARIABLE);
+        if (symbol instanceof VariableSymbol) {
+            node.setCategory(ExprNode.Category.VARIABLE);
             node.setType(symbol.getType());
-        }else if (symbol instanceof ClassSymbol){
-            node.setCategory(ExprNode.category.CLASS);
+        } else if (symbol instanceof ClassSymbol) {
+            node.setCategory(ExprNode.Category.CLASS);
             node.setType((ClassSymbol) symbol);
-        }else if (symbol instanceof FunctionSymbol){
-            node.setCategory(ExprNode.category.FUNCTION);
+        } else if (symbol instanceof FunctionSymbol) {
+            node.setCategory(ExprNode.Category.FUNCTION);
             node.setType(symbol.getType());
-            node.setFunctionSymbol((FunctionSymbol)symbol);
+            node.setFunctionSymbol((FunctionSymbol) symbol);
         }
     }
 
     @Override
     public void visit(NewExprNode node) {
-        node.getExprNodeList().forEach(x -> x.accept(this));
-        node.setCategory(ExprNode.category.NONLVALUE);
-        node.setType(new ArrayType(node.getBaseType(), node.getNumDims()));
+        node.getExprNodeList().forEach(x -> {
+            x.accept(this);
+            if (!(x.isInteger())) throw new SemanticError("Array subscript ought to be integers", node.getPosition());
+        });
+        Type type = globalScope.resolveType(node.getBaseType());
+        if (node.getNumDims() == 0) {
+            if (type instanceof ClassSymbol) {
+                if (type.getTypeName().equals("string")) {
+                    node.setCategory(ExprNode.Category.VARIABLE);
+                    node.setType(type);
+                } else {
+                    if (((ClassSymbol) type).getConstructor() == null) {
+                        node.setCategory(ExprNode.Category.VARIABLE);
+                        node.setType(type);
+                    } else {
+                        node.setCategory(ExprNode.Category.VARIABLE);
+                        node.setType(type);
+                        node.setFunctionSymbol(((ClassSymbol) type).getConstructor());
+                    }
+                }
+            } else {
+                node.setCategory(ExprNode.Category.VARIABLE);
+                node.setType(type);
+            }
+        } else {
+            node.setCategory(ExprNode.Category.VARIABLE);
+            node.setType(new ArrayType(type, node.getNumDims()));
+        }
     }
 
     @Override
     public void visit(ThisExprNode node) {
-        node.setCategory(ExprNode.category.CLASS);
+        node.setCategory(ExprNode.Category.THIS);
         node.setType((ClassSymbol) node.getScope());
     }
 
     @Override
     public void visit(UnaryExprNode node) {
         node.getExpression().accept(this);
-        switch (node.getOp()){
-            case PRE_INC :
-            case PRE_DEC :
-            case SUF_INC :
-            case SUF_DEC : {
-                if (node.getExpression().getCategory() == ExprNode.category.VARIABLE
-                    && node.getExpression().getType() == intTypeSymbol){
-                    node.setCategory(ExprNode.category.VARIABLE);
+        switch (node.getOp()) {
+            case PRE_INC:
+            case PRE_DEC:{
+                if (node.getExpression().isIntegerVaribale()) {
+                    node.setCategory(ExprNode.Category.VARIABLE);
                     node.setType(intTypeSymbol);
-                } else throw new SemanticError("Non-int expression", node.getPosition());
+                } else throw new SemanticError("Non-int variable", node.getPosition());
                 break;
             }
-            case POS     :
-            case NEG     :
-            case NOT     : {
-                if ((node.getExpression().getCategory() == ExprNode.category.VARIABLE || node.getExpression().getCategory() == ExprNode.category.NONLVALUE)
-                 && node.getExpression().getType() == intTypeSymbol){
-                    node.setCategory(ExprNode.category.NONLVALUE);
+            case SUF_INC:
+            case SUF_DEC: {
+                if (node.getExpression().isIntegerVaribale()) {
+                    node.setCategory(ExprNode.Category.NONLVALUE);
+                    node.setType(intTypeSymbol);
+                } else throw new SemanticError("Non-int variable", node.getPosition());
+                break;
+            }
+            case POS:
+            case NEG:
+            case NOT: {
+                if (node.getExpression().isInteger()) {
+                    node.setCategory(ExprNode.Category.NONLVALUE);
                     node.setType(intTypeSymbol);
                 } else throw new SemanticError("Non_int expression", node.getPosition());
                 break;
             }
-            case NOTL    : {
-                if ((node.getExpression().getCategory() == ExprNode.category.VARIABLE || node.getExpression().getCategory() == ExprNode.category.NONLVALUE)
-                && node.getExpression().getType() == boolTypeSymbol){
-                    node.setCategory(ExprNode.category.NONLVALUE);
+            case NOTL: {
+                if (node.getExpression().isBoolean()) {
+                    node.setCategory(ExprNode.Category.NONLVALUE);
                     node.setType(boolTypeSymbol);
                 }
                 break;
             }
-            default      : break;
+            default:
+                break;
         }
     }
 
     @Override
     public void visit(IntLiteralNode node) {
-        node.setCategory(ExprNode.category.NONLVALUE);
+        node.setCategory(ExprNode.Category.NONLVALUE);
         node.setType(intTypeSymbol);
     }
 
     @Override
     public void visit(BoolLiteralNode node) {
-        node.setCategory(ExprNode.category.NONLVALUE);
+        node.setCategory(ExprNode.Category.NONLVALUE);
         node.setType(boolTypeSymbol);
     }
 
     @Override
     public void visit(NullLiteralNode node) {
-        node.setCategory(ExprNode.category.NULL);
-        node.setType(null);
+        node.setCategory(ExprNode.Category.NONLVALUE);
+        node.setType(new NullType());
     }
 
     @Override
     public void visit(StringLiteralNode node) {
-        node.setCategory(ExprNode.category.NONLVALUE);
+        node.setCategory(ExprNode.Category.VARIABLE);
         node.setType(stringTypeSymbol);
     }
 }

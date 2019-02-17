@@ -1,22 +1,29 @@
 package Compiler.Symbol;
 
+import Compiler.AST.ArrayTypeNode;
+import Compiler.AST.ClassTypeNode;
+import Compiler.AST.PrimitiveTypeNode;
 import Compiler.AST.TypeNode;
+import Compiler.Utils.Position;
+import Compiler.Utils.SemanticError;
+
+import javax.swing.*;
 
 public class ArrayType implements Type {
-    TypeNode typeNode;
-    int dims;
+    private Type baseType;
+    private int dims;
 
-    public ArrayType(TypeNode typeNode, int dims) {
-        this.typeNode = typeNode;
+    public ArrayType(Type baseType, int dims) {
+        this.baseType = baseType;
         this.dims = dims;
     }
 
-    public TypeNode getTypeNode() {
-        return typeNode;
+    public Type getBaseType() {
+        return baseType;
     }
 
-    public void setTypeNode(TypeNode typeNode) {
-        this.typeNode = typeNode;
+    public void setBaseType(Type baseType) {
+        this.baseType = baseType;
     }
 
     public int getDims() {
@@ -29,10 +36,22 @@ public class ArrayType implements Type {
 
     @Override
     public String getTypeName() {
-        return typeNode.getTypeIdentifier() + " array";
+        return baseType.getTypeName() + " array";
     }
 
     public String getBaseTypeName(){
-        return typeNode.getTypeIdentifier();
+        return baseType.getTypeName();
+    }
+
+    @Override
+    public void compatible(Type type, Position position) {
+        if (type.getTypeName().equals("null")){
+
+        } else if (type instanceof ArrayType){
+            baseType.compatible(((ArrayType) type).getBaseType(), position);
+            if (dims == ((ArrayType) type).getDims()){
+
+            }else throw new SemanticError("Dimension not match", position);
+        } else throw new SemanticError("Type " + getTypeName() + " is not compatible with type " + type.getTypeName(), position);
     }
 }

@@ -2,12 +2,13 @@ package Compiler.AST;
 
 import Compiler.Utils.Position;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class NewExprNode extends ExprNode {
     private TypeNode baseType;
     private int numDims;
-    private List<ExprNode> exprNodeList;
+    private List<ExprNode> exprNodeList = new ArrayList<ExprNode>();
 
     public NewExprNode(TypeNode baseType, int numDims, List<ExprNode> exprNodeList, Position position) {
         super(position);

@@ -308,6 +308,13 @@ public interface MxstarVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitArrayCreator(MxstarParser.ArrayCreatorContext ctx);
 	/**
+	 * Visit a parse tree produced by the {@code classCreator}
+	 * labeled alternative in {@link MxstarParser#creator}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitClassCreator(MxstarParser.ClassCreatorContext ctx);
+	/**
 	 * Visit a parse tree produced by the {@code narrayCreator}
 	 * labeled alternative in {@link MxstarParser#creator}.
 	 * @param ctx the parse tree

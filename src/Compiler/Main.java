@@ -9,7 +9,6 @@ import Compiler.Symbol.ClassSymbol;
 import Compiler.Symbol.GlobalScope;
 import Compiler.Symbol.PrimitiveTypeSymbol;
 import Compiler.Utils.Position;
-import Compiler.Utils.SyntaxError;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTree;
@@ -23,7 +22,7 @@ public class Main {
         parser.removeErrorListeners();
         parser.addErrorListener(new MxstarErrorListener());
         ParseTree tree = parser.program();
-        //System.out.println(tree.toStringTree(parser));
+        System.out.println(tree.toStringTree(parser));
         ASTBuilder astBuilder = new ASTBuilder();
         return (ProgramNode) astBuilder.visit(tree);
     }
@@ -40,17 +39,19 @@ public class Main {
             new ClassMemberScanner(globalScope).visit(ast);
             new SymbolTableBuilder(globalScope).visit(ast);
             new SemanticChecker(globalScope,
-                    (PrimitiveTypeSymbol) globalScope.resolveSymbol("int",  new Position(0, 0)),
-                    (PrimitiveTypeSymbol) globalScope.resolveSymbol("bool", new Position(0, 0)),
-                    (ClassSymbol)         globalScope.resolveSymbol("string", new Position(0, 0)),
-                    (PrimitiveTypeSymbol) globalScope.resolveSymbol("void", new Position(0, 0))).visit(ast);
+                    (PrimitiveTypeSymbol) globalScope.resolveType("int",  new Position(0, 0)),
+                    (PrimitiveTypeSymbol) globalScope.resolveType("bool", new Position(0, 0)),
+                    (ClassSymbol)         globalScope.resolveType("string", new Position(0, 0)),
+                    (PrimitiveTypeSymbol) globalScope.resolveType("void", new Position(0, 0))).visit(ast);
             //IR transform
 
             //Control Flow Analysis
 
             //Data Flow Analysis
-        }catch (SyntaxError e){
-            System.out.println(e.getMessage());
+        }catch (Exception e){
+            e.printStackTrace();
+            System.err.println(e.getMessage());
+            throw new RuntimeException();
         }
     }
 }

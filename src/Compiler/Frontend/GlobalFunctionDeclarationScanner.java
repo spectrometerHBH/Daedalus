@@ -4,6 +4,7 @@ import Compiler.AST.*;
 import Compiler.Symbol.*;
 import Compiler.Utils.Position;
 import Compiler.Utils.SemanticError;
+import Compiler.Utils.Util;
 
 public class GlobalFunctionDeclarationScanner implements ASTVisitor {
     private GlobalScope globalScope;
@@ -13,16 +14,18 @@ public class GlobalFunctionDeclarationScanner implements ASTVisitor {
     }
 
     private void MainFunctionChecker(Symbol main) {
-        if (main.getType() instanceof PrimitiveTypeSymbol){
-            if (!main.getType().getTypeName().equals("int")) throw new SemanticError("Return type of main function ought to be int", new Position(0, 0));
-            if (!(((FuncDeclNode)main.getDef()).getParameterList().isEmpty())) throw new SemanticError("Parameter list of main funciton ought to be empty", new Position(0, 0));
-        }else throw new SemanticError("Return Type of main Function ought to be int", new Position(0, 0));
+        if (main.getType() instanceof PrimitiveTypeSymbol) {
+            if (!main.getType().getTypeName().equals("int"))
+                throw new SemanticError("Return type of main function ought to be int", new Position(0, 0));
+            if (!(((FuncDeclNode) main.getDef()).getParameterList().isEmpty()))
+                throw new SemanticError("Parameter list of main function ought to be empty", new Position(0, 0));
+        } else throw new SemanticError("Return Type of main Function ought to be int", new Position(0, 0));
     }
 
     @Override
     public void visit(ProgramNode node) {
-         node.getDeclNodeList().forEach(x -> x.accept(this));
-         MainFunctionChecker(globalScope.resolveMain());
+        node.getDeclNodeList().forEach(x -> x.accept(this));
+        MainFunctionChecker(globalScope.resolveMain());
     }
 
     @Override
@@ -32,10 +35,12 @@ public class GlobalFunctionDeclarationScanner implements ASTVisitor {
 
     @Override
     public void visit(FuncDeclNode node) {
-        Type returnType = globalScope.resolveType(node.getType());
+        if (node.getType() == null)
+            throw new SemanticError("Global function should have return type", node.getPosition());
+        Type returnType = Util.TypeNode2Type(node.getType(), globalScope);
         FunctionSymbol functionSymbol = new FunctionSymbol(node.getIdentifier(), returnType, node, globalScope);
-        for (VarDeclNode varDeclNode : node.getParameterList()){
-            Type parameterType = globalScope.resolveType(node.getType());
+        for (VarDeclNode varDeclNode : node.getParameterList()) {
+            Type parameterType = Util.TypeNode2Type(varDeclNode.getType(), globalScope);
             functionSymbol.defineVariable(new VariableSymbol(varDeclNode.getIdentifier(), parameterType, varDeclNode));
         }
         globalScope.defineFunction(functionSymbol);

@@ -2,6 +2,8 @@ package Compiler.Frontend;
 
 import Compiler.AST.*;
 import Compiler.Symbol.*;
+import Compiler.Utils.SemanticError;
+import Compiler.Utils.Util;
 
 public class ClassMemberScanner implements ASTVisitor {
     private GlobalScope globalScope;
@@ -13,21 +15,34 @@ public class ClassMemberScanner implements ASTVisitor {
 
     @Override
     public void visit(ProgramNode node) {
-        node.getDeclNodeList().forEach(x -> x.accept(this));
+        node.getDeclNodeList().forEach(x -> {
+            if (x instanceof ClassDeclNode) x.accept(this);
+        });
     }
 
     @Override
     public void visit(VarDeclNode node) {
-        Type type = globalScope.resolveType(node.getType());
+        Type type = Util.TypeNode2Type(node.getType(), globalScope);
         VariableSymbol variableSymbol = new VariableSymbol(node.getIdentifier(), type, node);
         currentScope.defineVariable(variableSymbol);
     }
 
     @Override
     public void visit(FuncDeclNode node) {
-        Type returnType = globalScope.resolveType(node.getType());
+        Type returnType = node.getType() == null
+                ? (ClassSymbol)currentScope :
+                Util.TypeNode2Type(node.getType(), globalScope);
         FunctionSymbol functionSymbol = new FunctionSymbol(node.getIdentifier(), returnType, node, currentScope);
         currentScope.defineFunction(functionSymbol);
+        if (currentScope instanceof ClassSymbol) {
+            if (node.getIdentifier().equals(((ClassSymbol) currentScope).getTypeName())) {
+                if (node.getType() == null) {
+                    if (((ClassSymbol) currentScope).getConstructor() != null)
+                        throw new SemanticError("Duplicated constructors", node.getPosition());
+                    ((ClassSymbol) currentScope).setConstructor(functionSymbol);
+                } else throw new SemanticError("Wrong type for constructor", node.getPosition());
+            }else if (node.getType() == null) throw new SemanticError("Return type missing", node.getPosition());
+        }
         currentScope = functionSymbol;
         node.getParameterList().forEach(x -> x.accept(this));
     }

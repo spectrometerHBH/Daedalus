@@ -11,6 +11,6 @@ public class SyntaxError extends RuntimeException {
     }
     @Override
     public String getMessage(){
-        return "Syntax Error" + super.getMessage() + position.toString();
+        return "[Syntax Error] : " + super.getMessage() + position.toString();
     }
 }

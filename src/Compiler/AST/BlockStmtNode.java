@@ -1,12 +1,19 @@
 package Compiler.AST;
 
 import Compiler.Utils.Position;
+import javafx.geometry.Pos;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class BlockStmtNode extends StmtNode {
-    private List<StmtNode> stmtList;
+    private List<StmtNode> stmtList = new ArrayList<>();
     private Position position;
+
+    public BlockStmtNode(StmtNode stmtNode, Position position){
+        super(position);
+        if (stmtNode != null) stmtList.add(stmtNode);
+    }
 
     public BlockStmtNode(List<StmtNode> stmtList, Position position){
         super(position);

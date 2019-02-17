@@ -1,19 +1,7 @@
-class A
-{
-	int a;
-	A(){
-
-	}
-	void f(int b)
-	{
-		a = b;
-	}
+int main() {
+    int i;
+    for (i = 0; i < 10; ++i)
+	break;
+    break;
 }
 
-int main()
-{
-	int c = 10;
-	A a = new A;
-	return a.f(c);
-	return 0;
-}

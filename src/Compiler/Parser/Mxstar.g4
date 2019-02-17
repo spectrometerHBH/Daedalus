@@ -93,13 +93,13 @@ jumpStatement
 // --- Expression
 expression
     :   expression op=('++' | '--')                                 #PostfixIncDec
+    |   <assoc=right> 'new' creator                                 #NewExpr  
     |   expression '(' parameterList? ')'                           #FunctionCall    
     |   array = expression '[' index = expression ']'               #Subscript
     |   expression '.' Identifier                                   #MemberAccess
     |   <assoc=right> op=('++' | '--') expression                   #UnaryExpr
     |   <assoc=right> op=('+' | '-') expression                     #UnaryExpr
-    |   <assoc=right> op=('!' | '~') expression                     #UnaryExpr
-    |   <assoc=right> 'new' creator                                 #NewExpr    
+    |   <assoc=right> op=('!' | '~') expression                     #UnaryExpr  
     |   lhs = expression op=('*' | '/' | '%') rhs = expression      #BinaryExpr
     |   lhs = expression op=('+' | '-') rhs = expression            #BinaryExpr
     |   lhs = expression op=('<<' | '>>') rhs = expression          #BinaryExpr
@@ -125,6 +125,7 @@ parameterList
 creator
     :   nonArrayType ('[' expression ']')+ ('[' ']')+ ('[' expression ']')+  #errorCreator
     |   nonArrayType ('[' expression ']')+ ('[' ']')*                        #arrayCreator
+    |   nonArrayType '(' ')'                                                 #classCreator   
     |   nonArrayType                                                         #narrayCreator
     ;
 

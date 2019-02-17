@@ -48,6 +48,7 @@ public class FunctionSymbol extends Symbol implements Scope{
 
     @Override
     public Symbol resolveSymbol(String identifier, Position position) {
-        return null;
+        if (arguments.containsKey(identifier)) return arguments.get(identifier);
+        else return enclosingScope.resolveSymbol(identifier, position);
     }
 }

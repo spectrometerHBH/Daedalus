@@ -8,11 +8,6 @@ public class VoidTypeNode extends PrimitiveTypeNode {
         super("void", position);
     }
 
-    @Override
-    public void compatible(ExprNode exprNode) {
-        throw new SemanticError("Type void not compatible with " + exprNode.getType().getTypeName(), getPosition());
-    }
-
     @Override public void accept(ASTVisitor visitor){
         visitor.visit(this);
     }

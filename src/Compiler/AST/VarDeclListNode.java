@@ -32,6 +32,6 @@ public class VarDeclListNode extends DeclNode{
     }
 
     @Override public void accept(ASTVisitor visitor){
-        visitor.visit(this);
+
     }
 }

@@ -20,17 +20,8 @@ public class ArrayTypeNode extends TypeNode {
         }
     }
 
-    @Override
-    public void compatible(ExprNode exprNode) {
-        Type type = exprNode.getType();
-        if (type instanceof ArrayType){
-            if (type.getTypeName().equals(baseType.getTypeIdentifier())){
-                if (dims >= ((ArrayType) type).getDims()) return;
-            }
-        }else if (type == null){
-            if (exprNode.getCategory() == ExprNode.category.NULL) return;
-        }
-        throw new SemanticError("Type " + baseType.getTypeIdentifier() + " array is not compatible with " + exprNode.getType().getTypeName(), getPosition());
+    public int getDims() {
+        return dims;
     }
 
     @Override public void accept(ASTVisitor visitor){
