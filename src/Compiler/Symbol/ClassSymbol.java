@@ -64,14 +64,18 @@ public class ClassSymbol extends Symbol implements Scope, Type {
 
     @Override
     public Symbol resolveSymbol(String identifier, Position position) {
-        if (variableSymbolMap.containsKey(identifier)) return variableSymbolMap.get(identifier);
-        if (functionSymbolMap.containsKey(identifier)) return functionSymbolMap.get(identifier);
+        Symbol variableSymbol = variableSymbolMap.get(identifier);
+        Symbol functionSymbol = functionSymbolMap.get(identifier);
+        if (variableSymbol != null) return variableSymbol;
+        if (functionSymbol != null) return functionSymbol;
         return enclosingScope.resolveSymbol(identifier, position);
     }
 
     public Symbol resolveMember(String identifier, Position position){
-        if (variableSymbolMap.containsKey(identifier)) return variableSymbolMap.get(identifier);
-        if (functionSymbolMap.containsKey(identifier)) return functionSymbolMap.get(identifier);
+        Symbol variableSymbol = variableSymbolMap.get(identifier);
+        Symbol functionSymbol = functionSymbolMap.get(identifier);
+        if (variableSymbol != null) return variableSymbol;
+        if (functionSymbol != null) return functionSymbol;
         throw new SemanticError(identifier + " is not a member of " + getSymbolName(), position);
     }
 
@@ -86,5 +90,30 @@ public class ClassSymbol extends Symbol implements Scope, Type {
 
             }else throw new SemanticError("Type " + getTypeName() + " is not compatible with type " + type.getTypeName(), position);
         }
+    }
+
+    @Override
+    public boolean isClassSymbol() {
+        return true;
+    }
+
+    @Override
+    public boolean isPrimitiveType() {
+        return false;
+    }
+
+    @Override
+    public boolean isClassType() {
+        return true;
+    }
+
+    @Override
+    public boolean isArrayType() {
+        return false;
+    }
+
+    @Override
+    public boolean isNullType() {
+        return false;
     }
 }

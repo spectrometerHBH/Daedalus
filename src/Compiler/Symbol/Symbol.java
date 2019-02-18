@@ -24,4 +24,8 @@ public class Symbol {
     public Type getType() {
         return type;
     }
+
+    public boolean isVariableSymbol(){ return false; }
+    public boolean isClassSymbol(){ return false; }
+    public boolean isFunctionSymbol(){ return false; }
 }

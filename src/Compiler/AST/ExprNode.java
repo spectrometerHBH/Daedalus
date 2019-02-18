@@ -68,7 +68,7 @@ public abstract class ExprNode extends ASTNode {
     }
 
     public boolean isAccessable() {
-        return (isValue() && type instanceof ClassSymbol);
+        return (isValue() && type.isClassType());
     }
 
     public boolean isAssignable() {
@@ -80,10 +80,10 @@ public abstract class ExprNode extends ASTNode {
     }
 
     public boolean isNullable(){
-        return (category == Category.VARIABLE && (type instanceof ClassSymbol || type instanceof ArrayType)) || type instanceof NullType;
+        return (category == Category.VARIABLE && (type.isClassType() || type.isArrayType())) || type.isNullType();
     }
 
     public boolean isNull(){
-        return type instanceof NullType;
+        return type.isNullType();
     }
 }

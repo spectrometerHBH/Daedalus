@@ -27,18 +27,21 @@ public class GlobalScope extends BaseScope{
 
     @Override
     public Symbol resolveSymbol(String identifier, Position position) {
-        if (!symbolMap.containsKey(identifier)) throw new SemanticError("Unknown identifier", position);
-        return symbolMap.get(identifier);
+        Symbol symbol = symbolMap.get(identifier);
+        if (symbol == null) throw new SemanticError("Unknown identifier", position);
+        return symbol;
     }
 
     public Type resolveType(TypeNode typeNode) {
-        if (!typeMap.containsKey(typeNode.getTypeIdentifier())) throw new SemanticError("Unknown type specifier", typeNode.getPosition());
-        return typeMap.get(typeNode.getTypeIdentifier());
+        Type type = typeMap.get(typeNode.getTypeIdentifier());
+        if (type == null) throw new SemanticError("Unknown type specifier", typeNode.getPosition());
+        return type;
     }
 
     public Type resolveType(String identifier, Position position) {
-        if (!typeMap.containsKey(identifier)) throw new SemanticError("Unknown type specifier", position);
-        return typeMap.get(identifier);
+        Type type = typeMap.get(identifier);
+        if (type == null) throw new SemanticError("Unknown type specifier", position);
+        return type;
     }
 
     public Symbol resolveMain() {

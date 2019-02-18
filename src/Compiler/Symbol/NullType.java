@@ -13,4 +13,24 @@ public class NullType implements Type {
     public void compatible(Type type, Position position) {
         throw new SemanticError("Null expression is not assignable", position);
     }
+
+    @Override
+    public boolean isPrimitiveType() {
+        return false;
+    }
+
+    @Override
+    public boolean isClassType() {
+        return false;
+    }
+
+    @Override
+    public boolean isArrayType() {
+        return false;
+    }
+
+    @Override
+    public boolean isNullType() {
+        return true;
+    }
 }

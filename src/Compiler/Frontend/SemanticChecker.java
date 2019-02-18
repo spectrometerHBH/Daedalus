@@ -151,7 +151,7 @@ public class SemanticChecker implements ASTVisitor {
         array.accept(this);
         index.accept(this);
         if (array.isAssignable()) {
-            if (array.getType() instanceof ArrayType) {
+            if (array.getType().isArrayType()) {
                 if (index.isInteger()) {
                     node.setCategory(ExprNode.Category.VARIABLE);
                     node.setType(((ArrayType) array.getType()).getDims() == 1
@@ -244,15 +244,15 @@ public class SemanticChecker implements ASTVisitor {
         if (node.getExpression().isAccessable()) {
             ClassSymbol classSymbol = (ClassSymbol) node.getExpression().getType();
             Symbol memberSymbol = classSymbol.resolveMember(node.getIdentifier(), node.getPosition());
-            if (memberSymbol instanceof VariableSymbol) {
+            if (memberSymbol.isVariableSymbol()) {
                 node.setCategory(ExprNode.Category.VARIABLE);
                 node.setType(memberSymbol.getType());
-            } else if (memberSymbol instanceof FunctionSymbol) {
+            } else if (memberSymbol.isFunctionSymbol()) {
                 node.setCategory(ExprNode.Category.FUNCTION);
                 node.setType(memberSymbol.getType());
                 node.setFunctionSymbol((FunctionSymbol) memberSymbol);
             }
-        } else if (node.getExpression().getType() instanceof ArrayType) {
+        } else if (node.getExpression().getType().isArrayType()) {
             if (node.getIdentifier().equals("size")) {
                 node.setCategory(ExprNode.Category.FUNCTION);
                 node.setType(intTypeSymbol);
@@ -273,7 +273,7 @@ public class SemanticChecker implements ASTVisitor {
                 functionSymbol.getArguments().forEach((identifier, variableSymbol) -> {
                     variableSymbol.getType().compatible(iterator.next().getType(), node.getPosition());
                 });
-                node.setCategory(function.getFunctionSymbol().getType() instanceof ClassSymbol ? ExprNode.Category.VARIABLE : ExprNode.Category.NONLVALUE);
+                node.setCategory(function.getFunctionSymbol().getType().isClassType() ? ExprNode.Category.VARIABLE : ExprNode.Category.NONLVALUE);
                 node.setType(function.getFunctionSymbol().getType());
             } else
                 throw new SemanticError("Function call expression error, parameter list length not match", node.getPosition());
@@ -283,13 +283,13 @@ public class SemanticChecker implements ASTVisitor {
     @Override
     public void visit(IDExprNode node) {
         Symbol symbol = node.getSymbol();
-        if (symbol instanceof VariableSymbol) {
+        if (symbol.isVariableSymbol()) {
             node.setCategory(ExprNode.Category.VARIABLE);
             node.setType(symbol.getType());
-        } else if (symbol instanceof ClassSymbol) {
+        } else if (symbol.isClassSymbol()) {
             node.setCategory(ExprNode.Category.CLASS);
             node.setType((ClassSymbol) symbol);
-        } else if (symbol instanceof FunctionSymbol) {
+        } else if (symbol.isFunctionSymbol()) {
             node.setCategory(ExprNode.Category.FUNCTION);
             node.setType(symbol.getType());
             node.setFunctionSymbol((FunctionSymbol) symbol);
@@ -304,7 +304,7 @@ public class SemanticChecker implements ASTVisitor {
         });
         Type type = globalScope.resolveType(node.getBaseType());
         if (node.getNumDims() == 0) {
-            if (type instanceof ClassSymbol) {
+            if (type.isClassType()) {
                 if (type.getTypeName().equals("string")) {
                     node.setCategory(ExprNode.Category.VARIABLE);
                     node.setType(type);

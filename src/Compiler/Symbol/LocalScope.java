@@ -14,7 +14,8 @@ public class LocalScope extends BaseScope {
 
     @Override
     public Symbol resolveSymbol(String identifier, Position position) {
-        if (symbolMap.containsKey(identifier)) return symbolMap.get(identifier);
+        Symbol symbol = symbolMap.get(identifier);
+        if (symbol != null) return symbol;
         else return getEnclosingScope().resolveSymbol(identifier, position);
     }
 }

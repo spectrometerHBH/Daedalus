@@ -23,4 +23,24 @@ public class PrimitiveTypeSymbol extends Symbol implements Type {
                 throw new SemanticError("Type " + getTypeName() + " not compatible with type " + type.getTypeName(), position);
         } else throw new SemanticError("Void expression on right hand side", position);
     }
+
+    @Override
+    public boolean isPrimitiveType() {
+        return true;
+    }
+
+    @Override
+    public boolean isClassType() {
+        return false;
+    }
+
+    @Override
+    public boolean isArrayType() {
+        return false;
+    }
+
+    @Override
+    public boolean isNullType() {
+        return false;
+    }
 }

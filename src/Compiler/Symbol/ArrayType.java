@@ -54,4 +54,24 @@ public class ArrayType implements Type {
             }else throw new SemanticError("Dimension not match", position);
         } else throw new SemanticError("Type " + getTypeName() + " is not compatible with type " + type.getTypeName(), position);
     }
+
+    @Override
+    public boolean isPrimitiveType() {
+        return false;
+    }
+
+    @Override
+    public boolean isClassType() {
+        return false;
+    }
+
+    @Override
+    public boolean isArrayType() {
+        return true;
+    }
+
+    @Override
+    public boolean isNullType() {
+        return false;
+    }
 }
