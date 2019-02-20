@@ -9,6 +9,10 @@ import java.util.Map;
 
 public class GlobalScope extends BaseScope{
     private Map<String, Type> typeMap = new LinkedHashMap<>();
+    private PrimitiveTypeSymbol IntTypeSymbol;
+    private PrimitiveTypeSymbol BoolTypeSymbol;
+    private PrimitiveTypeSymbol VoidTypeSymbol;
+    private ClassSymbol string;
 
     public GlobalScope(String name){
         super(name, null);
@@ -38,14 +42,40 @@ public class GlobalScope extends BaseScope{
         return type;
     }
 
-    public Type resolveType(String identifier, Position position) {
-        Type type = typeMap.get(identifier);
-        if (type == null) throw new SemanticError("Unknown type specifier", position);
-        return type;
-    }
-
     public Symbol resolveMain() {
         if (!symbolMap.containsKey("main")) throw new SemanticError("Can't find main function", new Position(0, 0));
         return symbolMap.get("main");
+    }
+
+    public PrimitiveTypeSymbol getIntTypeSymbol() {
+        return IntTypeSymbol;
+    }
+
+    public void setIntTypeSymbol(PrimitiveTypeSymbol intTypeSymbol) {
+        IntTypeSymbol = intTypeSymbol;
+    }
+
+    public PrimitiveTypeSymbol getBoolTypeSymbol() {
+        return BoolTypeSymbol;
+    }
+
+    public void setBoolTypeSymbol(PrimitiveTypeSymbol boolTypeSymbol) {
+        BoolTypeSymbol = boolTypeSymbol;
+    }
+
+    public PrimitiveTypeSymbol getVoidTypeSymbol() {
+        return VoidTypeSymbol;
+    }
+
+    public void setVoidTypeSymbol(PrimitiveTypeSymbol voidTypeSymbol) {
+        VoidTypeSymbol = voidTypeSymbol;
+    }
+
+    public ClassSymbol getString() {
+        return string;
+    }
+
+    public void setString(ClassSymbol string) {
+        this.string = string;
     }
 }

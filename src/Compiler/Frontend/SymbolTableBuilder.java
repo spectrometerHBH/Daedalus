@@ -36,6 +36,7 @@ public class SymbolTableBuilder implements ASTVisitor {
     public void visit(VarDeclNode node) {
         if (node.getExpr() != null) node.getExpr().accept(this);
         Type type = Util.TypeNode2Type(node.getType(), globalScope);
+        node.setTypeAfterResolve(type);
         currentScope.defineVariable(new VariableSymbol(node.getIdentifier(), type, node));
     }
 
@@ -103,6 +104,7 @@ public class SymbolTableBuilder implements ASTVisitor {
         node.getVarDeclList().getList().forEach(x -> {
             if (x.getExpr() != null) x.getExpr().accept(this);
             Type type = Util.TypeNode2Type(x.getType(), globalScope);
+            x.setTypeAfterResolve(type);
             currentScope.defineVariable(new VariableSymbol(x.getIdentifier(), type, x));
         });
     }
@@ -193,6 +195,7 @@ public class SymbolTableBuilder implements ASTVisitor {
     @Override
     public void visit(NewExprNode node) {
         Type type = Util.TypeNode2Type(node.getBaseType(), globalScope);
+        node.setBaseTypeAfterResolve(type);
         node.getExprNodeList().forEach(x -> x.accept(this));
     }
 

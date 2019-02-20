@@ -3,7 +3,6 @@ package Compiler.Frontend;
 import Compiler.AST.*;
 import Compiler.Symbol.*;
 import Compiler.Utils.SemanticError;
-import Compiler.Utils.Util;
 
 import java.util.Iterator;
 
@@ -12,12 +11,12 @@ public class SemanticChecker implements ASTVisitor {
     private ClassSymbol stringTypeSymbol;
     private PrimitiveTypeSymbol intTypeSymbol, boolTypeSymbol, voidTypeSymbol;
 
-    public SemanticChecker(GlobalScope globalScope, PrimitiveTypeSymbol intTypeSymbol, PrimitiveTypeSymbol boolTypeSymbol, ClassSymbol stringTypeSymbol, PrimitiveTypeSymbol voidTypeSymbol) {
+    public SemanticChecker(GlobalScope globalScope) {
         this.globalScope = globalScope;
-        this.intTypeSymbol = intTypeSymbol;
-        this.boolTypeSymbol = boolTypeSymbol;
-        this.stringTypeSymbol = stringTypeSymbol;
-        this.voidTypeSymbol = voidTypeSymbol;
+        this.intTypeSymbol = globalScope.getIntTypeSymbol();
+        this.boolTypeSymbol = globalScope.getBoolTypeSymbol();
+        this.stringTypeSymbol = globalScope.getString();
+        this.voidTypeSymbol = globalScope.getVoidTypeSymbol();
     }
 
     @Override
@@ -29,7 +28,7 @@ public class SemanticChecker implements ASTVisitor {
     public void visit(VarDeclNode node) {
         if (node.getExpr() != null) {
             node.getExpr().accept(this);
-            Util.TypeNode2Type(node.getType(), globalScope).compatible(node.getExpr().getType(), node.getPosition());
+            node.getTypeAfterResolve().compatible(node.getExpr().getType(), node.getPosition());
         }
     }
 
@@ -82,7 +81,7 @@ public class SemanticChecker implements ASTVisitor {
     public void visit(VarDeclStmtNode node) {
         node.getVarDeclList().getList().forEach(x -> {
             x.accept(this);
-            if (x.getExpr() != null) Util.TypeNode2Type(x.getType(), globalScope).compatible(x.getExpr().getType(), node.getPosition());
+            if (x.getExpr() != null) x.getTypeAfterResolve().compatible(x.getExpr().getType(), node.getPosition());
         });
     }
 
@@ -302,7 +301,7 @@ public class SemanticChecker implements ASTVisitor {
             x.accept(this);
             if (!(x.isInteger())) throw new SemanticError("Array subscript ought to be integers", node.getPosition());
         });
-        Type type = globalScope.resolveType(node.getBaseType());
+        Type type = node.getBaseTypeAfterResolve();
         if (node.getNumDims() == 0) {
             if (type.isClassType()) {
                 if (type.getTypeName().equals("string")) {

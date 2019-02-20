@@ -1,9 +1,11 @@
 package Compiler.AST;
 
+import Compiler.Symbol.Type;
 import Compiler.Utils.Position;
 
 public class VarDeclNode extends DeclNode {
     private TypeNode type;
+    private Type typeAfterResolve;
     private ExprNode expr;
     private String identifier;
     private Position position;
@@ -29,6 +31,14 @@ public class VarDeclNode extends DeclNode {
 
     public ExprNode getExpr() {
         return expr;
+    }
+
+    public Type getTypeAfterResolve() {
+        return typeAfterResolve;
+    }
+
+    public void setTypeAfterResolve(Type typeAfterResolve) {
+        this.typeAfterResolve = typeAfterResolve;
     }
 
     @Override public void accept(ASTVisitor visitor){

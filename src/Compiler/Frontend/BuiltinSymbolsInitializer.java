@@ -27,6 +27,11 @@ public class BuiltinSymbolsInitializer {
         }});
         globalScope.defineClass(string);
 
+        globalScope.setIntTypeSymbol(IntTypeSymbol);
+        globalScope.setBoolTypeSymbol(BoolTypeSymbol);
+        globalScope.setVoidTypeSymbol(VoidTypeSymbol);
+        globalScope.setString(string);
+
         //BuiltinFunctions
         globalScope.defineFunction(new FunctionSymbol("print", VoidTypeSymbol, null, globalScope){{
             defineVariable(new VariableSymbol("str", string, null));
