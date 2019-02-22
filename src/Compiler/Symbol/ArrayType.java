@@ -1,13 +1,8 @@
 package Compiler.Symbol;
 
-import Compiler.AST.ArrayTypeNode;
-import Compiler.AST.ClassTypeNode;
-import Compiler.AST.PrimitiveTypeNode;
-import Compiler.AST.TypeNode;
+import Compiler.Configruation;
 import Compiler.Utils.Position;
 import Compiler.Utils.SemanticError;
-
-import javax.swing.*;
 
 public class ArrayType implements Type {
     private Type baseType;
@@ -73,5 +68,10 @@ public class ArrayType implements Type {
     @Override
     public boolean isNullType() {
         return false;
+    }
+
+    @Override
+    public int getTypeSize() {
+        return Configruation.ARRAY_REFERENCE_SIZE();
     }
 }

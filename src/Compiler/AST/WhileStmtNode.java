@@ -1,11 +1,16 @@
 package Compiler.AST;
 
+import Compiler.IR.BasicBlock;
 import Compiler.Utils.Position;
 
-public class WhileStmtNode extends StmtNode {
+public class WhileStmtNode extends StmtNode implements Loop{
     private ExprNode expression;
     private StmtNode statement;
     private Position position;
+
+    //for IR
+    private BasicBlock stepBB;
+    private BasicBlock mergeBB;
 
     public WhileStmtNode(ExprNode expression, StmtNode statement, Position position){
         super(position);
@@ -23,5 +28,23 @@ public class WhileStmtNode extends StmtNode {
 
     @Override public void accept(ASTVisitor visitor){
         visitor.visit(this);
+    }
+
+    public void setStepBB(BasicBlock stepBB) {
+        this.stepBB = stepBB;
+    }
+
+    public void setMergeBB(BasicBlock mergeBB) {
+        this.mergeBB = mergeBB;
+    }
+
+    @Override
+    public BasicBlock getStepBB() {
+        return stepBB;
+    }
+
+    @Override
+    public BasicBlock getMergeBB() {
+        return mergeBB;
     }
 }

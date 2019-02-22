@@ -1,6 +1,9 @@
 package Compiler.AST;
 
-import Compiler.Symbol.*;
+import Compiler.IR.BasicBlock;
+import Compiler.IR.Operand.Oprand;
+import Compiler.Symbol.FunctionSymbol;
+import Compiler.Symbol.Type;
 import Compiler.Utils.Position;
 
 public abstract class ExprNode extends ASTNode {
@@ -8,9 +11,14 @@ public abstract class ExprNode extends ASTNode {
         VARIABLE, CLASS, FUNCTION, NONLVALUE, THIS
     }
 
-    private Category category;
+    //for Semantic Check
+    private Category category;//VARIABLE, NONLVALUE, THIS, CLASS, FUNCTION
     private Type type; //PrimitiveType, ClassSymbol, ArrayType, NullType
     private FunctionSymbol functionSymbol;
+
+    //for IR
+    private BasicBlock thenBB, elseBB;
+    private Oprand resultOprand;
 
     public ExprNode(Position position) {
         super(position);
@@ -32,12 +40,36 @@ public abstract class ExprNode extends ASTNode {
         this.type = type;
     }
 
+    public Oprand getResultOprand() {
+        return resultOprand;
+    }
+
+    public void setResultOprand(Oprand resultOprand) {
+        this.resultOprand = resultOprand;
+    }
+
     public FunctionSymbol getFunctionSymbol() {
         return functionSymbol;
     }
 
     public void setFunctionSymbol(FunctionSymbol functionSymbol) {
         this.functionSymbol = functionSymbol;
+    }
+
+    public BasicBlock getThenBB() {
+        return thenBB;
+    }
+
+    public void setThenBB(BasicBlock thenBB) {
+        this.thenBB = thenBB;
+    }
+
+    public BasicBlock getElseBB() {
+        return elseBB;
+    }
+
+    public void setElseBB(BasicBlock elseBB) {
+        this.elseBB = elseBB;
     }
 
     public boolean isIntegerVaribale() {

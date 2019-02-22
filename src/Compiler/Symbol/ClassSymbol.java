@@ -3,7 +3,6 @@ package Compiler.Symbol;
 import Compiler.AST.ClassDeclNode;
 import Compiler.Utils.Position;
 import Compiler.Utils.SemanticError;
-import javafx.geometry.Pos;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -14,6 +13,8 @@ public class ClassSymbol extends Symbol implements Scope, Type {
     private Map<String, VariableSymbol> variableSymbolMap = new LinkedHashMap<>();
     private Map<String, FunctionSymbol> functionSymbolMap = new LinkedHashMap<>();
 
+    //for IR
+    private int size;
     public ClassSymbol(String name, ClassDeclNode classDeclNode, Scope enclosingScope) {
         super(name, null, classDeclNode);
         this.enclosingScope = enclosingScope;
@@ -48,6 +49,7 @@ public class ClassSymbol extends Symbol implements Scope, Type {
         if (variableSymbolMap.containsKey(symbol.getSymbolName()) || functionSymbolMap.containsKey(symbol.getSymbolName()))
             throw new SemanticError("Duplicate identifiers", symbol.getDef().getPosition());
         variableSymbolMap.put(symbol.getSymbolName(), symbol);
+        size += symbol.getType().getTypeSize();
     }
 
     @Override
@@ -115,5 +117,10 @@ public class ClassSymbol extends Symbol implements Scope, Type {
     @Override
     public boolean isNullType() {
         return false;
+    }
+
+    @Override
+    public int getTypeSize() {
+        return size;
     }
 }

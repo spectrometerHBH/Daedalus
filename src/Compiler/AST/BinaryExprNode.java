@@ -5,7 +5,7 @@ import Compiler.Utils.Position;
 public class BinaryExprNode extends ExprNode {
     public enum Op{
         MUL, DIV, MOD, ADD, SUB, SHL, SHR, LT, GT, LEQ, GEQ, EQ, NEQ, AND, XOR, OR, ANDL, ORL, ASSIGN
-    };
+    }
 
     private Op op;
     private ExprNode lhs, rhs;

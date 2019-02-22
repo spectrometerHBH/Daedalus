@@ -1,5 +1,6 @@
 package Compiler.Symbol;
 
+import Compiler.Configruation;
 import Compiler.Utils.Position;
 import Compiler.Utils.SemanticError;
 
@@ -42,5 +43,10 @@ public class PrimitiveTypeSymbol extends Symbol implements Type {
     @Override
     public boolean isNullType() {
         return false;
+    }
+
+    @Override
+    public int getTypeSize() {
+        return Configruation.PRIMITIVETYPE_SIZE();
     }
 }

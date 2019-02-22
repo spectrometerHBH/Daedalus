@@ -33,4 +33,9 @@ public class NullType implements Type {
     public boolean isNullType() {
         return true;
     }
+
+    @Override
+    public int getTypeSize() {
+        return 0;
+    }
 }

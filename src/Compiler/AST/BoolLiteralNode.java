@@ -10,6 +10,10 @@ public class BoolLiteralNode extends ConstExprNode {
         this.val = val;
     }
 
+    public boolean getVal() {
+        return val;
+    }
+
     @Override public void accept(ASTVisitor visitor){
         visitor.visit(this);
     }

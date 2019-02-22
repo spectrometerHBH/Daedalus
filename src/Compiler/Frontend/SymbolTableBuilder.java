@@ -12,7 +12,7 @@ public class SymbolTableBuilder implements ASTVisitor {
     private Scope currentScope;
     private ClassSymbol currentClassSymbol;
     private FunctionSymbol currentFunctionSymbol;
-    private Stack<StmtNode> stackOfLoops = new Stack<StmtNode>();
+    private Stack<Loop> stackOfLoops = new Stack<Loop>();
 
     public SymbolTableBuilder(GlobalScope globalScope) {
         this.globalScope = globalScope;
@@ -37,7 +37,9 @@ public class SymbolTableBuilder implements ASTVisitor {
         if (node.getExpr() != null) node.getExpr().accept(this);
         Type type = Util.TypeNode2Type(node.getType(), globalScope);
         node.setTypeAfterResolve(type);
-        currentScope.defineVariable(new VariableSymbol(node.getIdentifier(), type, node));
+        VariableSymbol variableSymbol = new VariableSymbol(node.getIdentifier(), type, node);
+        currentScope.defineVariable(variableSymbol);
+        if (currentScope == globalScope) node.setGlobalVariable();
     }
 
     @Override
@@ -155,12 +157,14 @@ public class SymbolTableBuilder implements ASTVisitor {
     public void visit(BreakNode node) {
         if (stackOfLoops.empty())
             throw new SemanticError("Break should be in a loop", node.getPosition());
+        node.setCurrentLoop(stackOfLoops.peek());
     }
 
     @Override
     public void visit(ContinueNode node) {
         if (stackOfLoops.empty())
             throw new SemanticError("Continue should be in a loop", node.getPosition());
+        node.setCurrentLoop(stackOfLoops.peek());
     }
 
     @Override

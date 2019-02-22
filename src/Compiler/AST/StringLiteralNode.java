@@ -10,6 +10,10 @@ public class StringLiteralNode extends ConstExprNode {
         this.val = val;
     }
 
+    public String getVal() {
+        return val;
+    }
+
     @Override public void accept(ASTVisitor visitor){
         visitor.visit(this);
     }
