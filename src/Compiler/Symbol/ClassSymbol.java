@@ -15,6 +15,7 @@ public class ClassSymbol extends Symbol implements Scope, Type {
 
     //for IR
     private int size;
+
     public ClassSymbol(String name, ClassDeclNode classDeclNode, Scope enclosingScope) {
         super(name, null, classDeclNode);
         this.enclosingScope = enclosingScope;
@@ -49,6 +50,7 @@ public class ClassSymbol extends Symbol implements Scope, Type {
         if (variableSymbolMap.containsKey(symbol.getSymbolName()) || functionSymbolMap.containsKey(symbol.getSymbolName()))
             throw new SemanticError("Duplicate identifiers", symbol.getDef().getPosition());
         variableSymbolMap.put(symbol.getSymbolName(), symbol);
+        symbol.setOffset(size);
         size += symbol.getType().getTypeSize();
     }
 
@@ -73,7 +75,7 @@ public class ClassSymbol extends Symbol implements Scope, Type {
         return enclosingScope.resolveSymbol(identifier, position);
     }
 
-    public Symbol resolveMember(String identifier, Position position){
+    public Symbol resolveMember(String identifier, Position position) {
         Symbol variableSymbol = variableSymbolMap.get(identifier);
         Symbol functionSymbol = functionSymbolMap.get(identifier);
         if (variableSymbol != null) return variableSymbol;
@@ -83,14 +85,15 @@ public class ClassSymbol extends Symbol implements Scope, Type {
 
     @Override
     public void compatible(Type type, Position position) {
-        if (getTypeName().equals("string")){
-            if (type.getTypeName().equals("string")){
+        if (getTypeName().equals("string")) {
+            if (type.getTypeName().equals("string")) {
 
-            }else throw new SemanticError("Type string is not compatible with type " + type.getTypeName(), position);
-        }else{
-            if (type.getTypeName().equals("null") || type.getTypeName().equals(getTypeName())){
+            } else throw new SemanticError("Type string is not compatible with type " + type.getTypeName(), position);
+        } else {
+            if (type.getTypeName().equals("null") || type.getTypeName().equals(getTypeName())) {
 
-            }else throw new SemanticError("Type " + getTypeName() + " is not compatible with type " + type.getTypeName(), position);
+            } else
+                throw new SemanticError("Type " + getTypeName() + " is not compatible with type " + type.getTypeName(), position);
         }
     }
 

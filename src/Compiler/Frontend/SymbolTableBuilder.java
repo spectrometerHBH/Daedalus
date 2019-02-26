@@ -45,6 +45,7 @@ public class SymbolTableBuilder implements ASTVisitor {
     @Override
     public void visit(FuncDeclNode node) {
         FunctionSymbol functionSymbol = (FunctionSymbol) currentScope.resolveSymbol(node.getIdentifier(), node.getPosition());
+        if (currentScope instanceof ClassSymbol) functionSymbol.setMemberFunction();
         currentScope = functionSymbol;
         currentFunctionSymbol = functionSymbol;
         visit(node.getBlock());
@@ -52,7 +53,7 @@ public class SymbolTableBuilder implements ASTVisitor {
 
     @Override
     public void visit(ClassDeclNode node) {
-        ClassSymbol classSymbol = (ClassSymbol) globalScope.resolveSymbol(node.getIdentifier(), node.getPosition());
+        ClassSymbol classSymbol = node.getClassSymbol();
         currentScope = classSymbol;
         currentClassSymbol = classSymbol;
         node.getFuncDeclList().forEach(x -> {

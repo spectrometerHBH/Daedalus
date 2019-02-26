@@ -1,5 +1,6 @@
 package Compiler.AST;
 
+import Compiler.Symbol.ClassSymbol;
 import Compiler.Utils.Position;
 
 import java.util.List;
@@ -8,6 +9,7 @@ public class ClassDeclNode extends DeclNode{
     private String identifier;
     private List<FuncDeclNode> funcDeclList;
     private List<VarDeclNode> varDecList;
+    private ClassSymbol classSymbol;
 
     public ClassDeclNode(String identifier, List<FuncDeclNode> funcDeclList, List<VarDeclNode> varDecList, Position position){
         super(position);
@@ -30,5 +32,13 @@ public class ClassDeclNode extends DeclNode{
 
     public List<FuncDeclNode> getFuncDeclList() {
         return funcDeclList;
+    }
+
+    public ClassSymbol getClassSymbol() {
+        return classSymbol;
+    }
+
+    public void setClassSymbol(ClassSymbol classSymbol) {
+        this.classSymbol = classSymbol;
     }
 }

@@ -49,7 +49,7 @@ public class ClassMemberScanner implements ASTVisitor {
 
     @Override
     public void visit(ClassDeclNode node) {
-        ClassSymbol classSymbol = (ClassSymbol) globalScope.resolveSymbol(node.getIdentifier(), node.getPosition());
+        ClassSymbol classSymbol = node.getClassSymbol();
         currentScope = classSymbol;
         node.getVarDecList().forEach(x -> x.accept(this));
         node.getFuncDeclList().forEach(x -> {

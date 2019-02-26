@@ -1,17 +1,13 @@
 package Compiler;
 
-public class Configruation {
+public class Configuration {
     public static int REGISTER_SIZE = 8;
 
     public static int PRIMITIVETYPE_SIZE(){
         return 8;
     }
 
-    public static int ARRAY_REFERENCE_SIZE(){
-        return 8;
-    }
-
-    public static int CLASS_REFERENCE_SIZE(){
+    public static int POINTER_SIZE(){
         return 8;
     }
 }

@@ -11,6 +11,9 @@ public class FunctionSymbol extends Symbol implements Scope{
     private Scope enclosingScope;
     private Map<String, VariableSymbol> arguments = new LinkedHashMap<>();
 
+    //for IR
+    private boolean isMemberFunction = false;
+
     public FunctionSymbol(String name, Type type, FuncDeclNode funcDeclNode, Scope enclosingScope) {
         super(name, type, funcDeclNode);
         this.enclosingScope = enclosingScope;
@@ -18,6 +21,14 @@ public class FunctionSymbol extends Symbol implements Scope{
 
     public Map<String, VariableSymbol> getArguments() {
         return arguments;
+    }
+
+    public boolean isMemberFunction() {
+        return isMemberFunction;
+    }
+
+    public void setMemberFunction() {
+        isMemberFunction = true;
     }
 
     @Override

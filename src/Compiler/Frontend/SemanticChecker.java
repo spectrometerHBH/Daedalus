@@ -243,6 +243,7 @@ public class SemanticChecker implements ASTVisitor {
         if (node.getExpression().isAccessable()) {
             ClassSymbol classSymbol = (ClassSymbol) node.getExpression().getType();
             Symbol memberSymbol = classSymbol.resolveMember(node.getIdentifier(), node.getPosition());
+            node.setSymbol(memberSymbol);
             if (memberSymbol.isVariableSymbol()) {
                 node.setCategory(ExprNode.Category.VARIABLE);
                 node.setType(memberSymbol.getType());

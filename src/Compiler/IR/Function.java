@@ -10,6 +10,7 @@ public class Function {
     private BasicBlock entryBlock;
     private BasicBlock exitBlock;
     private List<Return> returnInstList = new ArrayList<>();
+    private Storage referenceForClassMethod = null;
     private List<Storage> parameterList = new ArrayList<>();
     private String name;
 
@@ -21,5 +22,9 @@ public class Function {
     }
     public String getName() {
         return name;
+    }
+
+    public Storage getReferenceForClassMethod() {
+        return referenceForClassMethod;
     }
 }
