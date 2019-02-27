@@ -35,6 +35,9 @@ public class NullType implements Type {
     }
 
     @Override
+    public boolean isPointerType() { return true; }
+
+    @Override
     public int getTypeSize() {
         return 0;
     }

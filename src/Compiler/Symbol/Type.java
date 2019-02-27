@@ -9,5 +9,6 @@ public interface Type {
     boolean isClassType();
     boolean isArrayType();
     boolean isNullType();
+    boolean isPointerType();
     int getTypeSize();
 }

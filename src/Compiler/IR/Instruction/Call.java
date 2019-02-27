@@ -2,7 +2,6 @@ package Compiler.IR.Instruction;
 
 import Compiler.IR.BasicBlock;
 import Compiler.IR.Operand.Oprand;
-import Compiler.IR.Operand.VirtualRegister;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -10,9 +9,9 @@ import java.util.List;
 public class Call extends IRInstruction {
     private List<Oprand> parameterList = new ArrayList<>();
     private Oprand objectPointer;
-    private VirtualRegister result;
+    private Oprand result;
 
-    public Call(BasicBlock currentBB, VirtualRegister result) {
+    public Call(BasicBlock currentBB, Oprand result) {
         super(currentBB);
         this.result = result;
     }

@@ -24,7 +24,7 @@ public class IRBuilder implements ASTVisitor {
         return irRoot;
     }
 
-    //TODO
+    //TODO : 1.process null, allocate 0x0 for null
     @Override
     public void visit(ProgramNode node) {
 
@@ -35,15 +35,15 @@ public class IRBuilder implements ASTVisitor {
         VariableSymbol variableSymbol = node.getVariableSymbol();
         Type type = node.getTypeAfterResolve();
         if (node.isGlobalVariable()) {
-            GlobalVariable globalVariable = new GlobalVariable(new VirtualRegister(), type.getTypeSize());
-            irRoot.addGlobalVariable(globalVariable);
+            VirtualRegister globalVariable = type.isPointerType() ? new GlobalI64Pointer() : new GlobalI64Value();
+            irRoot.addGlobalVariable((GlobalVariable) globalVariable);
             variableSymbol.setVariableStorage(globalVariable);
-            //global variable init TODO
+            //TODO global variable init
         } else {
-            VirtualRegister virtualRegister = new VirtualRegister();
+            VirtualRegister virtualRegister = type.isPointerType() ? new I64Pointer() : new I64Value();
             if (currentFunction != null) currentFunction.appendParameterList(virtualRegister);
             variableSymbol.setVariableStorage(virtualRegister);
-            if (node.getExpr() != null) assign(virtualRegister, node.getExpr());
+            if (node.getExpr() != null) assign(type.isPointerType(), virtualRegister, node.getExpr());
         }
     }
 
@@ -188,8 +188,8 @@ public class IRBuilder implements ASTVisitor {
         if (node.getFunctionSymbol().getType().getTypeName().equals("void")) {
             currentBB.terminate(new Return(currentBB, null));
         } else {
-            VirtualRegister virtualRegister = new VirtualRegister();
-            assign(virtualRegister, node.getExpression());
+            VirtualRegister virtualRegister = node.getFunctionSymbol().getType().isPointerType() ? new I64Pointer() : new I64Value();
+            assign(node.getFunctionSymbol().getType().isPointerType(), virtualRegister, node.getExpression());
             currentBB.terminate(new Return(currentBB, virtualRegister));
         }
     }
@@ -209,38 +209,80 @@ public class IRBuilder implements ASTVisitor {
         ArrayType arrayType = (ArrayType) node.getType();
         ExprNode array = node.getArray();
         ExprNode index = node.getIndex();
-        HeapData basePointer = (HeapData) array.getResultOprand();
-        VirtualRegister indexVR = (VirtualRegister) array.getResultOprand();
-        //Result type may be ArrayType or BaseType or Primitive
-        if (arrayType.getDims() > 1) {
-            //Result type is ArrayType
-            HeapData result = new HeapData(new VirtualRegister(), Configuration.POINTER_SIZE());
-            node.setResultOprand(result);
-            VirtualRegister offset = new VirtualRegister();
-            currentBB.appendInst(new Binary(currentBB, Binary.Op.MUL, indexVR, new Immediate(Configuration.POINTER_SIZE()), offset));
-            currentBB.appendInst(new Binary(currentBB, Binary.Op.ADD, basePointer, offset, result));
-        } else {
-            if (arrayType.getBaseType() instanceof ClassSymbol) {
-                //Result type is ClassType
-                HeapData result = new HeapData(new VirtualRegister(), Configuration.POINTER_SIZE());
-                VirtualRegister offset = new VirtualRegister();
-                currentBB.appendInst(new Binary(currentBB, Binary.Op.MUL, indexVR, new Immediate(arrayType.getBaseType().getTypeSize()), offset));
-                currentBB.appendInst(new Binary(currentBB, Binary.Op.ADD, basePointer, offset, result));
-            } else {
-                //Result type is baseType
-                VirtualRegister offset = new VirtualRegister();
-                currentBB.appendInst(new Binary(currentBB, Binary.Op.MUL, indexVR, new Immediate(arrayType.getBaseType().getTypeSize()), offset));
-                VirtualRegister pointer = new VirtualRegister();
-                currentBB.appendInst(new Binary(currentBB, Binary.Op.ADD, basePointer, offset, pointer));
-                node.setResultOprand(new VirtualRegister());
-                currentBB.appendInst(new Move(currentBB, new HeapData(pointer, arrayType.getBaseType().getTypeSize()), node.getResultOprand()));
-            }
-        }
+        Pointer basePointer = (Pointer) array.getResultOprand();
+        Value indexValue = getOprandForValueUse(currentBB, index.getResultOprand());
+        node.setResultOprand(new I64Pointer());
+        I64Value offset = new I64Value();
+        currentBB.appendInst(new Binary(currentBB, Binary.Op.MUL, indexValue, new Immediate(arrayType.getDims() > 1 ? Configuration.POINTER_SIZE() : arrayType.getBaseType().getTypeSize()), offset));
+        currentBB.appendInst(new Binary(currentBB, Binary.Op.ADD, basePointer, offset, node.getResultOprand()));
     }
 
     //TODO
     @Override
     public void visit(BinaryExprNode node) {
+        ExprNode lhs = node.getLhs();
+        ExprNode rhs = node.getRhs();
+        lhs.accept(this);
+        rhs.accept(this);
+        Binary.Op op_binary = Binary.Op.MUL;
+        Cmp.Op op_cmp = Cmp.Op.LT;
+        switch (node.getOp()) {
+            case MUL:
+                op_binary = Binary.Op.MUL;
+                break;
+            case DIV:
+                op_binary = Binary.Op.DIV;
+                break;
+            case MOD:
+                op_binary = Binary.Op.MOD;
+                break;
+            case SUB:
+                op_binary = Binary.Op.SUB;
+                break;
+            case SHL:
+                op_binary = Binary.Op.SHL;
+                break;
+            case SHR:
+                op_binary = Binary.Op.SHR;
+                break;
+            case AND:
+                op_binary = Binary.Op.AND;
+                break;
+            case XOR:
+                op_binary = Binary.Op.XOR;
+                break;
+            case OR:
+                op_binary = Binary.Op.OR;
+                break;
+            case ADD:
+                op_binary = Binary.Op.ADD;
+                break;
+            case GT:
+                op_cmp = Cmp.Op.GT;
+                break;
+            case LEQ:
+                op_cmp = Cmp.Op.LEQ;
+                break;
+            case GEQ:
+                op_cmp = Cmp.Op.GEQ;
+                break;
+            case LT:
+                op_cmp = Cmp.Op.LT;
+                break;
+            case NEQ:
+                op_cmp = Cmp.Op.NEQ;
+                break;
+            case EQ:
+                op_cmp = Cmp.Op.EQ;
+                break;
+            case ANDL:
+                break;
+            case ORL:
+                break;
+            case ASSIGN:
+                break;
+        }
+
         switch (node.getOp()) {
             case MUL:
             case DIV:
@@ -251,26 +293,64 @@ public class IRBuilder implements ASTVisitor {
             case AND:
             case XOR:
             case OR: {
-
+                //lhs & rhs are both int type
+                Oprand lhsOprand = getOprandForValueUse(currentBB, lhs.getResultOprand());
+                Oprand rhsOprand = getOprandForValueUse(currentBB, rhs.getResultOprand());
+                node.setResultOprand(new I64Value());
+                currentBB.appendInst(new Binary(currentBB, op_binary, lhsOprand, rhsOprand, node.getResultOprand()));
+                break;
             }
             case ADD: {
-
+                if (lhs.isString()) {
+                    //both lhs & rhs are string
+                    //TODO call string_add function
+                } else {
+                    //both lhs & rhs are int
+                    Oprand lhsOprand = getOprandForValueUse(currentBB, lhs.getResultOprand());
+                    Oprand rhsOprand = getOprandForValueUse(currentBB, rhs.getResultOprand());
+                    node.setResultOprand(new I64Value());
+                    currentBB.appendInst(new Binary(currentBB, op_binary, lhsOprand, rhsOprand, node.getResultOprand()));
+                }
+                break;
             }
             case GT:
             case LEQ:
             case GEQ:
             case LT: {
-
+                if (lhs.isString()) {
+                    //both lhs & rhs are string
+                    //TODO call string_LT function
+                } else {
+                    //both lhs & rhs are int
+                    Oprand lhsOprand = getOprandForValueUse(currentBB, lhs.getResultOprand());
+                    Oprand rhsOprand = getOprandForValueUse(currentBB, rhs.getResultOprand());
+                    node.setResultOprand(new I64Value());
+                    currentBB.appendInst(new Cmp(currentBB, op_cmp, lhsOprand, rhsOprand, node.getResultOprand()));
+                }
+                break;
             }
             case NEQ:
             case EQ: {
-
+                if (lhs.isString()) {
+                    //both string
+                    //TODO call string_EQ funtion
+                } else {
+                    Oprand lhsOprand = getOprandForValueUse(currentBB, lhs.getResultOprand());
+                    Oprand rhsOprand = getOprandForValueUse(currentBB, rhs.getResultOprand());
+                    node.setResultOprand(new I64Value());
+                    currentBB.appendInst(new Cmp(currentBB, op_cmp, lhsOprand, rhsOprand, node.getResultOprand()));
+                }
             }
             case ANDL:
             case ORL: {
-
+                //short-cut evaluation
+                Oprand lhsOprand = getOprandForValueUse(currentBB, lhs.getResultOprand());
+                Oprand rhsOprand = getOprandForValueUse(currentBB, rhs.getResultOprand());
+                break;
             }
             case ASSIGN: {
+                assign(lhs.getType().isPointerType(), lhs.getResultOprand(), rhs);
+                break;
             }
         }
     }
@@ -278,20 +358,17 @@ public class IRBuilder implements ASTVisitor {
     @Override
     public void visit(ClassMemberNode node) {
         node.getExpression().accept(this);
-        Memory base = (Memory) node.getExpression().getResultOprand();
+        Pointer base = (Pointer) node.getExpression().getResultOprand();
         if (node.getExpression().isAccessable()) {
             //Class
-            ClassSymbol classSymbol = (ClassSymbol) node.getExpression().getType();
             Symbol memberSymbol = node.getSymbol();
             if (memberSymbol instanceof VariableSymbol) {
                 //Class.variable
                 //base is HeapData type, get its pointer, string has no variable member, so HeapData is safe
-                HeapData memberPointer = new HeapData(new VirtualRegister(), memberSymbol.getType().getTypeSize());
-                //compute offset
-                currentBB.appendInst(new Binary(currentBB, Binary.Op.ADD, base.getPointer(), new Immediate(((VariableSymbol) memberSymbol).getOffset()), memberPointer.getPointer()));
-                node.setResultOprand(new VirtualRegister());
-                //load member from memory & note down the result VR
-                currentBB.appendInst(new Move(currentBB, memberPointer, node.getResultOprand()));
+                I64Pointer memberPointer = new I64Pointer();
+                //compute offset & set result
+                currentBB.appendInst(new Binary(currentBB, Binary.Op.ADD, base, new Immediate(((VariableSymbol) memberSymbol).getOffset()), memberPointer));
+                node.setResultOprand(memberPointer);
             } else {
                 //Class.function()
                 //note down pointer of class for function call use
@@ -306,13 +383,14 @@ public class IRBuilder implements ASTVisitor {
 
     @Override
     public void visit(FuncallExprNode node) {
-        node.setResultOprand(new VirtualRegister());
-        Call call = new Call(currentBB, (VirtualRegister) node.getResultOprand());
+        FunctionSymbol functionSymbol = node.getFunction().getFunctionSymbol();
+        if (node.getType().isPointerType()) node.setResultOprand(new I64Pointer());
+        else node.setResultOprand(new I64Value());
+        Call call = new Call(currentBB, node.getResultOprand());
         node.getParameterList().forEach(x -> {
             x.accept(this);
             call.appendParameterList(x.getResultOprand());
         });
-        FunctionSymbol functionSymbol = node.getFunction().getFunctionSymbol();
         if (functionSymbol.isMemberFunction()) {
             //is member function, need pass class reference
             call.setObjectPointer(node.getFunction().getResultOprand());
@@ -327,17 +405,17 @@ public class IRBuilder implements ASTVisitor {
             node.setResultOprand(((VariableSymbol) symbol).getVariableStorage());
     }
 
-    //TODO
     @Override
     public void visit(NewExprNode node) {
         Type type = node.getBaseTypeAfterResolve();
         if (node.getNumDims() == 0) {
             //new an object
-            node.setResultOprand(new HeapData(new VirtualRegister(), type.getTypeSize()));
-            currentBB.appendInst(new Alloc(currentBB, type.getTypeSize(), ((HeapData)node.getResultOprand()).getPointer()));
+            node.setResultOprand(new I64Pointer());
+            currentBB.appendInst(new Alloc(currentBB, new Immediate(type.getTypeSize()), (I64Pointer) node.getResultOprand()));
         } else {
             //new an array
-
+            node.setResultOprand(new I64Pointer());
+            arrayAllocation(node, (I64Pointer) node.getResultOprand(), 0);
         }
     }
 
@@ -389,28 +467,101 @@ public class IRBuilder implements ASTVisitor {
 
     @Override
     public void visit(StringLiteralNode node) {
-        StaticString staticString = new StaticString(new VirtualRegister(), node.getVal().length(), node.getVal());
-        node.setResultOprand(staticString);
+        StaticString staticString = new StaticString(new GlobalI64Pointer(), node.getVal());
+        node.setResultOprand(staticString.getPointer());
         irRoot.addStaticString(staticString);
     }
 
-    private void assign(VirtualRegister virtualRegister, ExprNode exprNode) {
-        if (exprNode.isBoolean()) {
-            //short-circuit evaluation
-            BasicBlock thenBB = new BasicBlock(currentFunction, "thenBB");
-            BasicBlock elseBB = new BasicBlock(currentFunction, "elseBB");
-            BasicBlock mergeBB = new BasicBlock(currentFunction, "mergeBB");
-            exprNode.setThenBB(thenBB);
-            exprNode.setElseBB(elseBB);
-            exprNode.accept(this);
-            thenBB.appendInst(new Move(thenBB, new Immediate(1), virtualRegister));
-            thenBB.terminate(new Jump(thenBB, mergeBB));
-            elseBB.appendInst(new Move(elseBB, new Immediate(0), virtualRegister));
-            elseBB.terminate(new Jump(elseBB, mergeBB));
-            currentBB = mergeBB;
+    //oprand(Register/Memory) = expr(Register/Memory/Immediate)
+    private void assign(boolean isPointerAssign, Oprand lhs, ExprNode rhsExpr) {
+        if (isPointerAssign) {
+            currentBB.appendInst(new Move(currentBB, rhsExpr.getResultOprand(), lhs));
         } else {
-            exprNode.accept(this);
-            currentBB.appendInst(new Move(currentBB, exprNode.getResultOprand(), virtualRegister));
+            if (rhsExpr.isBoolean()) {
+                //short-circuit evaluation
+                BasicBlock thenBB = new BasicBlock(currentFunction, "thenBB");
+                BasicBlock elseBB = new BasicBlock(currentFunction, "elseBB");
+                BasicBlock mergeBB = new BasicBlock(currentFunction, "mergeBB");
+                rhsExpr.setThenBB(thenBB);
+                rhsExpr.setElseBB(elseBB);
+                rhsExpr.accept(this);
+                if (lhs instanceof Pointer) {
+                    thenBB.appendInst(new Store(thenBB, new Immediate(1), lhs));
+                    elseBB.appendInst(new Store(elseBB, new Immediate(0), lhs));
+                } else {
+                    thenBB.appendInst(new Move(thenBB, new Immediate(1), lhs));
+                    elseBB.appendInst(new Move(elseBB, new Immediate(0), lhs));
+                }
+                thenBB.terminate(new Jump(thenBB, mergeBB));
+                elseBB.terminate(new Jump(elseBB, mergeBB));
+                currentBB = mergeBB;
+            } else {
+                rhsExpr.accept(this);
+                if (rhsExpr.getResultOprand() instanceof Pointer) {
+                    I64Value tmp_value = new I64Value();
+                    currentBB.appendInst(new Load(currentBB, rhsExpr.getResultOprand(), tmp_value));
+                    if (lhs instanceof Pointer) currentBB.appendInst(new Store(currentBB, tmp_value, lhs));
+                    else currentBB.appendInst(new Move(currentBB, tmp_value, lhs));
+                } else {
+                    if (lhs instanceof Pointer)
+                        currentBB.appendInst(new Store(currentBB, rhsExpr.getResultOprand(), lhs));
+                    else currentBB.appendInst(new Move(currentBB, rhsExpr.getResultOprand(), lhs));
+                }
+            }
         }
+    }
+
+    //new Type [expr_1][expr_2]....[expr_n][][][]...[]
+    //for NewExpr, expand it recursively
+    private void arrayAllocation(NewExprNode node, I64Pointer resultOprand, int depth) {
+        ExprNode indexExprNode = node.getExprNodeList().get(depth);
+        indexExprNode.accept(this);
+        Value indexValue = getOprandForValueUse(currentBB, indexExprNode.getResultOprand());
+        I64Value allocateSize = new I64Value();
+
+        if (depth == node.getNumDims() - 1) {
+            //ultimate dimension
+            currentBB.appendInst(new Binary(currentBB, Binary.Op.MUL, indexValue, new Immediate(node.getType().getTypeSize()), allocateSize));
+            currentBB.appendInst(new Alloc(currentBB, allocateSize, resultOprand));
+        } else {
+            //generate new
+            currentBB.appendInst(new Binary(currentBB, Binary.Op.MUL, indexValue, new Immediate(Configuration.POINTER_SIZE()), allocateSize));
+            currentBB.appendInst(new Alloc(currentBB, allocateSize, resultOprand));
+            //generate for TODO expand loops for compile-time constants
+            BasicBlock bodyBB = new BasicBlock(currentFunction, "for_body");
+            BasicBlock condBB = new BasicBlock(currentFunction, "for_cond");
+            BasicBlock stepBB = new BasicBlock(currentFunction, "for_step");
+            BasicBlock mergeBB = new BasicBlock(currentFunction, "for_merge");
+            I64Pointer nowPointer = new I64Pointer();
+            I64Pointer endPointer = new I64Pointer();
+            I64Pointer tempPointer = new I64Pointer();
+            //generate init
+            currentBB.appendInst(new Move(currentBB, resultOprand, nowPointer));
+            currentBB.appendInst(new Binary(currentBB, Binary.Op.ADD, resultOprand, allocateSize, endPointer));
+            currentBB.appendInst(new Jump(currentBB, condBB));
+            //generate cond
+            currentBB = condBB;
+            I64Value cmp = new I64Value();
+            condBB.appendInst(new Cmp(currentBB, Cmp.Op.EQ, nowPointer, endPointer, cmp));
+            condBB.appendInst(new Branch(currentBB, cmp, bodyBB, mergeBB));
+            //generate body
+            currentBB = bodyBB;
+            arrayAllocation(node, nowPointer, depth + 1);
+            currentBB.terminate(new Jump(currentBB, stepBB));
+            //generate step
+            currentBB = stepBB;
+            currentBB.appendInst(new Binary(currentBB, Binary.Op.ADD, nowPointer, new Immediate(Configuration.POINTER_SIZE()), tempPointer));
+            currentBB.appendInst(new Move(currentBB, tempPointer, nowPointer));
+            currentBB.appendInst(new Jump(currentBB, condBB));
+            currentBB = mergeBB;
+        }
+    }
+
+    private Value getOprandForValueUse(BasicBlock currentBB, Oprand oprand) {
+        if (oprand instanceof Pointer) {
+            I64Value value = new I64Value();
+            currentBB.appendInst(new Load(currentBB, oprand, value));
+            return value;
+        } else return (Value) oprand;
     }
 }

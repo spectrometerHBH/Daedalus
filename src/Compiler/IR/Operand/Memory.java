@@ -2,11 +2,9 @@ package Compiler.IR.Operand;
 
 public abstract class Memory extends Storage {
     private VirtualRegister pointer;
-    private int size;
 
-    public Memory(VirtualRegister pointer, int size) {
+    public Memory(VirtualRegister pointer) {
         this.pointer = pointer;
-        this.size = size;
     }
 
     public VirtualRegister getPointer() {

@@ -1,6 +1,6 @@
 package Compiler.Symbol;
 
-import Compiler.Configruation;
+import Compiler.Configuration;
 import Compiler.Utils.Position;
 import Compiler.Utils.SemanticError;
 
@@ -71,7 +71,10 @@ public class ArrayType implements Type {
     }
 
     @Override
+    public boolean isPointerType() { return true; }
+
+    @Override
     public int getTypeSize() {
-        return Configruation.ARRAY_REFERENCE_SIZE();
+        return Configuration.POINTER_SIZE();
     }
 }
