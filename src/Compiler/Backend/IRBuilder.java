@@ -217,13 +217,10 @@ public class IRBuilder implements ASTVisitor {
         currentBB.appendInst(new Binary(currentBB, Binary.Op.ADD, basePointer, offset, node.getResultOprand()));
     }
 
-    //TODO
     @Override
     public void visit(BinaryExprNode node) {
         ExprNode lhs = node.getLhs();
         ExprNode rhs = node.getRhs();
-        lhs.accept(this);
-        rhs.accept(this);
         Binary.Op op_binary = Binary.Op.MUL;
         Cmp.Op op_cmp = Cmp.Op.LT;
         switch (node.getOp()) {
@@ -294,6 +291,8 @@ public class IRBuilder implements ASTVisitor {
             case XOR:
             case OR: {
                 //lhs & rhs are both int type
+                lhs.accept(this);
+                rhs.accept(this);
                 Oprand lhsOprand = getOprandForValueUse(currentBB, lhs.getResultOprand());
                 Oprand rhsOprand = getOprandForValueUse(currentBB, rhs.getResultOprand());
                 node.setResultOprand(new I64Value());
@@ -301,6 +300,8 @@ public class IRBuilder implements ASTVisitor {
                 break;
             }
             case ADD: {
+                lhs.accept(this);
+                rhs.accept(this);
                 if (lhs.isString()) {
                     //both lhs & rhs are string
                     //TODO call string_add function
@@ -317,38 +318,64 @@ public class IRBuilder implements ASTVisitor {
             case LEQ:
             case GEQ:
             case LT: {
+                lhs.accept(this);
+                rhs.accept(this);
+                Oprand lhsOprand = getOprandForValueUse(currentBB, lhs.getResultOprand());
+                Oprand rhsOprand = getOprandForValueUse(currentBB, rhs.getResultOprand());
                 if (lhs.isString()) {
                     //both lhs & rhs are string
                     //TODO call string_LT function
                 } else {
                     //both lhs & rhs are int
-                    Oprand lhsOprand = getOprandForValueUse(currentBB, lhs.getResultOprand());
-                    Oprand rhsOprand = getOprandForValueUse(currentBB, rhs.getResultOprand());
                     node.setResultOprand(new I64Value());
                     currentBB.appendInst(new Cmp(currentBB, op_cmp, lhsOprand, rhsOprand, node.getResultOprand()));
+                    if (node.getThenBB() != null)
+                        currentBB.appendInst(new Branch(currentBB, node.getResultOprand(), node.getThenBB(), node.getElseBB()));
                 }
                 break;
             }
             case NEQ:
             case EQ: {
+                lhs.accept(this);
+                rhs.accept(this);
+                Oprand lhsOprand = getOprandForValueUse(currentBB, lhs.getResultOprand());
+                Oprand rhsOprand = getOprandForValueUse(currentBB, rhs.getResultOprand());
                 if (lhs.isString()) {
                     //both string
                     //TODO call string_EQ funtion
                 } else {
-                    Oprand lhsOprand = getOprandForValueUse(currentBB, lhs.getResultOprand());
-                    Oprand rhsOprand = getOprandForValueUse(currentBB, rhs.getResultOprand());
+                    //both int
                     node.setResultOprand(new I64Value());
                     currentBB.appendInst(new Cmp(currentBB, op_cmp, lhsOprand, rhsOprand, node.getResultOprand()));
+                    if (node.getThenBB() != null)
+                        currentBB.appendInst(new Branch(currentBB, node.getResultOprand(), node.getThenBB(), node.getElseBB()));
                 }
             }
-            case ANDL:
+            case ANDL: {
+                //short-circuit evaluation
+                lhs.setThenBB(new BasicBlock(currentFunction, "lhs_then"));
+                lhs.setElseBB(node.getElseBB());
+                lhs.accept(this);
+                currentBB = lhs.getThenBB();
+                rhs.setThenBB(node.getThenBB());
+                rhs.setElseBB(node.getElseBB());
+                rhs.accept(this);
+                break;
+            }
             case ORL: {
-                //short-cut evaluation
-                Oprand lhsOprand = getOprandForValueUse(currentBB, lhs.getResultOprand());
-                Oprand rhsOprand = getOprandForValueUse(currentBB, rhs.getResultOprand());
+                //short-circuit evaluation
+                lhs.setThenBB(node.getThenBB());
+                lhs.setElseBB(new BasicBlock(currentFunction, "lhs_else"));
+                lhs.accept(this);
+                currentBB = lhs.getElseBB();
+                rhs.setThenBB(node.getThenBB());
+                rhs.setElseBB(node.getElseBB());
+                rhs.accept(this);
                 break;
             }
             case ASSIGN: {
+                lhs.accept(this);
+                rhs.accept(this);
                 assign(lhs.getType().isPointerType(), lhs.getResultOprand(), rhs);
                 break;
             }
@@ -364,7 +391,6 @@ public class IRBuilder implements ASTVisitor {
             Symbol memberSymbol = node.getSymbol();
             if (memberSymbol instanceof VariableSymbol) {
                 //Class.variable
-                //base is HeapData type, get its pointer, string has no variable member, so HeapData is safe
                 I64Pointer memberPointer = new I64Pointer();
                 //compute offset & set result
                 currentBB.appendInst(new Binary(currentBB, Binary.Op.ADD, base, new Immediate(((VariableSymbol) memberSymbol).getOffset()), memberPointer));
@@ -428,22 +454,67 @@ public class IRBuilder implements ASTVisitor {
     @Override
     public void visit(UnaryExprNode node) {
         ExprNode exprNode = node.getExpression();
+        Unary.Op op = Unary.Op.NOT;
+        switch (node.getOp()) {
+            case PRE_INC : op = Unary.Op.INC;
+            case PRE_DEC : op = Unary.Op.DEC;
+            case SUF_INC : op = Unary.Op.INC;
+            case SUF_DEC : op = Unary.Op.DEC;
+            case POS : op = Unary.Op.POS;
+            case NEG : op = Unary.Op.NEG;
+            case NOT : op = Unary.Op.NOT;
+            case NOTL : break;
+            default : break;
+        }
         switch (node.getOp()) {
             case PRE_INC:
             case PRE_DEC: {
-
+                exprNode.accept(this);
+                Oprand oprand = exprNode.getResultOprand();
+                Value value = getOprandForValueUse(currentBB, oprand);
+                if (oprand instanceof Pointer){
+                    I64Value tmp = new I64Value();
+                    currentBB.appendInst(new Binary(currentBB, node.getOp() == UnaryExprNode.Op.PRE_INC ? Binary.Op.ADD : Binary.Op.SUB, value, new Immediate(1), tmp));
+                    currentBB.appendInst(new Store(currentBB, tmp, oprand));
+                    node.setResultOprand(oprand);
+                } else if (oprand instanceof Value){
+                    currentBB.appendInst(new Binary(currentBB, node.getOp() == UnaryExprNode.Op.PRE_INC ? Binary.Op.ADD : Binary.Op.SUB, value, new Immediate(1), value));
+                    node.setResultOprand(oprand);
+                }
+                break;
             }
             case SUF_INC:
             case SUF_DEC: {
-
+                exprNode.accept(this);
+                Oprand oprand = exprNode.getResultOprand();
+                Value value = getOprandForValueUse(currentBB, oprand);
+                if (oprand instanceof Pointer){
+                    I64Value tmp = new I64Value();
+                    currentBB.appendInst(new Binary(currentBB, node.getOp() == UnaryExprNode.Op.SUF_INC ? Binary.Op.ADD : Binary.Op.SUB, value, new Immediate(1), tmp));
+                    currentBB.appendInst(new Store(currentBB, tmp, oprand));
+                    node.setResultOprand(value);
+                } else if (oprand instanceof Value){
+                    I64Value tmp = new I64Value();
+                    currentBB.appendInst(new Move(currentBB, value, tmp));
+                    currentBB.appendInst(new Binary(currentBB, node.getOp() == UnaryExprNode.Op.SUF_INC ? Binary.Op.ADD : Binary.Op.SUB, value, new Immediate(1), value));
+                    node.setResultOprand(tmp);
+                }
+                break;
             }
             case POS:
             case NEG:
             case NOT: {
-
+                exprNode.accept(this);
+                Value value = getOprandForValueUse(currentBB, exprNode.getResultOprand());
+                node.setResultOprand(new I64Value());
+                currentBB.appendInst(new Unary(currentBB, op, value, node.getResultOprand()));
+                break;
             }
             case NOTL: {
-
+                exprNode.setThenBB(node.getElseBB());
+                exprNode.setElseBB(node.getThenBB());
+                exprNode.accept(this);
+                break;
             }
             default:
                 break;
