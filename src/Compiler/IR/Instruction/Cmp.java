@@ -1,7 +1,7 @@
 package Compiler.IR.Instruction;
 
 import Compiler.IR.BasicBlock;
-import Compiler.IR.Operand.Oprand;
+import Compiler.IR.Operand.Operand;
 
 public class Cmp extends IRInstruction {
     public enum Op{
@@ -9,11 +9,11 @@ public class Cmp extends IRInstruction {
     }
 
     private Op op;
-    private Oprand lhs;
-    private Oprand rhs;
-    private Oprand dest;
+    private Operand lhs;
+    private Operand rhs;
+    private Operand dest;
 
-    public Cmp(BasicBlock currentBB, Op op, Oprand lhs, Oprand rhs, Oprand dest) {
+    public Cmp(BasicBlock currentBB, Op op, Operand lhs, Operand rhs, Operand dest) {
         super(currentBB);
         this.op = op;
         this.lhs = lhs;

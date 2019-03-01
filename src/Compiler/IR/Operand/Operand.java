@@ -1,5 +1,5 @@
 package Compiler.IR.Operand;
 
-public abstract class Oprand {
+public abstract class Operand {
 
 }

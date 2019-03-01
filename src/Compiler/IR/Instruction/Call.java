@@ -1,34 +1,37 @@
 package Compiler.IR.Instruction;
 
 import Compiler.IR.BasicBlock;
-import Compiler.IR.Operand.Oprand;
+import Compiler.IR.Function;
+import Compiler.IR.Operand.Operand;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class Call extends IRInstruction {
-    private List<Oprand> parameterList = new ArrayList<>();
-    private Oprand objectPointer;
-    private Oprand result;
+    private List<Operand> parameterList = new ArrayList<>();
+    private Function callee;
+    private Operand objectPointer;
+    private Operand result;
 
-    public Call(BasicBlock currentBB, Oprand result) {
+    public Call(BasicBlock currentBB, Function callee, Operand result) {
         super(currentBB);
+        this.callee = callee;
         this.result = result;
     }
 
-    public void appendParameterList(Oprand oprand){
-        parameterList.add(oprand);
+    public void appendParameterList(Operand operand) {
+        parameterList.add(operand);
     }
 
-    public List<Oprand> getParameterList() {
+    public List<Operand> getParameterList() {
         return parameterList;
     }
 
-    public Oprand getObjectPointer() {
+    public Operand getObjectPointer() {
         return objectPointer;
     }
 
-    public void setObjectPointer(Oprand objectPointer) {
+    public void setObjectPointer(Operand objectPointer) {
         this.objectPointer = objectPointer;
     }
 }

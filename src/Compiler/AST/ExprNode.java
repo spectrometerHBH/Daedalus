@@ -1,7 +1,7 @@
 package Compiler.AST;
 
 import Compiler.IR.BasicBlock;
-import Compiler.IR.Operand.Oprand;
+import Compiler.IR.Operand.Operand;
 import Compiler.Symbol.FunctionSymbol;
 import Compiler.Symbol.Type;
 import Compiler.Utils.Position;
@@ -18,7 +18,7 @@ public abstract class ExprNode extends ASTNode {
 
     //for IR
     private BasicBlock thenBB, elseBB;
-    private Oprand resultOprand;
+    private Operand resultOperand;
 
     public ExprNode(Position position) {
         super(position);
@@ -40,12 +40,12 @@ public abstract class ExprNode extends ASTNode {
         this.type = type;
     }
 
-    public Oprand getResultOprand() {
-        return resultOprand;
+    public Operand getResultOperand() {
+        return resultOperand;
     }
 
-    public void setResultOprand(Oprand resultOprand) {
-        this.resultOprand = resultOprand;
+    public void setResultOperand(Operand resultOperand) {
+        this.resultOperand = resultOperand;
     }
 
     public FunctionSymbol getFunctionSymbol() {

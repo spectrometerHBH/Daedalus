@@ -33,6 +33,7 @@ public class ClassMemberScanner implements ASTVisitor {
                 ? (ClassSymbol)currentScope :
                 Util.TypeNode2Type(node.getType(), globalScope);
         FunctionSymbol functionSymbol = new FunctionSymbol(node.getIdentifier(), returnType, node, currentScope);
+        node.setFunctionSymbol(functionSymbol);
         currentScope.defineFunction(functionSymbol);
         if (currentScope instanceof ClassSymbol) {
             if (node.getIdentifier().equals(((ClassSymbol) currentScope).getTypeName())) {

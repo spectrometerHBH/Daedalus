@@ -13,6 +13,7 @@ public class GlobalScope extends BaseScope{
     private PrimitiveTypeSymbol BoolTypeSymbol;
     private PrimitiveTypeSymbol VoidTypeSymbol;
     private ClassSymbol string;
+    private FunctionSymbol arraySizeFunctionSymbol;
 
     public GlobalScope(String name){
         super(name, null);
@@ -77,5 +78,13 @@ public class GlobalScope extends BaseScope{
 
     public void setString(ClassSymbol string) {
         this.string = string;
+    }
+
+    public FunctionSymbol getArraySizeFunctionSymbol() {
+        return arraySizeFunctionSymbol;
+    }
+
+    public void setArraySizeFunctionSymbol(FunctionSymbol arraySizeFunctionSymbol) {
+        this.arraySizeFunctionSymbol = arraySizeFunctionSymbol;
     }
 }

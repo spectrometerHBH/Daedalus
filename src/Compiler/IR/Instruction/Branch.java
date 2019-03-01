@@ -1,14 +1,14 @@
 package Compiler.IR.Instruction;
 
 import Compiler.IR.BasicBlock;
-import Compiler.IR.Operand.Oprand;
+import Compiler.IR.Operand.Operand;
 
 public class Branch extends IRInstruction {
-    private Oprand cond;
+    private Operand cond;
     private BasicBlock thenBB;
     private BasicBlock elseBB;
 
-    public Branch(BasicBlock currentBB, Oprand cond, BasicBlock thenBB, BasicBlock elseBB) {
+    public Branch(BasicBlock currentBB, Operand cond, BasicBlock thenBB, BasicBlock elseBB) {
         super(currentBB);
         this.cond = cond;
         this.thenBB = thenBB;

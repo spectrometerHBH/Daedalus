@@ -1,6 +1,6 @@
 package Compiler.IR.Operand;
 
-public class Immediate extends Oprand {
+public class Immediate extends Operand {
     private int immediate;
 
     public Immediate(int immediate) {

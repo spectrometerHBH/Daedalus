@@ -39,6 +39,7 @@ public class GlobalFunctionDeclarationScanner implements ASTVisitor {
             throw new SemanticError("Global function should have return type", node.getPosition());
         Type returnType = Util.TypeNode2Type(node.getType(), globalScope);
         FunctionSymbol functionSymbol = new FunctionSymbol(node.getIdentifier(), returnType, node, globalScope);
+        node.setFunctionSymbol(functionSymbol);
         for (VarDeclNode varDeclNode : node.getParameterList()) {
             Type parameterType = Util.TypeNode2Type(varDeclNode.getType(), globalScope);
             functionSymbol.defineVariable(new VariableSymbol(varDeclNode.getIdentifier(), parameterType, varDeclNode));

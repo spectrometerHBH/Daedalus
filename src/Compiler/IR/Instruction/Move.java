@@ -1,19 +1,19 @@
 package Compiler.IR.Instruction;
 
 import Compiler.IR.BasicBlock;
-import Compiler.IR.Operand.Oprand;
+import Compiler.IR.Operand.Operand;
 
 public class Move extends IRInstruction {
     //Load  : src(Memory)   dst(Register)
     //Store : src(Register/Immediate) dst(Memory)
     //Move  : src(Register/Immediate) dst(Register)
     //Memory to Memory is not allowed.
-    private Oprand srcOprand;
-    private Oprand dstOprand;
+    private Operand srcOperand;
+    private Operand dstOperand;
 
-    public Move(BasicBlock currentBB, Oprand srcOprand, Oprand dstOprand) {
+    public Move(BasicBlock currentBB, Operand srcOperand, Operand dstOperand) {
         super(currentBB);
-        this.srcOprand = srcOprand;
-        this.dstOprand = dstOprand;
+        this.srcOperand = srcOperand;
+        this.dstOperand = dstOperand;
     }
 }

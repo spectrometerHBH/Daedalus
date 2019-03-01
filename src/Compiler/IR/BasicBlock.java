@@ -13,8 +13,8 @@ public class BasicBlock {
     private IRInstruction tail;
     private Function currentFunction;
     private String name;
-    private List<BasicBlock> predecessors = new LinkedList<BasicBlock>();
-    private List<BasicBlock> successors = new LinkedList<BasicBlock>();
+    private List<BasicBlock> predecessors = new LinkedList<>();
+    private List<BasicBlock> successors = new LinkedList<>();
     private boolean terminated;
 
     public BasicBlock(Function currentFunction, String name) {
@@ -26,12 +26,17 @@ public class BasicBlock {
         return terminated;
     }
 
-    public void appendSuccessor(BasicBlock BB){
+    private void appendSuccessor(BasicBlock BB) {
         successors.add(BB);
     }
 
-    public void appendPredecessor(BasicBlock BB){
+    private void appendPredecessor(BasicBlock BB) {
         predecessors.add(BB);
+    }
+
+    private void removeSuccessor(BasicBlock BB) {
+        successors.remove(BB);
+        BB.predecessors.remove(this);
     }
 
     public void appendInst(IRInstruction irInstruction) {
@@ -44,7 +49,23 @@ public class BasicBlock {
         }
     }
 
-    public void appendBB(BasicBlock BB) {
+    public void removeInst() {
+        terminated = false;
+        if (tail == null) {
+            throw new RuntimeException("empty BB!");
+        } else {
+            if (tail instanceof Branch) {
+                removeSuccessor(((Branch) tail).getThenBB());
+                removeSuccessor(((Branch) tail).getElseBB());
+            } else if (tail instanceof Jump) {
+                removeSuccessor(((Jump) tail).getTargetBB());
+            } else if (tail instanceof Return) {
+                currentFunction.getReturnInstList().remove(tail);
+            }
+        }
+    }
+
+    private void appendBB(BasicBlock BB) {
         this.appendSuccessor(BB);
         BB.appendPredecessor(this);
     }
@@ -56,7 +77,7 @@ public class BasicBlock {
             appendBB(((Branch) irInstruction).getElseBB());
         } else if (irInstruction instanceof Jump) {
             appendBB(((Jump) irInstruction).getTargetBB());
-        } else if (irInstruction instanceof Return){
+        } else if (irInstruction instanceof Return) {
             currentFunction.appendReturnList((Return) irInstruction);
         }
         terminated = true;

@@ -27,4 +27,20 @@ public class IRRoot {
     public void addGlobalVariable(GlobalVariable globalVariable){
         globalVariableList.add(globalVariable);
     }
+
+    public Function builtinSubstring;
+    public Function builtinParseInt;
+    public Function builtinOrd;
+    public Function builtinPrint;
+    public Function builtinPrintln;
+    public Function builtinGetString;
+    public Function builtinGetInt;
+    public Function builtinToString;
+    public Function builtinStringAdd;
+    public Function builtinStringLT;
+    public Function builtinStringLEQ;
+    public Function builtinStringEQ;
+    public Function builtinStringGEQ;
+    public Function builtinStringGT;
+    public Function builtinStringNEQ;
 }

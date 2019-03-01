@@ -1,7 +1,7 @@
 package Compiler.IR.Instruction;
 
 import Compiler.IR.BasicBlock;
-import Compiler.IR.Operand.Oprand;
+import Compiler.IR.Operand.Operand;
 
 public class Binary extends IRInstruction {
     public enum Op{
@@ -9,9 +9,9 @@ public class Binary extends IRInstruction {
     }
 
     private Op op;
-    private Oprand src1, src2, dest;
+    private Operand src1, src2, dest;
 
-    public Binary(BasicBlock currentBB, Op op, Oprand src1, Oprand src2, Oprand dest) {
+    public Binary(BasicBlock currentBB, Op op, Operand src1, Operand src2, Operand dest) {
         super(currentBB);
         this.op = op;
         this.src1 = src1;

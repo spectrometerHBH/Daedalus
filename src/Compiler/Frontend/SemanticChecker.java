@@ -5,6 +5,7 @@ import Compiler.Symbol.*;
 import Compiler.Utils.SemanticError;
 
 import java.util.Iterator;
+import java.util.Map;
 
 public class SemanticChecker implements ASTVisitor {
     private GlobalScope globalScope;
@@ -256,7 +257,7 @@ public class SemanticChecker implements ASTVisitor {
             if (node.getIdentifier().equals("size")) {
                 node.setCategory(ExprNode.Category.FUNCTION);
                 node.setType(intTypeSymbol);
-                node.setFunctionSymbol(new FunctionSymbol("array.size", intTypeSymbol, null, globalScope));
+                node.setFunctionSymbol(globalScope.getArraySizeFunctionSymbol());
             } else throw new SemanticError("Type array builtin function call error", node.getPosition());
         } else throw new SemanticError("Member Access error, expression not a class type variable", node.getPosition());
     }
@@ -270,9 +271,11 @@ public class SemanticChecker implements ASTVisitor {
             if (node.getParameterList().size() == function.getFunctionSymbol().getArguments().size()) {
                 FunctionSymbol functionSymbol = function.getFunctionSymbol();
                 Iterator<ExprNode> iterator = node.getParameterList().iterator();
-                functionSymbol.getArguments().forEach((identifier, variableSymbol) -> {
+                for (Map.Entry<String, VariableSymbol> entry : functionSymbol.getArguments().entrySet()) {
+                    String identifier = entry.getKey();
+                    VariableSymbol variableSymbol = entry.getValue();
                     variableSymbol.getType().compatible(iterator.next().getType(), node.getPosition());
-                });
+                }
                 node.setCategory(function.getFunctionSymbol().getType().isClassType() ? ExprNode.Category.VARIABLE : ExprNode.Category.NONLVALUE);
                 node.setType(function.getFunctionSymbol().getType());
             } else

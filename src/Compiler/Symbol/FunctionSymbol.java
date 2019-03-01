@@ -1,6 +1,7 @@
 package Compiler.Symbol;
 
 import Compiler.AST.FuncDeclNode;
+import Compiler.IR.Function;
 import Compiler.Utils.Position;
 import Compiler.Utils.SemanticError;
 
@@ -9,6 +10,7 @@ import java.util.Map;
 
 public class FunctionSymbol extends Symbol implements Scope{
     private Scope enclosingScope;
+    private Function function;
     private Map<String, VariableSymbol> arguments = new LinkedHashMap<>();
 
     //for IR
@@ -29,6 +31,14 @@ public class FunctionSymbol extends Symbol implements Scope{
 
     public void setMemberFunction() {
         isMemberFunction = true;
+    }
+
+    public Function getFunction() {
+        return function;
+    }
+
+    public void setFunction(Function function) {
+        this.function = function;
     }
 
     @Override

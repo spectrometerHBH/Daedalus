@@ -1,7 +1,7 @@
 package Compiler.IR.Instruction;
 
 import Compiler.IR.BasicBlock;
-import Compiler.IR.Operand.Oprand;
+import Compiler.IR.Operand.Operand;
 
 public class Unary extends IRInstruction {
     public enum Op{
@@ -9,10 +9,10 @@ public class Unary extends IRInstruction {
     }
 
     private Op op;
-    private Oprand Src;
-    private Oprand Dst;
+    private Operand Src;
+    private Operand Dst;
 
-    public Unary(BasicBlock currentBB, Op op, Oprand src, Oprand dst) {
+    public Unary(BasicBlock currentBB, Op op, Operand src, Operand dst) {
         super(currentBB);
         this.op = op;
         Src = src;

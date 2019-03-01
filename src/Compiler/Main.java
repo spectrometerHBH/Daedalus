@@ -31,7 +31,7 @@ public class Main {
             //Parser & Lexer
             ProgramNode ast = buildAST(in);
             //Semantic Analysis
-            GlobalScope globalScope = (new BuiltinSymbolsInitializer()).getGlobalScope();
+            GlobalScope globalScope = (new BuiltinSymbolsInitializer(ast)).getGlobalScope();
             new ClassDeclarationScanner(globalScope).visit(ast);
             new GlobalFunctionDeclarationScanner(globalScope).visit(ast);
             new ClassMemberScanner(globalScope).visit(ast);
@@ -39,9 +39,10 @@ public class Main {
             new SemanticChecker(globalScope).visit(ast);
             //IR transform(Explicit CFG with Quad & Explicit Variables without SSA form)
             new IRBuilder(globalScope).visit(ast);
-            //Control Flow Analysis
+            //Optimization
 
-            //Data Flow Analysis
+            //Code generation
+
         }catch (Exception e){
             e.printStackTrace();
             System.err.println(e.getMessage());

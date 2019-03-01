@@ -1,5 +1,6 @@
 package Compiler.AST;
 
+import Compiler.Symbol.FunctionSymbol;
 import Compiler.Utils.Position;
 
 import java.util.List;
@@ -9,6 +10,7 @@ public class FuncDeclNode extends DeclNode {
     private String identifier;
     private List<VarDeclNode> parameterList;
     private BlockStmtNode block;
+    private FunctionSymbol functionSymbol;
 
     public FuncDeclNode(TypeNode type, String identifier, List<VarDeclNode> parameterList, BlockStmtNode block, Position position){
         super(position);
@@ -32,6 +34,14 @@ public class FuncDeclNode extends DeclNode {
 
     public BlockStmtNode getBlock() {
         return block;
+    }
+
+    public FunctionSymbol getFunctionSymbol() {
+        return functionSymbol;
+    }
+
+    public void setFunctionSymbol(FunctionSymbol functionSymbol) {
+        this.functionSymbol = functionSymbol;
     }
 
     @Override public void accept(ASTVisitor visitor){
