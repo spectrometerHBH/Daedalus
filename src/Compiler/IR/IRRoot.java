@@ -41,19 +41,19 @@ public class IRRoot {
         return globalVariableList;
     }
 
-    public Function builtinSubstring;
-    public Function builtinParseInt;
-    public Function builtinOrd;
-    public Function builtinPrint;
-    public Function builtinPrintln;
-    public Function builtinGetString;
-    public Function builtinGetInt;
-    public Function builtinToString;
-    public Function builtinStringAdd;
-    public Function builtinStringLT;
-    public Function builtinStringLEQ;
-    public Function builtinStringEQ;
-    public Function builtinStringGEQ;
-    public Function builtinStringGT;
-    public Function builtinStringNEQ;
+    public Function builtinSubstring = new Function("string.substring");
+    public Function builtinParseInt = new Function("string.parseInt");
+    public Function builtinOrd = new Function("string.ord");
+    public Function builtinPrint = new Function("print");
+    public Function builtinPrintln = new Function("println");
+    public Function builtinGetString = new Function("getString");
+    public Function builtinGetInt = new Function("getInt");
+    public Function builtinToString = new Function("toString");
+    public Function builtinStringAdd = new Function("string.add");
+    public Function builtinStringLT = new Function("string.lt");
+    public Function builtinStringLEQ = new Function("string.leq");
+    public Function builtinStringEQ = new Function("string.eq");
+    public Function builtinStringGEQ = new Function("string.geq");
+    public Function builtinStringGT = new Function("string.gt");
+    public Function builtinStringNEQ = new Function("string.neq");
 }

@@ -18,6 +18,7 @@ public class FuncDeclNode extends DeclNode {
         this.identifier = identifier;
         this.parameterList = parameterList;
         this.block = block;
+        this.parameterList.forEach(VarDeclNode::setParameterVariable);
     }
 
     public String getIdentifier() {

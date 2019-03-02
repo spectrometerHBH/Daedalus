@@ -15,6 +15,6 @@ public class Immediate extends Operand {
 
     @Override
     public void accept(IRVisitor irVisitor) {
-
+        irVisitor.visit(this);
     }
 }

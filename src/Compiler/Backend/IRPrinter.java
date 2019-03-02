@@ -25,13 +25,9 @@ public class IRPrinter implements IRVisitor {
 
     @Override
     public void visit(IRRoot irRoot) {
-        irRoot.getGlobalVariableList().forEach(globalVariable -> {
-            out.println("@" + getName((Storage) globalVariable));
-        });
-        irRoot.getStaticStringList().forEach(staticString -> {
-            out.println("@" + getName(staticString.getPointer()) + " = " + staticString.getVal());
-        });
-        out.println();
+        irRoot.getGlobalVariableList().forEach(globalVariable -> out.println("@" + getName((Storage) globalVariable)));
+        irRoot.getStaticStringList().forEach(staticString -> out.println("@" + getName(staticString.getPointer()) + " = " + staticString.getVal()));
+        if (!irRoot.getGlobalVariableList().isEmpty() || !irRoot.getStaticStringList().isEmpty()) out.println();
         for (Map.Entry<String, Function> entry : irRoot.getFunctionMap().entrySet()) entry.getValue().accept(this);
     }
 
@@ -42,6 +38,7 @@ public class IRPrinter implements IRVisitor {
         out.println("{");
         function.getPostOrderDFSBBList().forEach(this::visit);
         out.println("}");
+        out.println();
     }
 
     @Override
@@ -56,6 +53,7 @@ public class IRPrinter implements IRVisitor {
             out.print("    ");
             irInstruction.accept(this);
         }
+        out.println();
     }
 
     @Override
@@ -122,6 +120,7 @@ public class IRPrinter implements IRVisitor {
             inst.getResult().accept(this);
             out.print(" = call ");
         } else out.print("call ");
+        out.print(inst.getCallee().getName() + " ");
         if (inst.getObjectPointer() != null) {
             inst.getObjectPointer().accept(this);
             out.print(" ");
@@ -248,7 +247,8 @@ public class IRPrinter implements IRVisitor {
     }
 
     private String getName(Storage storage) {
-        return storageStringMap.getOrDefault(storage, createName(storage, storage.getName() == null ? "__tmp" : storage.getName()));
+        String name = storageStringMap.get(storage);
+        return name != null ? name : createName(storage, storage.getName() == null ? "__tmp" : storage.getName());
     }
 
     private String createLabel(BasicBlock basicBlock, String name) {
@@ -260,6 +260,7 @@ public class IRPrinter implements IRVisitor {
     }
 
     private String getLabel(BasicBlock basicBlock) {
-        return basicBlockStringMap.getOrDefault(basicBlock, createLabel(basicBlock, basicBlock.getName()));
+        String name = basicBlockStringMap.get(basicBlock);
+        return name != null ? name : createLabel(basicBlock, basicBlock.getName());
     }
 }

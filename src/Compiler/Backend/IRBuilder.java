@@ -14,7 +14,7 @@ public class IRBuilder implements ASTVisitor {
     private BasicBlock currentBB;
     private ClassSymbol currentClassSymbol;
     private Function currentFunction;
-    private IRRoot irRoot;
+    private IRRoot irRoot = new IRRoot();
 
     public IRBuilder(GlobalScope globalScope) {
         this.globalScope = globalScope;
@@ -26,6 +26,13 @@ public class IRBuilder implements ASTVisitor {
 
     @Override
     public void visit(ProgramNode node) {
+        builtinFunctionSymbolInitialization();
+        node.getDeclNodeList().forEach(x -> {
+            if (x instanceof FuncDeclNode) {
+                FunctionSymbol functionSymbol = ((FuncDeclNode) x).getFunctionSymbol();
+                functionSymbol.setFunction(new Function(functionSymbol.getSymbolName()));
+            }
+        });
         node.getDeclNodeList().forEach(x -> x.accept(this));
     }
 
@@ -39,7 +46,8 @@ public class IRBuilder implements ASTVisitor {
             variableSymbol.setVariableStorage(globalVariable);
         } else {
             VirtualRegister virtualRegister = type.isPointerType() ? new I64Pointer(node.getIdentifier()) : new I64Value(node.getIdentifier());
-            if (currentFunction != null) currentFunction.appendParameterList(virtualRegister);
+            if (currentFunction != null && node.isParameterVariable())
+                currentFunction.appendParameterList(virtualRegister);
             variableSymbol.setVariableStorage(virtualRegister);
             if (node.getExpr() != null) assign(type.isPointerType(), virtualRegister, node.getExpr());
         }
@@ -48,7 +56,7 @@ public class IRBuilder implements ASTVisitor {
     @Override
     public void visit(FuncDeclNode node) {
         FunctionSymbol functionSymbol = node.getFunctionSymbol();
-        currentFunction = new Function(functionSymbol.getSymbolName());
+        currentFunction = functionSymbol.getFunction();
         if (functionSymbol.isMemberFunction()) currentFunction.setReferenceForClassMethod(new I64Pointer("this"));
         irRoot.addFunction(currentFunction);
         currentBB = currentFunction.getEntryBlock();
@@ -209,10 +217,18 @@ public class IRBuilder implements ASTVisitor {
         if (node.getFunctionSymbol().getType().getTypeName().equals("void")) {
             currentBB.terminate(new Return(currentBB, null));
         } else {
-            node.getExpression().accept(this);
+            /*
             VirtualRegister virtualRegister = node.getFunctionSymbol().getType().isPointerType() ? new I64Pointer() : new I64Value();
             assign(node.getFunctionSymbol().getType().isPointerType(), virtualRegister, node.getExpression());
             currentBB.terminate(new Return(currentBB, virtualRegister));
+            */
+            node.getExpression().accept(this);
+            if (node.getFunctionSymbol().getType().isPointerType()) {
+                currentBB.terminate(new Return(currentBB, node.getExpression().getResultOperand()));
+            } else {
+                Operand retValue = getOperandForValueUse(currentBB, node.getExpression().getResultOperand());
+                currentBB.terminate(new Return(currentBB, retValue));
+            }
         }
     }
 
@@ -242,7 +258,7 @@ public class IRBuilder implements ASTVisitor {
         if (node.getThenBB() != null) {
             I64Value tmp = new I64Value();
             currentBB.terminate(new Load(currentBB, node.getResultOperand(), tmp));
-            currentBB.appendInst(new Branch(currentBB, tmp, node.getThenBB(), node.getElseBB()));
+            currentBB.terminate(new Branch(currentBB, tmp, node.getThenBB(), node.getElseBB()));
         }
     }
 
@@ -375,7 +391,7 @@ public class IRBuilder implements ASTVisitor {
                 }
                 //short-circuit evaluation
                 if (node.getThenBB() != null)
-                    currentBB.appendInst(new Branch(currentBB, node.getResultOperand(), node.getThenBB(), node.getElseBB()));
+                    currentBB.terminate(new Branch(currentBB, node.getResultOperand(), node.getThenBB(), node.getElseBB()));
                 break;
             }
             case NEQ:
@@ -402,7 +418,7 @@ public class IRBuilder implements ASTVisitor {
                 }
                 //short-circuit evaluation
                 if (node.getThenBB() != null)
-                    currentBB.appendInst(new Branch(currentBB, node.getResultOperand(), node.getThenBB(), node.getElseBB()));
+                    currentBB.terminate(new Branch(currentBB, node.getResultOperand(), node.getThenBB(), node.getElseBB()));
                 break;
             }
             case ANDL: {
@@ -429,7 +445,7 @@ public class IRBuilder implements ASTVisitor {
             }
             case ASSIGN: {
                 lhs.accept(this);
-                rhs.accept(this);
+                //rhs.accept(this);
                 assign(lhs.getType().isPointerType(), lhs.getResultOperand(), rhs);
                 break;
             }
@@ -469,7 +485,8 @@ public class IRBuilder implements ASTVisitor {
 
     @Override
     public void visit(FuncallExprNode node) {
-        if (BuiltinFunctionCall(node)) return;
+        if (stringLengthOrArraySize(node)) return;
+        node.getFunction().accept(this);
         FunctionSymbol functionSymbol = node.getFunction().getFunctionSymbol();
         if (node.getType().isPointerType()) node.setResultOperand(new I64Pointer());
         else node.setResultOperand(new I64Value());
@@ -625,7 +642,7 @@ public class IRBuilder implements ASTVisitor {
 
     @Override
     public void visit(StringLiteralNode node) {
-        StaticString staticString = new StaticString(new GlobalI64Pointer(), node.getVal());
+        StaticString staticString = new StaticString(new GlobalI64Pointer("str"), node.getVal());
         node.setResultOperand(staticString.getPointer());
         irRoot.addStaticString(staticString);
     }
@@ -633,6 +650,7 @@ public class IRBuilder implements ASTVisitor {
     //lhs(Register/Memory) = rhsExpr(Register/Memory/Immediate)
     private void assign(boolean isPointerAssign, Operand lhs, ExprNode rhsExpr) {
         if (isPointerAssign) {
+            rhsExpr.accept(this);
             currentBB.appendInst(new Move(currentBB, rhsExpr.getResultOperand(), lhs));
         } else {
             if (rhsExpr.isBoolean()) {
@@ -699,12 +717,12 @@ public class IRBuilder implements ASTVisitor {
             //generate init
             currentBB.appendInst(new Move(currentBB, resultOprand, nowPointer));
             currentBB.appendInst(new Binary(currentBB, Binary.Op.ADD, resultOprand, allocateSize, endPointer));
-            currentBB.appendInst(new Jump(currentBB, condBB));
+            currentBB.terminate(new Jump(currentBB, condBB));
             //generate cond
             currentBB = condBB;
             I64Value cmp = new I64Value();
             condBB.appendInst(new Cmp(currentBB, Cmp.Op.EQ, nowPointer, endPointer, cmp));
-            condBB.appendInst(new Branch(currentBB, cmp, bodyBB, mergeBB));
+            condBB.terminate(new Branch(currentBB, cmp, bodyBB, mergeBB));
             //generate body
             currentBB = bodyBB;
             arrayAllocation(node, nowPointer, depth + 1);
@@ -713,7 +731,7 @@ public class IRBuilder implements ASTVisitor {
             currentBB = stepBB;
             currentBB.appendInst(new Binary(currentBB, Binary.Op.ADD, nowPointer, new Immediate(Configuration.POINTER_SIZE()), tempPointer));
             currentBB.appendInst(new Move(currentBB, tempPointer, nowPointer));
-            currentBB.appendInst(new Jump(currentBB, condBB));
+            currentBB.terminate(new Jump(currentBB, condBB));
             currentBB = mergeBB;
         }
     }
@@ -729,85 +747,29 @@ public class IRBuilder implements ASTVisitor {
     }
 
     //for BuiltinFunctionCall
-    private boolean BuiltinFunctionCall(FuncallExprNode node) {
+    private void builtinFunctionSymbolInitialization() {
+        ((FunctionSymbol) globalScope.getString().resolveSymbol("substring", null)).setFunction(irRoot.builtinSubstring);
+        ((FunctionSymbol) globalScope.getString().resolveSymbol("parseInt", null)).setFunction(irRoot.builtinParseInt);
+        ((FunctionSymbol) globalScope.getString().resolveSymbol("ord", null)).setFunction(irRoot.builtinOrd);
+        ((FunctionSymbol) globalScope.resolveSymbol("print", null)).setFunction(irRoot.builtinPrint);
+        ((FunctionSymbol) globalScope.resolveSymbol("println", null)).setFunction(irRoot.builtinPrintln);
+        ((FunctionSymbol) globalScope.resolveSymbol("getString", null)).setFunction(irRoot.builtinGetString);
+        ((FunctionSymbol) globalScope.resolveSymbol("getInt", null)).setFunction(irRoot.builtinGetInt);
+        ((FunctionSymbol) globalScope.resolveSymbol("toString", null)).setFunction(irRoot.builtinToString);
+    }
+
+    private boolean stringLengthOrArraySize(FuncallExprNode node) {
         FunctionSymbol functionSymbol = node.getFunction().getFunctionSymbol();
         String functionName = functionSymbol.getSymbolName();
         if (functionSymbol.isMemberFunction()) {
-            switch (functionName) {
-                case "string.length":
-                case "array.size": {
-                    //store length of array/string in first 64 bits of memory
-                    node.getFunction().accept(this);
-                    Pointer objectPointer = (Pointer) node.getFunction().getResultOperand();
-                    node.setResultOperand(new I64Value());
-                    currentBB.appendInst(new Load(currentBB, objectPointer, node.getResultOperand()));
-                    break;
-                }
-                case "string.substring": { //substring(int l, int r);
-                    node.getFunction().accept(this);
-                    Pointer objectPointer = (Pointer) node.getFunction().getResultOperand();
-                    node.setResultOperand(new I64Pointer()); //return string
-
-                    Call call = new Call(currentBB, irRoot.builtinSubstring, node.getResultOperand());
-                    call.setObjectPointer(objectPointer);
-                    node.getParameterList().forEach(x -> {
-                        x.accept(this);
-                        call.appendParameterList(getOperandForValueUse(currentBB, x.getResultOperand()));
-                    });
-                    currentBB.appendInst(call);
-                    break;
-                }
-                case "string.parseInt":
-                case "string.ord": {
-                    node.getFunction().accept(this);
-                    Pointer objectPointer = (Pointer) node.getFunction().getResultOperand();
-                    node.setResultOperand(new I64Value()); //return int
-
-                    Call call = new Call(currentBB, functionName.equals("string.parseInt") ? irRoot.builtinParseInt : irRoot.builtinOrd, node.getResultOperand());
-                    call.setObjectPointer(objectPointer);
-                    node.getParameterList().forEach(x -> {
-                        x.accept(this);
-                        call.appendParameterList(getOperandForValueUse(currentBB, x.getResultOperand()));
-                    });
-                    currentBB.appendInst(call);
-                    break;
-                }
-                default:
-                    return false;
-            }
-        } else {
-            switch (functionName) {
-                case "print":
-                case "println": {
-                    Call call = new Call(currentBB, functionName.equals("print") ? irRoot.builtinPrint : irRoot.builtinPrintln, null);
-                    node.getParameterList().forEach(x -> {
-                        x.accept(this);
-                        call.appendParameterList(getOperandForValueUse(currentBB, x.getResultOperand()));
-                    });
-                    currentBB.appendInst(call);
-                    break;
-                }
-                case "getString":
-                case "toString": {
-                    node.setResultOperand(new I64Pointer());
-                    Call call = new Call(currentBB, functionName.equals("getString") ? irRoot.builtinGetString : irRoot.builtinToString, node.getResultOperand());
-                    node.getParameterList().forEach(x -> {
-                        x.accept(this);
-                        call.appendParameterList(getOperandForValueUse(currentBB, x.getResultOperand()));
-                    });
-                    currentBB.appendInst(call);
-                    break;
-                }
-                case "getInt": {
-                    node.setResultOperand(new I64Value());
-                    Call call = new Call(currentBB, irRoot.builtinGetInt, node.getResultOperand());
-                    currentBB.appendInst(call);
-                    break;
-                }
-                default:
-                    return false;
-            }
-        }
+            if ((functionSymbol.getEnclosingScope() == globalScope.getString() && functionName.equals("length"))
+                    || functionName.equals("array.size")) {
+                node.getFunction().accept(this);
+                Pointer objectPointer = (Pointer) node.getFunction().getResultOperand();
+                node.setResultOperand(new I64Value());
+                currentBB.appendInst(new Load(currentBB, objectPointer, node.getResultOperand()));
+            } else return false;
+        } else return false;
         return true;
     }
 }

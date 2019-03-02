@@ -38,6 +38,7 @@ public class SymbolTableBuilder implements ASTVisitor {
         Type type = Util.TypeNode2Type(node.getType(), globalScope);
         node.setTypeAfterResolve(type);
         VariableSymbol variableSymbol = new VariableSymbol(node.getIdentifier(), type, node);
+        node.setVariableSymbol(variableSymbol);
         currentScope.defineVariable(variableSymbol);
         if (currentScope == globalScope) node.setGlobalVariable();
     }
@@ -45,7 +46,7 @@ public class SymbolTableBuilder implements ASTVisitor {
     @Override
     public void visit(FuncDeclNode node) {
         FunctionSymbol functionSymbol = (FunctionSymbol) currentScope.resolveSymbol(node.getIdentifier(), node.getPosition());
-        if (currentScope instanceof ClassSymbol) functionSymbol.setMemberFunction();
+        //if (currentScope instanceof ClassSymbol) functionSymbol.setMemberFunction();
         currentScope = functionSymbol;
         currentFunctionSymbol = functionSymbol;
         visit(node.getBlock());
@@ -104,12 +105,7 @@ public class SymbolTableBuilder implements ASTVisitor {
 
     @Override
     public void visit(VarDeclStmtNode node) {
-        node.getVarDeclList().getList().forEach(x -> {
-            if (x.getExpr() != null) x.getExpr().accept(this);
-            Type type = Util.TypeNode2Type(x.getType(), globalScope);
-            x.setTypeAfterResolve(type);
-            currentScope.defineVariable(new VariableSymbol(x.getIdentifier(), type, x));
-        });
+        node.getVarDeclList().getList().forEach(x -> x.accept(this));
     }
 
     @Override

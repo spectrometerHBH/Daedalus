@@ -24,13 +24,13 @@ public class Main {
         parser.removeErrorListeners();
         parser.addErrorListener(new MxstarErrorListener());
         ParseTree tree = parser.program();
-        System.out.println(tree.toStringTree(parser));
+        //System.out.println(tree.toStringTree(parser));
         ASTBuilder astBuilder = new ASTBuilder();
         return (ProgramNode) astBuilder.visit(tree);
     }
 
     public static void main(String... args) throws Exception {
-        InputStream in = new FileInputStream("test.txt");
+        InputStream in = new FileInputStream("test.java");
         PrintStream out_test = new PrintStream(new FileOutputStream("test_out.txt"));
 
         try {

@@ -13,14 +13,13 @@ public class VarDeclNode extends DeclNode {
 
     //for IR
     private VariableSymbol variableSymbol;
-    private boolean isGlobalVariable;
-
+    private boolean isGlobalVariable = false;
+    private boolean isParameterVariable = false;
     public VarDeclNode(TypeNode type, ExprNode expr, String identifier, Position position){
         super(position);
         this.type = type;
         this.expr = expr;
         this.identifier = identifier;
-        this.isGlobalVariable = false;
     }
 
     public VariableSymbol getVariableSymbol() {
@@ -41,6 +40,14 @@ public class VarDeclNode extends DeclNode {
 
     public void setGlobalVariable() {
         isGlobalVariable = true;
+    }
+
+    public boolean isParameterVariable() {
+        return isParameterVariable;
+    }
+
+    public void setParameterVariable() {
+        isParameterVariable = true;
     }
 
     public TypeNode getType() {

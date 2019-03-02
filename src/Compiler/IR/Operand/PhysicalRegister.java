@@ -12,6 +12,6 @@ public class PhysicalRegister extends Register {
 
     @Override
     public void accept(IRVisitor irVisitor) {
-
+        irVisitor.visit(this);
     }
 }

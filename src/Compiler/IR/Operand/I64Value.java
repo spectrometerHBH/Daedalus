@@ -12,6 +12,6 @@ public class I64Value extends Value {
 
     @Override
     public void accept(IRVisitor irVisitor) {
-
+        irVisitor.visit(this);
     }
 }

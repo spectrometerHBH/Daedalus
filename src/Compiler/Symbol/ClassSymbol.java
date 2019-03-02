@@ -58,6 +58,7 @@ public class ClassSymbol extends Symbol implements Scope, Type {
     public void defineFunction(FunctionSymbol symbol) {
         if (variableSymbolMap.containsKey(symbol.getSymbolName()) || functionSymbolMap.containsKey(symbol.getSymbolName()))
             throw new SemanticError("Duplicate identifiers", symbol.getDef().getPosition());
+        symbol.setMemberFunction();
         functionSymbolMap.put(symbol.getSymbolName(), symbol);
     }
 

@@ -24,6 +24,7 @@ public class ClassMemberScanner implements ASTVisitor {
     public void visit(VarDeclNode node) {
         Type type = Util.TypeNode2Type(node.getType(), globalScope);
         VariableSymbol variableSymbol = new VariableSymbol(node.getIdentifier(), type, node);
+        node.setVariableSymbol(variableSymbol);
         currentScope.defineVariable(variableSymbol);
     }
 
