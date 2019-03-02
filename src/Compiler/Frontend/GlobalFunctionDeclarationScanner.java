@@ -42,7 +42,9 @@ public class GlobalFunctionDeclarationScanner implements ASTVisitor {
         node.setFunctionSymbol(functionSymbol);
         for (VarDeclNode varDeclNode : node.getParameterList()) {
             Type parameterType = Util.TypeNode2Type(varDeclNode.getType(), globalScope);
-            functionSymbol.defineVariable(new VariableSymbol(varDeclNode.getIdentifier(), parameterType, varDeclNode));
+            VariableSymbol variableSymbol = new VariableSymbol(varDeclNode.getIdentifier(), parameterType, varDeclNode);
+            varDeclNode.setVariableSymbol(variableSymbol);
+            functionSymbol.defineVariable(variableSymbol);
         }
         globalScope.defineFunction(functionSymbol);
     }

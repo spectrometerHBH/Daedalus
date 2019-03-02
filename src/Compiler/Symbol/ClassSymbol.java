@@ -1,6 +1,7 @@
 package Compiler.Symbol;
 
 import Compiler.AST.ClassDeclNode;
+import Compiler.Configuration;
 import Compiler.Utils.Position;
 import Compiler.Utils.SemanticError;
 
@@ -51,6 +52,7 @@ public class ClassSymbol extends Symbol implements Scope, Type {
             throw new SemanticError("Duplicate identifiers", symbol.getDef().getPosition());
         variableSymbolMap.put(symbol.getSymbolName(), symbol);
         symbol.setOffset(size);
+        symbol.setScope(this);
         size += symbol.getType().getTypeSize();
     }
 
@@ -59,6 +61,7 @@ public class ClassSymbol extends Symbol implements Scope, Type {
         if (variableSymbolMap.containsKey(symbol.getSymbolName()) || functionSymbolMap.containsKey(symbol.getSymbolName()))
             throw new SemanticError("Duplicate identifiers", symbol.getDef().getPosition());
         symbol.setMemberFunction();
+        symbol.setScope(this);
         functionSymbolMap.put(symbol.getSymbolName(), symbol);
     }
 
@@ -130,6 +133,10 @@ public class ClassSymbol extends Symbol implements Scope, Type {
 
     @Override
     public int getTypeSize() {
+        return Configuration.POINTER_SIZE();
+    }
+
+    public int getObjectSize() {
         return size;
     }
 }

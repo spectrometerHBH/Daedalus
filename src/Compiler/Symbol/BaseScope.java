@@ -26,11 +26,13 @@ public abstract class BaseScope implements Scope {
     @Override public void defineVariable(VariableSymbol symbol){
         if (symbolMap.containsKey(symbol.getSymbolName())) throw new SemanticError("Duplicate identifiers.", symbol.getDef().getPosition());
         symbolMap.put(symbol.getSymbolName(), symbol);
+        symbol.setScope(this);
     }
 
     @Override public void defineFunction(FunctionSymbol symbol){
         if (symbolMap.containsKey(symbol.getSymbolName())) throw new SemanticError("Duplicate identifiers.", symbol.getDef().getPosition());
         symbolMap.put(symbol.getSymbolName(), symbol);
+        symbol.setScope(this);
     }
 
 }

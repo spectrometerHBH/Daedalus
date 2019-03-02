@@ -2,7 +2,6 @@ package Compiler;
 
 import Compiler.AST.ProgramNode;
 import Compiler.Backend.IRBuilder;
-import Compiler.Backend.IRPrinter;
 import Compiler.Frontend.*;
 import Compiler.IR.IRRoot;
 import Compiler.Parser.MxstarErrorListener;
@@ -30,7 +29,7 @@ public class Main {
     }
 
     public static void main(String... args) throws Exception {
-        InputStream in = new FileInputStream("test.java");
+        InputStream in = new FileInputStream("test.txt");
         PrintStream out_test = new PrintStream(new FileOutputStream("test_out.txt"));
 
         try {
@@ -47,7 +46,7 @@ public class Main {
             IRBuilder irBuilder = new IRBuilder(globalScope);
             irBuilder.visit(ast);
             IRRoot irRoot = irBuilder.getIrRoot();
-            new IRPrinter(out_test).visit(irRoot);
+            //new IRPrinter(out_test).visit(irRoot);
             //Optimization
 
             //Code generation

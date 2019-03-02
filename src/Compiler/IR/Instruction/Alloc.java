@@ -3,13 +3,12 @@ package Compiler.IR.Instruction;
 import Compiler.IR.BasicBlock;
 import Compiler.IR.IRVisitor;
 import Compiler.IR.Operand.Operand;
-import Compiler.IR.Operand.VirtualRegister;
 
 public class Alloc extends IRInstruction {
     private Operand size;
-    private VirtualRegister pointer;
+    private Operand pointer;
 
-    public Alloc(BasicBlock currentBB, Operand size, VirtualRegister pointer) {
+    public Alloc(BasicBlock currentBB, Operand size, Operand pointer) {
         super(currentBB);
         this.size = size;
         this.pointer = pointer;
@@ -19,7 +18,7 @@ public class Alloc extends IRInstruction {
         return size;
     }
 
-    public VirtualRegister getPointer() {
+    public Operand getPointer() {
         return pointer;
     }
 

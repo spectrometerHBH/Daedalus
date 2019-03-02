@@ -24,10 +24,12 @@ public class GlobalScope extends BaseScope{
         if (symbolMap.containsKey(symbol.getSymbolName())) throw new SemanticError("Duplicate identifiers.", symbol.getDef().getPosition());
         symbolMap.put(symbol.getSymbolName(), symbol);
         typeMap.put(symbol.getSymbolName(), symbol);
+        symbol.setScope(this);
     }
 
     public void definePrimitiveType(PrimitiveTypeSymbol symbol){
         typeMap.put(symbol.getSymbolName(), symbol);
+        symbol.setScope(this);
     }
 
     @Override
@@ -86,5 +88,6 @@ public class GlobalScope extends BaseScope{
 
     public void setArraySizeFunctionSymbol(FunctionSymbol arraySizeFunctionSymbol) {
         this.arraySizeFunctionSymbol = arraySizeFunctionSymbol;
+        arraySizeFunctionSymbol.setMemberFunction();
     }
 }

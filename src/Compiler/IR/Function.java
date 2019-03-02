@@ -6,8 +6,8 @@ import Compiler.IR.Operand.Storage;
 import java.util.*;
 
 public class Function {
-    private BasicBlock entryBlock = new BasicBlock(this, "function_entry");
-    private BasicBlock exitBlock = new BasicBlock(this, "function_exit");
+    private BasicBlock entryBlock = new BasicBlock(this, "entry");
+    private BasicBlock exitBlock = new BasicBlock(this, "exit");
     private List<Return> returnInstList = new ArrayList<>();
     private Storage referenceForClassMethod = null;
     private List<Storage> parameterList = new ArrayList<>();

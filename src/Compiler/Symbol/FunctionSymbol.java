@@ -55,6 +55,7 @@ public class FunctionSymbol extends Symbol implements Scope{
     public void defineVariable(VariableSymbol symbol) {
         if (arguments.containsKey(symbol.getSymbolName())) throw new SemanticError("duplicate name variables", symbol.getDef().getPosition());
         else arguments.put(symbol.getSymbolName(), symbol);
+        symbol.setScope(this);
     }
 
     @Override

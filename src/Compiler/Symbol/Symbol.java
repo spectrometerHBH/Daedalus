@@ -5,6 +5,7 @@ import Compiler.AST.ASTNode;
 public class Symbol {
     private String name;
     private Type type;
+    private Scope scope;
     private ASTNode define;
 
     public Symbol(String name, Type type, ASTNode define) {
@@ -23,6 +24,14 @@ public class Symbol {
 
     public Type getType() {
         return type;
+    }
+
+    public Scope getScope() {
+        return scope;
+    }
+
+    public void setScope(Scope scope) {
+        this.scope = scope;
     }
 
     public boolean isVariableSymbol(){ return false; }

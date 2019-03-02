@@ -47,6 +47,7 @@ public class BasicBlock {
     }
 
     private void removeSuccessor(BasicBlock BB) {
+        if (BB == null) return;
         successors.remove(BB);
         BB.predecessors.remove(this);
     }
@@ -74,10 +75,14 @@ public class BasicBlock {
             } else if (tail instanceof Return) {
                 currentFunction.getReturnInstList().remove(tail);
             }
+            tail = tail.getLastInstruction();
+            if (tail != null) tail.setNextInstruction(null);
+            else head = tail = null;
         }
     }
 
     private void appendBB(BasicBlock BB) {
+        if (BB == null) return;
         this.appendSuccessor(BB);
         BB.appendPredecessor(this);
     }

@@ -34,7 +34,11 @@ public class IRPrinter implements IRVisitor {
     @Override
     public void visit(Function function) {
         out.print("define func @" + function.getName() + "() ");
-        function.getParameterList().forEach(this::visit);
+        if (function.getReferenceForClassMethod() != null) function.getReferenceForClassMethod().accept(this);
+        function.getParameterList().forEach(x -> {
+            x.accept(this);
+            out.print(" ");
+        });
         out.println("{");
         function.getPostOrderDFSBBList().forEach(this::visit);
         out.println("}");
@@ -48,7 +52,7 @@ public class IRPrinter implements IRVisitor {
 
     @Override
     public void visit(BasicBlock basicBlock) {
-        out.println("$" + getLabel(basicBlock) + ":");
+        out.println(getLabel(basicBlock) + ":");
         for (IRInstruction irInstruction = basicBlock.head; irInstruction != null; irInstruction = irInstruction.getNextInstruction()) {
             out.print("    ");
             irInstruction.accept(this);
@@ -125,7 +129,10 @@ public class IRPrinter implements IRVisitor {
             inst.getObjectPointer().accept(this);
             out.print(" ");
         }
-        inst.getParameterList().forEach(x -> x.accept(this));
+        inst.getParameterList().forEach(x -> {
+            x.accept(this);
+            out.print(" ");
+        });
         out.println();
     }
 
@@ -260,6 +267,7 @@ public class IRPrinter implements IRVisitor {
     }
 
     private String getLabel(BasicBlock basicBlock) {
+        if (basicBlock == null) return "";
         String name = basicBlockStringMap.get(basicBlock);
         return name != null ? name : createLabel(basicBlock, basicBlock.getName());
     }
