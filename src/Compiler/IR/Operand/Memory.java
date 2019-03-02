@@ -4,6 +4,7 @@ public abstract class Memory extends Storage {
     private VirtualRegister pointer;
 
     public Memory(VirtualRegister pointer) {
+        super(pointer.getName());
         this.pointer = pointer;
     }
 

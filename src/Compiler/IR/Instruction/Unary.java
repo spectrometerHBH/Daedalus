@@ -1,6 +1,7 @@
 package Compiler.IR.Instruction;
 
 import Compiler.IR.BasicBlock;
+import Compiler.IR.IRVisitor;
 import Compiler.IR.Operand.Operand;
 
 public class Unary extends IRInstruction {
@@ -17,5 +18,22 @@ public class Unary extends IRInstruction {
         this.op = op;
         Src = src;
         Dst = dst;
+    }
+
+    public Op getOp() {
+        return op;
+    }
+
+    public Operand getSrc() {
+        return Src;
+    }
+
+    public Operand getDst() {
+        return Dst;
+    }
+
+    @Override
+    public void accept(IRVisitor irVisitor) {
+        irVisitor.visit(this);
     }
 }

@@ -1,6 +1,7 @@
 package Compiler.IR.Instruction;
 
 import Compiler.IR.BasicBlock;
+import Compiler.IR.IRVisitor;
 import Compiler.IR.Operand.Operand;
 
 public class Binary extends IRInstruction {
@@ -17,5 +18,26 @@ public class Binary extends IRInstruction {
         this.src1 = src1;
         this.src2 = src2;
         this.dest = dest;
+    }
+
+    public Op getOp() {
+        return op;
+    }
+
+    public Operand getSrc1() {
+        return src1;
+    }
+
+    public Operand getSrc2() {
+        return src2;
+    }
+
+    public Operand getDest() {
+        return dest;
+    }
+
+    @Override
+    public void accept(IRVisitor irVisitor) {
+        irVisitor.visit(this);
     }
 }

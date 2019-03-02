@@ -12,6 +12,7 @@ public class IRRoot {
     private Map<String, Function> functionMap = new LinkedHashMap<>();
     private List<StaticString> staticStringList = new ArrayList<>();
     private List<GlobalVariable> globalVariableList = new ArrayList<>();
+
     public IRRoot(){
 
     }
@@ -26,6 +27,18 @@ public class IRRoot {
 
     public void addGlobalVariable(GlobalVariable globalVariable){
         globalVariableList.add(globalVariable);
+    }
+
+    public Map<String, Function> getFunctionMap() {
+        return functionMap;
+    }
+
+    public List<StaticString> getStaticStringList() {
+        return staticStringList;
+    }
+
+    public List<GlobalVariable> getGlobalVariableList() {
+        return globalVariableList;
     }
 
     public Function builtinSubstring;

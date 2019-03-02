@@ -1,6 +1,7 @@
 package Compiler.IR.Instruction;
 
 import Compiler.IR.BasicBlock;
+import Compiler.IR.IRVisitor;
 import Compiler.IR.Operand.Operand;
 
 public class Cmp extends IRInstruction {
@@ -19,5 +20,26 @@ public class Cmp extends IRInstruction {
         this.lhs = lhs;
         this.rhs = rhs;
         this.dest = dest;
+    }
+
+    public Op getOp() {
+        return op;
+    }
+
+    public Operand getLhs() {
+        return lhs;
+    }
+
+    public Operand getRhs() {
+        return rhs;
+    }
+
+    public Operand getDest() {
+        return dest;
+    }
+
+    @Override
+    public void accept(IRVisitor irVisitor) {
+        irVisitor.visit(this);
     }
 }

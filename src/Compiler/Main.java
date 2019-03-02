@@ -2,7 +2,9 @@ package Compiler;
 
 import Compiler.AST.ProgramNode;
 import Compiler.Backend.IRBuilder;
+import Compiler.Backend.IRPrinter;
 import Compiler.Frontend.*;
+import Compiler.IR.IRRoot;
 import Compiler.Parser.MxstarErrorListener;
 import Compiler.Parser.MxstarLexer;
 import Compiler.Parser.MxstarParser;
@@ -12,7 +14,9 @@ import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTree;
 
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.InputStream;
+import java.io.PrintStream;
 
 public class Main {
     private static ProgramNode buildAST(InputStream in) throws Exception {
@@ -27,6 +31,8 @@ public class Main {
 
     public static void main(String... args) throws Exception {
         InputStream in = new FileInputStream("test.txt");
+        PrintStream out_test = new PrintStream(new FileOutputStream("test_out.txt"));
+
         try {
             //Parser & Lexer
             ProgramNode ast = buildAST(in);
@@ -37,8 +43,11 @@ public class Main {
             new ClassMemberScanner(globalScope).visit(ast);
             new SymbolTableBuilder(globalScope).visit(ast);
             new SemanticChecker(globalScope).visit(ast);
-            //IR transform(Explicit CFG with Quad & Explicit Variables without SSA form)
-            new IRBuilder(globalScope).visit(ast);
+            //IR Construction(Explicit CFG with Quad & Explicit Variables without SSA form)
+            IRBuilder irBuilder = new IRBuilder(globalScope);
+            irBuilder.visit(ast);
+            IRRoot irRoot = irBuilder.getIrRoot();
+            new IRPrinter(out_test).visit(irRoot);
             //Optimization
 
             //Code generation

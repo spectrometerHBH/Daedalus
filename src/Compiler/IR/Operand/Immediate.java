@@ -1,5 +1,7 @@
 package Compiler.IR.Operand;
 
+import Compiler.IR.IRVisitor;
+
 public class Immediate extends Operand {
     private int immediate;
 
@@ -9,5 +11,10 @@ public class Immediate extends Operand {
 
     public int getImmediate() {
         return immediate;
+    }
+
+    @Override
+    public void accept(IRVisitor irVisitor) {
+
     }
 }

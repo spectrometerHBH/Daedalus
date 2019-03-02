@@ -9,8 +9,8 @@ import java.util.LinkedList;
 import java.util.List;
 
 public class BasicBlock {
-    private IRInstruction head;
-    private IRInstruction tail;
+    public IRInstruction head;
+    public IRInstruction tail;
     private Function currentFunction;
     private String name;
     private List<BasicBlock> predecessors = new LinkedList<>();
@@ -20,6 +20,18 @@ public class BasicBlock {
     public BasicBlock(Function currentFunction, String name) {
         this.currentFunction = currentFunction;
         this.name = name;
+    }
+
+    public String getName() {
+        return currentFunction.getName() + "_" + name;
+    }
+
+    public List<BasicBlock> getPredecessors() {
+        return predecessors;
+    }
+
+    public List<BasicBlock> getSuccessors() {
+        return successors;
     }
 
     public boolean isTerminated() {

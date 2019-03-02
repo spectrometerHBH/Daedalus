@@ -1,6 +1,7 @@
 package Compiler.IR.Instruction;
 
 import Compiler.IR.BasicBlock;
+import Compiler.IR.IRVisitor;
 
 public class Jump extends IRInstruction {
     private BasicBlock targetBB;
@@ -12,5 +13,10 @@ public class Jump extends IRInstruction {
 
     public BasicBlock getTargetBB() {
         return targetBB;
+    }
+
+    @Override
+    public void accept(IRVisitor irVisitor) {
+        irVisitor.visit(this);
     }
 }

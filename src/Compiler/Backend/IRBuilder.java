@@ -34,11 +34,11 @@ public class IRBuilder implements ASTVisitor {
         VariableSymbol variableSymbol = node.getVariableSymbol();
         Type type = node.getTypeAfterResolve();
         if (node.isGlobalVariable()) {
-            VirtualRegister globalVariable = type.isPointerType() ? new GlobalI64Pointer() : new GlobalI64Value();
+            VirtualRegister globalVariable = type.isPointerType() ? new GlobalI64Pointer(node.getIdentifier()) : new GlobalI64Value(node.getIdentifier());
             irRoot.addGlobalVariable((GlobalVariable) globalVariable);
             variableSymbol.setVariableStorage(globalVariable);
         } else {
-            VirtualRegister virtualRegister = type.isPointerType() ? new I64Pointer() : new I64Value();
+            VirtualRegister virtualRegister = type.isPointerType() ? new I64Pointer(node.getIdentifier()) : new I64Value(node.getIdentifier());
             if (currentFunction != null) currentFunction.appendParameterList(virtualRegister);
             variableSymbol.setVariableStorage(virtualRegister);
             if (node.getExpr() != null) assign(type.isPointerType(), virtualRegister, node.getExpr());
@@ -48,8 +48,8 @@ public class IRBuilder implements ASTVisitor {
     @Override
     public void visit(FuncDeclNode node) {
         FunctionSymbol functionSymbol = node.getFunctionSymbol();
-        currentFunction = new Function();
-        if (functionSymbol.isMemberFunction()) currentFunction.setReferenceForClassMethod(new I64Pointer());
+        currentFunction = new Function(functionSymbol.getSymbolName());
+        if (functionSymbol.isMemberFunction()) currentFunction.setReferenceForClassMethod(new I64Pointer("this"));
         irRoot.addFunction(currentFunction);
         currentBB = currentFunction.getEntryBlock();
         node.getParameterList().forEach(x -> x.accept(this));
@@ -528,18 +528,25 @@ public class IRBuilder implements ASTVisitor {
         switch (node.getOp()) {
             case PRE_INC:
                 op = Unary.Op.INC;
+                break;
             case PRE_DEC:
                 op = Unary.Op.DEC;
+                break;
             case SUF_INC:
                 op = Unary.Op.INC;
+                break;
             case SUF_DEC:
                 op = Unary.Op.DEC;
+                break;
             case POS:
                 op = Unary.Op.POS;
+                break;
             case NEG:
                 op = Unary.Op.NEG;
+                break;
             case NOT:
                 op = Unary.Op.NOT;
+                break;
             case NOTL:
                 break;
             default:

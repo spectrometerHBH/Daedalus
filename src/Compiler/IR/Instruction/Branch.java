@@ -1,6 +1,7 @@
 package Compiler.IR.Instruction;
 
 import Compiler.IR.BasicBlock;
+import Compiler.IR.IRVisitor;
 import Compiler.IR.Operand.Operand;
 
 public class Branch extends IRInstruction {
@@ -21,5 +22,14 @@ public class Branch extends IRInstruction {
 
     public BasicBlock getElseBB() {
         return elseBB;
+    }
+
+    public Operand getCond() {
+        return cond;
+    }
+
+    @Override
+    public void accept(IRVisitor irVisitor) {
+        irVisitor.visit(this);
     }
 }

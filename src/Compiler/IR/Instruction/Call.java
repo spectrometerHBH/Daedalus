@@ -2,6 +2,7 @@ package Compiler.IR.Instruction;
 
 import Compiler.IR.BasicBlock;
 import Compiler.IR.Function;
+import Compiler.IR.IRVisitor;
 import Compiler.IR.Operand.Operand;
 
 import java.util.ArrayList;
@@ -33,5 +34,18 @@ public class Call extends IRInstruction {
 
     public void setObjectPointer(Operand objectPointer) {
         this.objectPointer = objectPointer;
+    }
+
+    public Function getCallee() {
+        return callee;
+    }
+
+    public Operand getResult() {
+        return result;
+    }
+
+    @Override
+    public void accept(IRVisitor irVisitor) {
+        irVisitor.visit(this);
     }
 }

@@ -1,6 +1,7 @@
 package Compiler.IR.Instruction;
 
 import Compiler.IR.BasicBlock;
+import Compiler.IR.IRVisitor;
 
 public abstract class IRInstruction {
     private BasicBlock currentBB;
@@ -30,4 +31,6 @@ public abstract class IRInstruction {
     public void setNextInstruction(IRInstruction nextInstruction) {
         this.nextInstruction = nextInstruction;
     }
+
+    public abstract void accept(IRVisitor irVisitor);
 }
