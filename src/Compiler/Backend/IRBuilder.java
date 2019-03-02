@@ -225,7 +225,7 @@ public class IRBuilder implements ASTVisitor {
 
     @Override
     public void visit(ReturnNode node) {
-        if (node.getFunctionSymbol().getType().getTypeName().equals("void")) {
+        if (node.getExpression() == null) {
             currentBB.terminate(new Return(currentBB, null));
         } else {
             Operand retValue = new I64Value();
@@ -327,8 +327,10 @@ public class IRBuilder implements ASTVisitor {
                 callFunction = irRoot.builtinStringEQ;
                 break;
             case ANDL:
+                op_binary = Binary.Op.ANDL;
                 break;
             case ORL:
+                op_binary = Binary.Op.ORL;
                 break;
             case ASSIGN:
                 break;
@@ -422,26 +424,40 @@ public class IRBuilder implements ASTVisitor {
                 break;
             }
             case ANDL: {
-                //short-circuit evaluation
-                lhs.setThenBB(new BasicBlock(currentFunction, "lhs_then"));
-                lhs.setElseBB(node.getElseBB());
-                lhs.accept(this);
-                currentBB = lhs.getThenBB();
-                rhs.setThenBB(node.getThenBB());
-                rhs.setElseBB(node.getElseBB());
-                rhs.accept(this);
+                if (node.getThenBB() != null) {
+                    //short-circuit evaluation
+                    lhs.setThenBB(new BasicBlock(currentFunction, "lhs_then"));
+                    lhs.setElseBB(node.getElseBB());
+                    lhs.accept(this);
+                    currentBB = lhs.getThenBB();
+                    rhs.setThenBB(node.getThenBB());
+                    rhs.setElseBB(node.getElseBB());
+                    rhs.accept(this);
+                } else {
+                    lhs.accept(this);
+                    rhs.accept(this);
+                    node.setResultOperand(new I64Value());
+                    currentBB.appendInst(new Binary(currentBB, op_binary, getOperandForValueUse(currentBB, lhs.getResultOperand()), getOperandForValueUse(currentBB, rhs.getResultOperand()), node.getResultOperand()));
+                }
                 break;
             }
             case ORL: {
-                //short-circuit evaluation
-                lhs.setThenBB(node.getThenBB());
-                lhs.setElseBB(new BasicBlock(currentFunction, "lhs_else"));
-                lhs.accept(this);
-                currentBB = lhs.getElseBB();
-                rhs.setThenBB(node.getThenBB());
-                rhs.setElseBB(node.getElseBB());
-                rhs.accept(this);
-                break;
+                if (node.getThenBB() != null) {
+                    //short-circuit evaluation
+                    lhs.setThenBB(node.getThenBB());
+                    lhs.setElseBB(new BasicBlock(currentFunction, "lhs_else"));
+                    lhs.accept(this);
+                    currentBB = lhs.getElseBB();
+                    rhs.setThenBB(node.getThenBB());
+                    rhs.setElseBB(node.getElseBB());
+                    rhs.accept(this);
+                    break;
+                } else {
+                    lhs.accept(this);
+                    rhs.accept(this);
+                    node.setResultOperand(new I64Value());
+                    currentBB.appendInst(new Binary(currentBB, op_binary, getOperandForValueUse(currentBB, lhs.getResultOperand()), getOperandForValueUse(currentBB, rhs.getResultOperand()), node.getResultOperand()));
+                }
             }
             case ASSIGN: {
                 lhs.accept(this);
@@ -580,6 +596,7 @@ public class IRBuilder implements ASTVisitor {
                 op = Unary.Op.NOT;
                 break;
             case NOTL:
+                op = Unary.Op.NOTL;
                 break;
             default:
                 break;
@@ -629,11 +646,17 @@ public class IRBuilder implements ASTVisitor {
                 break;
             }
             case NOTL: {
-                //short-circuit evaluation
-                exprNode.setThenBB(node.getElseBB());
-                exprNode.setElseBB(node.getThenBB());
-                exprNode.accept(this);
-                break;
+                if (node.getThenBB() != null) {
+                    //short-circuit evaluation
+                    exprNode.setThenBB(node.getElseBB());
+                    exprNode.setElseBB(node.getThenBB());
+                    exprNode.accept(this);
+                    break;
+                } else {
+                    exprNode.accept(this);
+                    node.setResultOperand(new I64Value());
+                    currentBB.appendInst(new Unary(currentBB, op, getOperandForValueUse(currentBB, exprNode.getResultOperand()), node.getResultOperand()));
+                }
             }
             default:
                 break;
@@ -648,6 +671,10 @@ public class IRBuilder implements ASTVisitor {
     @Override
     public void visit(BoolLiteralNode node) {
         node.setResultOperand(new Immediate(node.getVal() ? 1 : 0));
+        if (node.getThenBB() != null) {
+            if (node.getVal()) currentBB.terminate(new Jump(currentBB, node.getThenBB()));
+            else currentBB.terminate(new Jump(currentBB, node.getElseBB()));
+        }
     }
 
     @Override

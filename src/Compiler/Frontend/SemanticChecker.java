@@ -122,14 +122,16 @@ public class SemanticChecker implements ASTVisitor {
 
     @Override
     public void visit(ReturnNode node) {
-        if (((FuncDeclNode) node.getFunctionSymbol().getDef()).getType() == null)
-            throw new SemanticError("Constructor shouldn't have return statement", node.getPosition());
+        //if (((FuncDeclNode) node.getFunctionSymbol().getDef()).getType() == null)
+        //    throw new SemanticError("Constructor shouldn't have return statement", node.getPosition());
         Type returnType = node.getFunctionSymbol().getType();
         if (node.getExpression() != null) {
+            if (((FuncDeclNode) node.getFunctionSymbol().getDef()).getType() == null)
+                throw new SemanticError("Constructor shouldn't have return statement with expression", node.getPosition());
             node.getExpression().accept(this);
             returnType.compatible(node.getExpression().getType(), node.getPosition());
         } else {
-            if (!(returnType.getTypeName().equals("void")))
+            if (!(returnType.getTypeName().equals("void") || ((FuncDeclNode) node.getFunctionSymbol().getDef()).getType() == null))
                 throw new SemanticError("Return without expression", node.getPosition());
         }
     }
@@ -150,16 +152,16 @@ public class SemanticChecker implements ASTVisitor {
         ExprNode index = node.getIndex();
         array.accept(this);
         index.accept(this);
-        if (array.isAssignable()) {
-            if (array.getType().isArrayType()) {
-                if (index.isInteger()) {
-                    node.setCategory(ExprNode.Category.VARIABLE);
-                    node.setType(((ArrayType) array.getType()).getDims() == 1
-                            ? ((ArrayType) array.getType()).getBaseType()
-                            : new ArrayType(((ArrayType) array.getType()).getBaseType(), ((ArrayType) array.getType()).getDims() - 1));
-                } else throw new SemanticError("Subscript ought to be int type", node.getPosition());
-            } else throw new SemanticError("Array expression ought to be array type", node.getPosition());
-        } else throw new SemanticError("Array expression ought to be lvalue", node.getPosition());
+        //if (array.isAssignable()) {
+        if (array.getType().isArrayType()) {
+            if (index.isInteger()) {
+                node.setCategory(ExprNode.Category.VARIABLE);
+                node.setType(((ArrayType) array.getType()).getDims() == 1
+                        ? ((ArrayType) array.getType()).getBaseType()
+                        : new ArrayType(((ArrayType) array.getType()).getBaseType(), ((ArrayType) array.getType()).getDims() - 1));
+            } else throw new SemanticError("Subscript ought to be int type", node.getPosition());
+        } else throw new SemanticError("Array expression ought to be array type", node.getPosition());
+        //} else throw new SemanticError("Array expression ought to be lvalue", node.getPosition());
     }
 
     @Override

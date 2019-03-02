@@ -220,14 +220,22 @@ public class IRPrinter implements IRVisitor {
         switch (inst.getOp()) {
             case NOT:
                 op = "not";
+                break;
             case NEG:
                 op = "neg";
+                break;
             case INC:
                 op = "inc";
+                break;
             case DEC:
                 op = "dec";
+                break;
             case POS:
                 op = "pos";
+                break;
+            case NOTL:
+                op = "notl";
+                break;
         }
         inst.getDst().accept(this);
         out.print(" = " + op + " ");

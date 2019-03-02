@@ -6,7 +6,7 @@ import Compiler.IR.Operand.Operand;
 
 public class Unary extends IRInstruction {
     public enum Op{
-        NOT, NEG, INC, DEC, POS
+        NOT, NEG, INC, DEC, POS, NOTL
     }
 
     private Op op;

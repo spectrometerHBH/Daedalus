@@ -343,7 +343,7 @@ public class ASTBuilder extends MxstarBaseVisitor<ASTNode> {
     @Override
     public ASTNode visitPostfixIncDec(MxstarParser.PostfixIncDecContext ctx) {
         return new UnaryExprNode((ExprNode) visit(ctx.expression()),
-                (ctx.op.getText().equals("++")) ? UnaryExprNode.Op.PRE_INC : UnaryExprNode.Op.PRE_DEC,
+                (ctx.op.getText().equals("++")) ? UnaryExprNode.Op.SUF_INC : UnaryExprNode.Op.SUF_DEC,
                 new Position(ctx.getStart()));
     }
 
@@ -352,10 +352,10 @@ public class ASTBuilder extends MxstarBaseVisitor<ASTNode> {
         UnaryExprNode.Op op;
         switch (ctx.op.getText()) {
             case "++":
-                op = UnaryExprNode.Op.SUF_INC;
+                op = UnaryExprNode.Op.PRE_INC;
                 break;
             case "--":
-                op = UnaryExprNode.Op.SUF_DEC;
+                op = UnaryExprNode.Op.PRE_DEC;
                 break;
             case "+":
                 op = UnaryExprNode.Op.POS;
