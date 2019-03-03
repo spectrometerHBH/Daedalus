@@ -24,19 +24,21 @@ Get the exitcode of the virtual machine.
 Return true if the virtual machine is terminated by an exception.
 
 ## Brief Introduction to IR
+//Modified to be more LLVM-like
 
 - Infinite number of registers.
-- Registers are writeable if not in SSA Mode.
-- Registers' name start with `$`. e.g. `$t1`, `$arr_addr`, `$arr.addr`, ...
-- Blocks' name starts with `%`. e.g. `%entry`, `%if_true`, `%if.true`, ...
+- Registers are writable if not in SSA Mode.
+- Global Registers' name start with `@`. e.g. `@N_1`, `@M_1`, `@str_1`, ...
+- Local Registers' name start with `%`. e.g. `%t1`, `%arr_addr`, `%arr.addr`, ...
+- Blocks' name starts without indent and ends with `:`. e.g. `entry:`, `if_true:`, `if.true:`, ...
 - A block must end with a jump instruction, i.e., fall-through is not allowed.
-- Function call: `$dest = call name $arg1 $arg2 ...`.
-- Use `func name $arg1 $arg2 ... {` to start a function definition. `func` can be replaced with `void` if no return value.
+- Function call: `%dest = call name %arg1 %arg2 ...`.
+- Use `define i64/void @name %arg1 %arg2 ... {` to start a function definition. `func` can be replaced with `void` if no return value.
 - The entry block of a function is the first block in it.
-- Heap allocation: `$dest = alloc $size` will acquire `$size` bytes from heap.
+- Heap allocation: `%dest = alloc %size` will acquire `%size` bytes from heap.
 
 ## Brief Introduction to SSA Mode
-
+//Not in use now 
 In SSA Mode,
 
 - A register can only be defined once statically (not dynamically).
@@ -46,123 +48,66 @@ In SSA Mode,
 
 ## Brief Introduction to VM
 
-- All registers are 32-bit integer register.
+- All registers are 64-bit integer register.
 - All integers are signed integer.
-- Functions do not share any register.
+- Functions do not share any register except global registers.
 - Will terminate if memory access violation occurs.
 - Will terminate if arithmetic error occurs.
 - Will terminate if you try to read a register that has no value.
-- Execution starts at `main` function.
+- Execution starts at `__init` function.
 - A random padding `(< 4KB)` is added after `alloc` in order to help detect memory access violation.
 
 ## Instruction Set
 
-You can guess the meaning from their names. All register except `$dest` and `$reg*` can be replaced by immediate number. `$reg*` can also be replaced by `undef`.
+You can guess the meaning from their names. All register except `%dest` and `%reg*` can be replaced by immediate number. `%reg*` can also be replaced by `undef`.
 
 ```
 Jump Instruction:
-    ret $src
-    jump %target
-    br $cond %ifTrue %ifFalse
+    ret %src
+    jump target
+    br %cond ifTrue ifFalse
 
 Memory Access Instruction:
-    store size $addr $src offset    // M[$addr+offset : $addr+offset+size-1] <- $src
-    $dest = load size $addr offset  // $dest <- M[$addr+offset : $addr+offset+size-1]
-    $dest = alloc $size
+    store %src %dest    // M[%dest] <- %src
+    %dest = load %addr  // %dest <- M[%addr] (I believe simplicity favours regularity)
+    %dest = alloc %size // Allocate %size byte memory in heap space and return top pointer
 
 Function Call Instruction:
-    call funcname $op1 $op2 $op3 ...
-    $dest = call funcname $op1 $op2 $op3 ...
+    call funcname %op1 %op2 %op3 ...
+    %dest = call funcname %op1 %op2 %op3 ...
 
 Register Transfer Instruction:
-    $dest = move $src
+    %dest = move %src
 
-Phi Instruction:
-    $dest = phi %block1 $reg1 %block2 $reg2 ...
+Phi Instruction:(not in use now)
+    %dest = phi block1 %reg1 block2 %reg2 ...
 
-Arithmetic Instruction:
-    $dest = neg $src
-    $dest = add $src1 $src2
-    $dest = sub $src1 $src2
-    $dest = mul $src1 $src2
-    $dest = div $src1 $src2
-    $dest = rem $src1 $src2
+Binary Instruction:
+Arithmetic:
+    %dest = add %src1 %src2
+    %dest = sub %src1 %src2
+    %dest = mul %src1 %src2
+    %dest = div %src1 %src2
+    %dest = mod %src1 %src2
+    %dest = shl %src1 %src2
+    %dest = shr %src1 %src2
+    %dest = and %src1 %src2
+    %dest = or  %src1 %src2
+    %dest = xor %src1 %src2
+Logical:
+    %dest = slt %src1 %src2
+    %dest = sle %src1 %src2
+    %dest = seq %src1 %src2
+    %dest = sne %src1 %src2
+    %dest = sge %src1 %src2
+    %dest = sgt %src1 %src2
 
-Bitwise Instruction:
-    $dest = shl $src1 $src2
-    $dest = shr $src1 $src2
-    $dest = and $src1 $src2
-    $dest = xor $src1 $src2
-    $dest = or $src1 $src2
-    $dest = not $src
-
-Condition Set Instruction:
-    $dest = slt $src1 $src2
-    $dest = sgt $src1 $src2
-    $dest = sle $src1 $src2
-    $dest = sge $src1 $src2
-    $dest = seq $src1 $src2
-    $dest = sne $src1 $src2
+Unary Instruction:
+    %dest = neg %src
+    %dest = not %src
+    
 ```
 
-## Sample IR 1
-
-```llvm
-func min $a $b {
-%min_entry:
-    $t = sle $a $b
-    br $t %if_true %if_merge
-
-%if_true:
-    ret $a
-
-%if_merge:
-    ret $b
-}
-
-func main {
-%main_entry:
-    $x = move 10
-    $y = move 20
-    $x = call min $x $y 
-    ret $x
-}
-```
-
-## Sample IR 2
-
-```llvm
-func main {
-%main.entry:
-    $n.1  = move 10
-    $f0.1 = move 0
-    $f1.1 = move 1
-    $i.1  = move 1
-    jump %for_cond
-
-%for_cond:
-    $f2.1 = phi %for_step $f2.2  %main.entry undef
-    $f1.2 = phi %for_step $f1.3  %main.entry $f1.1
-    $i.2  = phi %for_step $i.3   %main.entry $i.1
-    $f0.2 = phi %for_step $f0.3  %main.entry $f0.1
-    $t.1  = slt $i.2 $n.1
-    br $t.1 %for_loop %for_after
-
-%for_loop:
-    $t_2.1 = add $f0.2 $f1.2
-    $f2.2  = move $t_2.1
-    $f0.3  = move $f1.2
-    $f1.3  = move $f2.2
-    jump %for_step
-
-%for_step:
-    $i.3   = add $i.2 1
-    jump %for_cond
-
-%for_after:
-    ret $f2.2
-}
-```
 
 ## To-do List
 

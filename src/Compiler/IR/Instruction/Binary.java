@@ -6,7 +6,7 @@ import Compiler.IR.Operand.Operand;
 
 public class Binary extends IRInstruction {
     public enum Op{
-        ADD, SUB, MUL, DIV, MOD, SHL, SHR, AND, OR, XOR, ANDL, ORL
+        ADD, SUB, MUL, DIV, MOD, SHL, SHR, AND, OR, XOR
     }
 
     private Op op;

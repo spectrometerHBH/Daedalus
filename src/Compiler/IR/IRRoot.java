@@ -41,6 +41,7 @@ public class IRRoot {
         return globalVariableList;
     }
 
+    public Function builtinStringLength = new Function("string.length");
     public Function builtinSubstring = new Function("string.substring");
     public Function builtinParseInt = new Function("string.parseInt");
     public Function builtinOrd = new Function("string.ord");

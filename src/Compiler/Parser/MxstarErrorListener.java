@@ -11,7 +11,7 @@ public class MxstarErrorListener extends BaseErrorListener {
                                       Object offendingSymbol,
                                       int line, int charPositionInLine,
                                       String msg,
-                                      RecognitionException e){
+                                      RecognitionException e) {
 
         throw new SyntaxError(msg, new Position(line, charPositionInLine));
     }

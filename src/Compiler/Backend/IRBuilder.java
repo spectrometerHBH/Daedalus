@@ -200,6 +200,8 @@ public class IRBuilder implements ASTVisitor {
         BasicBlock condBB = node.getCond() == null ? bodyBB : new BasicBlock(currentFunction, "for_cond");
         BasicBlock stepBB = node.getStep() == null ? condBB : new BasicBlock(currentFunction, "for_step");
         BasicBlock mergeBB = new BasicBlock(currentFunction, "for_merge");
+        node.setStepBB(stepBB);
+        node.setMergeBB(mergeBB);
         //generate init
         if (node.getInit() != null) node.getInit().accept(this);
         currentBB.terminate(new Jump(currentBB, condBB));
@@ -327,10 +329,8 @@ public class IRBuilder implements ASTVisitor {
                 callFunction = irRoot.builtinStringEQ;
                 break;
             case ANDL:
-                op_binary = Binary.Op.ANDL;
                 break;
             case ORL:
-                op_binary = Binary.Op.ORL;
                 break;
             case ASSIGN:
                 break;
@@ -434,10 +434,8 @@ public class IRBuilder implements ASTVisitor {
                     rhs.setElseBB(node.getElseBB());
                     rhs.accept(this);
                 } else {
-                    lhs.accept(this);
-                    rhs.accept(this);
                     node.setResultOperand(new I64Value());
-                    currentBB.appendInst(new Binary(currentBB, op_binary, getOperandForValueUse(currentBB, lhs.getResultOperand()), getOperandForValueUse(currentBB, rhs.getResultOperand()), node.getResultOperand()));
+                    assign(node.getResultOperand(), node);
                 }
                 break;
             }
@@ -453,10 +451,8 @@ public class IRBuilder implements ASTVisitor {
                     rhs.accept(this);
                     break;
                 } else {
-                    lhs.accept(this);
-                    rhs.accept(this);
                     node.setResultOperand(new I64Value());
-                    currentBB.appendInst(new Binary(currentBB, op_binary, getOperandForValueUse(currentBB, lhs.getResultOperand()), getOperandForValueUse(currentBB, rhs.getResultOperand()), node.getResultOperand()));
+                    assign(node.getResultOperand(), node);
                 }
             }
             case ASSIGN: {
@@ -501,7 +497,8 @@ public class IRBuilder implements ASTVisitor {
 
     @Override
     public void visit(FuncallExprNode node) {
-        if (stringLengthOrArraySize(node)) return;
+        //if (stringLengthOrArraySize(node)) return;
+        if (isArraySizeCall(node)) return;
         node.getFunction().accept(this);
         FunctionSymbol functionSymbol = node.getFunction().getFunctionSymbol();
         if (node.getType().getTypeName().equals("void")) node.setResultOperand(null);
@@ -596,7 +593,6 @@ public class IRBuilder implements ASTVisitor {
                 op = Unary.Op.NOT;
                 break;
             case NOTL:
-                op = Unary.Op.NOTL;
                 break;
             default:
                 break;
@@ -636,7 +632,12 @@ public class IRBuilder implements ASTVisitor {
                 }
                 break;
             }
-            case POS:
+            case POS: {
+                exprNode.accept(this);
+                Operand value = getOperandForValueUse(currentBB, exprNode.getResultOperand());
+                node.setResultOperand(value);
+                break;
+            }
             case NEG:
             case NOT: {
                 exprNode.accept(this);
@@ -653,9 +654,8 @@ public class IRBuilder implements ASTVisitor {
                     exprNode.accept(this);
                     break;
                 } else {
-                    exprNode.accept(this);
                     node.setResultOperand(new I64Value());
-                    currentBB.appendInst(new Unary(currentBB, op, getOperandForValueUse(currentBB, exprNode.getResultOperand()), node.getResultOperand()));
+                    assign(node.getResultOperand(), node);
                 }
             }
             default:
@@ -806,6 +806,7 @@ public class IRBuilder implements ASTVisitor {
 
     //for BuiltinFunctionCall
     private void builtinFunctionSymbolInitialization() {
+        ((FunctionSymbol) globalScope.getString().resolveSymbol("length", null)).setFunction(irRoot.builtinStringLength);
         ((FunctionSymbol) globalScope.getString().resolveSymbol("substring", null)).setFunction(irRoot.builtinSubstring);
         ((FunctionSymbol) globalScope.getString().resolveSymbol("parseInt", null)).setFunction(irRoot.builtinParseInt);
         ((FunctionSymbol) globalScope.getString().resolveSymbol("ord", null)).setFunction(irRoot.builtinOrd);
@@ -816,6 +817,19 @@ public class IRBuilder implements ASTVisitor {
         ((FunctionSymbol) globalScope.resolveSymbol("toString", null)).setFunction(irRoot.builtinToString);
     }
 
+    private boolean isArraySizeCall(FuncallExprNode node) {
+        FunctionSymbol functionSymbol = node.getFunction().getFunctionSymbol();
+        String functionName = functionSymbol.getSymbolName();
+        if (functionSymbol.isMemberFunction() && functionName.equals("array.size")) {
+            node.getFunction().accept(this);
+            Operand objectPointer = node.getFunction().getResultOperand();
+            node.setResultOperand(new I64Value());
+            currentBB.appendInst(new Load(currentBB, objectPointer, node.getResultOperand()));
+            return true;
+        } else return false;
+    }
+
+    /*
     private boolean stringLengthOrArraySize(FuncallExprNode node) {
         FunctionSymbol functionSymbol = node.getFunction().getFunctionSymbol();
         String functionName = functionSymbol.getSymbolName();
@@ -829,5 +843,5 @@ public class IRBuilder implements ASTVisitor {
                 return true;
             } else return false;
         } else return false;
-    }
+    }*/
 }

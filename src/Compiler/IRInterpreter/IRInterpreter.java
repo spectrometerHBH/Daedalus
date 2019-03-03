@@ -1,17 +1,15 @@
 package Compiler.IRInterpreter;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.util.*;
 
 /**
  * Created by abcdabcd987 on 2016-04-23.
+ *
  * Modified by spectrometer on 2019-03-03.
- * <p>
- * Modified for My IR
- * Special thanks to abcdabcd987
+ * Modified for adaption for My IR
+ * Support global variables, static strings and builtin function call
+ * Special thanks to Lequn Chen for his fundamental work
  */
 
 public class IRInterpreter {
@@ -22,7 +20,7 @@ public class IRInterpreter {
     // instructions that have destination
     static private final Set<String> opnames2 = new HashSet<>(Arrays.asList(
             "load", "move", "alloc", "phi",
-            "add", "sub", "mul", "div", "rem", "shl", "shr", "and", "or", "xor", "neg", "not",
+            "add", "sub", "mul", "div", "mod", "shl", "shr", "and", "or", "xor", "neg", "not",
             "slt", "sgt", "sle", "sge", "seq", "sne", "call"
     ));
     // instructions that have exactly 1 operand
@@ -44,29 +42,41 @@ public class IRInterpreter {
     private BufferedReader br;
     private boolean allowPhi;
     private Map<String, Register> registers;
-    private Map<String, Integer> tmpRegister = new HashMap<>(); // for phi node
-    private Map<Integer, Byte> memory = new HashMap<>();
-    private int heapTop = (int) (Math.random() * 4096);
-    private int retValue;
+    private Map<String, Register> globalRegisters = new HashMap<>();
+    private Map<Long, String> stringObjects = new HashMap<>();
+    private Map<String, Long> tmpRegister = new HashMap<>(); // for phi node
+    private Map<Long, Byte> memory = new HashMap<>();
+    private long heapTop = (int) (Math.random() * 4096);
+    private long retValue;
     private boolean ret;
     private int cntInst = 0;
     private BasicBlock lastBB = null;
-
+    private long staticStringCnt = 0;
     //====== SSA check
     private boolean isReady = false;
 
     //====== run IR
-    private int exitcode = -1;
+    private long exitcode = -1;
     private boolean exception = false;
     private int instLimit = Integer.MAX_VALUE;
 
-    public IRInterpreter(InputStream in, boolean isSSAMode) throws IOException {
+    private DataInputStream data_in;
+    private DataOutputStream data_out;
+    private Scanner scanner;
+
+    public IRInterpreter(InputStream in, boolean isSSAMode, DataInputStream data_in, DataOutputStream data_out) throws IOException {
         this.isSSAMode = isSSAMode;
+        this.data_in = data_in;
+        this.data_out = data_out;
+        this.scanner = new Scanner(data_in);
+
         try {
             br = new BufferedReader(new InputStreamReader(in));
             while (readLine() != null) {
-                if (line.startsWith("func ") || line.startsWith("void ")) {
+                if (line.startsWith("define")) {
                     readFunction();
+                } else {
+                    readGlobalVariable();
                 }
             }
             br.close();
@@ -82,7 +92,7 @@ public class IRInterpreter {
 
     public static void main(String[] args) throws IOException {
         boolean ssa = args.length > 0 && args[0].trim().equals("+ssa");
-        IRInterpreter vm = new IRInterpreter(System.in, ssa);
+        IRInterpreter vm = new IRInterpreter(System.in, ssa, new DataInputStream(System.in), new DataOutputStream(System.out));
         if (ssa)
             System.out.println("running with SSA mode");
         else
@@ -109,8 +119,7 @@ public class IRInterpreter {
 
     private void readInstruction() throws SemanticError {
         // basic block
-        if (line.startsWith("%")) {
-            if (!line.endsWith(":")) throw new SemanticError("expected a `:`");
+        if (line.endsWith(":")) {
             curBB = new BasicBlock();
             curBB.name = line.substring(0, line.length() - 1);
             if (curFunc.blocks.containsKey(curBB.name))
@@ -145,15 +154,15 @@ public class IRInterpreter {
         switch (inst.operator) {
             case "store":
                 inst.op1 = words.get(2);
-                inst.op2 = words.get(3);
-                inst.size = Integer.valueOf(words.get(1));
-                inst.offset = Integer.valueOf(words.get(4));
+                inst.op2 = words.get(1);
+                //inst.size = Integer.valueOf(words.get(1));
+                //inst.offset = Integer.valueOf(words.get(4));
                 return;
             case "load":
                 inst.dest = split[0].trim();
-                inst.op1 = words.get(2);
-                inst.size = Integer.valueOf(words.get(1));
-                inst.offset = Integer.valueOf(words.get(3));
+                inst.op1 = words.get(1);
+                //inst.size = Integer.valueOf(words.get(1));
+                //inst.offset = Integer.valueOf(words.get(3));
                 return;
             case "alloc":
                 inst.dest = split[0].trim();
@@ -177,8 +186,8 @@ public class IRInterpreter {
                 for (int i = 1; i < words.size(); i += 2) {
                     String label = words.get(i);
                     String reg = words.get(i + 1);
-                    if (!label.startsWith("%")) throw new SemanticError("label should starts with `%`");
-                    if (!reg.startsWith("$") && !reg.equals("undef"))
+                    if (!label.endsWith(":")) throw new SemanticError("label should end with `:`");
+                    if (!reg.startsWith("%") && !reg.equals("undef"))
                         throw new SemanticError("source of a phi node should be a register or `undef`");
                     phi.paths.put(label, reg);
                 }
@@ -196,9 +205,9 @@ public class IRInterpreter {
         List<String> words = splitBySpaces(line);
         if (!words.get(words.size() - 1).equals("{")) throw new SemanticError("expected a `{`");
         curFunc = new Function();
-        curFunc.hasReturnValue = line.startsWith("func ");
-        curFunc.name = words.get(1);
-        curFunc.args = words.subList(2, words.size() - 1);
+        curFunc.hasReturnValue = line.startsWith("define i64 ");
+        curFunc.name = words.get(2).substring(1);
+        curFunc.args = words.subList(3, words.size() - 1);
         if (functions.containsKey(curFunc.name))
             throw new SemanticError("function `" + curFunc.name + "` has already been defined");
         functions.put(curFunc.name, curFunc);
@@ -208,6 +217,29 @@ public class IRInterpreter {
             readInstruction();
         }
 
+    }
+
+    private void readGlobalVariable() {
+        if (!line.startsWith("@")) throw new RuntimeException("global variable should start with '@'");
+        if (line.contains("=")) {
+            //string
+            String[] words = line.split("=");
+            String name = words[0].substring(1).trim();
+            words[1] = words[1].trim();
+            String val = words[1].substring(1, words[1].length() - 1);
+            Register reg = new Register();
+            reg.value = staticStringCnt;
+            reg.timestamp = 0;
+            globalRegisters.put(name, reg);
+            stringObjects.put(staticStringCnt++, val);
+        } else {
+            //other
+            String name = line.substring(1).trim();
+            Register reg = new Register();
+            reg.value = 0;
+            reg.timestamp = 0;
+            globalRegisters.put(name, reg);
+        }
     }
 
     private void perfromSSACheck() throws SemanticError {
@@ -227,25 +259,31 @@ public class IRInterpreter {
         }
     }
 
-    private int memoryRead(int addr) throws RuntimeError {
+    private int memoryRead(long addr) throws RuntimeError {
         Byte data = memory.get(addr);
         if (data == null) throw new RuntimeError("memory read violation");
         return data & 0xFF;
     }
 
-    private void memoryWrite(int addr, Byte value) throws RuntimeError {
+    private void memoryWrite(long addr, Byte value) throws RuntimeError {
         if (!memory.containsKey(addr)) throw new RuntimeError("memory write violation");
         memory.put(addr, value);
     }
 
-    private int registerRead(String name) throws RuntimeError {
+    private long registerRead(String name) throws RuntimeError {
         Register reg = registers.get(name);
         if (reg == null) throw new RuntimeError("register `" + name + "` haven't been defined yet");
         return reg.value;
     }
 
-    private void registerWrite(String name, Integer value) throws RuntimeError {
-        if (!name.startsWith("$")) throw new RuntimeError("not a register");
+    private long globalRegistersRead(String name) throws RuntimeError {
+        Register reg = globalRegisters.get(name);
+        if (reg == null) throw new RuntimeError("global register `" + name + "` haven't been defined yet");
+        return reg.value;
+    }
+
+    private void registerWrite(String name, long value) throws RuntimeError {
+        if (!name.startsWith("%")) throw new RuntimeError("not a register");
         Register reg = registers.get(name);
         if (reg == null) {
             reg = new Register();
@@ -255,9 +293,10 @@ public class IRInterpreter {
         reg.timestamp = cntInst;
     }
 
-    private int readSrc(String name) throws RuntimeError {
-        if (name.startsWith("$")) return registerRead(name);
-        return Integer.valueOf(name);
+    private long readSrc(String name) throws RuntimeError {
+        if (name.startsWith("%")) return registerRead(name);
+        else if (name.startsWith("@")) return globalRegistersRead(name);
+        else return Long.valueOf(name);
     }
 
     private void jump(String name) throws RuntimeError {
@@ -268,27 +307,29 @@ public class IRInterpreter {
         curBB = BB;
     }
 
-    private void runInstruction() throws RuntimeError {
+    private void runInstruction() throws RuntimeError, IOException {
         if (++cntInst >= instLimit) throw new RuntimeError("instruction limit exceeded");
         switch (curInst.operator) {
             case "load":
-                int addr = readSrc(curInst.op1) + curInst.offset;
-                int res = 0;
+                long addr = readSrc(curInst.op1); //+ curInst.offset;
+                curInst.size = 8;
+                long res = 0;
                 for (int i = 0; i < curInst.size; ++i) res = (res << 8) | memoryRead(addr + i);
                 registerWrite(curInst.dest, res);
                 return;
 
             case "store":
-                int address = readSrc(curInst.op1) + curInst.offset;
-                int data = readSrc(curInst.op2);
-                for (int i = curInst.size - 1; i >= 0; --i) {
+                long address = readSrc(curInst.op1); // + curInst.offset;
+                long data = readSrc(curInst.op2);
+                curInst.size = 8;
+                for (long i = curInst.size - 1; i >= 0; --i) {
                     memoryWrite(address + i, (byte) (data & 0xFF));
                     data >>= 8;
                 }
                 return;
 
             case "alloc":
-                int size = readSrc(curInst.op1);
+                long size = readSrc(curInst.op1);
                 registerWrite(curInst.dest, heapTop);
                 for (int i = 0; i < size; ++i) memory.put(heapTop + i, (byte) (Math.random() * 256));
                 heapTop += (int) (Math.random() * 4096);
@@ -300,7 +341,7 @@ public class IRInterpreter {
                 return;
 
             case "br":
-                int cond = readSrc(curInst.dest);
+                long cond = readSrc(curInst.dest);
                 jump(cond == 0 ? curInst.op2 : curInst.op1);
                 return;
 
@@ -310,11 +351,119 @@ public class IRInterpreter {
 
             case "call":
                 Function func = functions.get(curInst.op1);
+                switch (func.name) {
+                    case "string.length": {
+                        String str = stringObjects.get(readSrc(curInst.args.get(0)));
+                        registerWrite(curInst.dest, str.length());
+                        return;
+                    }
+                    case "string.substring": {
+                        String str = stringObjects.get(readSrc(curInst.args.get(0)));
+                        long left = readSrc(curInst.args.get(1));
+                        long right = readSrc(curInst.args.get(2));
+                        String resStr = str.substring((int) left, (int) right + 1);
+                        registerWrite(curInst.dest, staticStringCnt);
+                        stringObjects.put(staticStringCnt++, resStr);
+                        return;
+                    }
+                    case "string.parseInt": {
+                        String str = stringObjects.get(readSrc(curInst.args.get(0)));
+                        char[] charArray = str.toCharArray();
+                        long result = 0;
+                        for (char ch : charArray) {
+                            if (ch < '0' || ch > '9') break;
+                            result = result * 10 + ch - '0';
+                        }
+                        registerWrite(curInst.dest, result);
+                        return;
+                    }
+                    case "string.ord": {
+                        String str = stringObjects.get(readSrc(curInst.args.get(0)));
+                        long pos = readSrc(curInst.args.get(1));
+                        registerWrite(curInst.dest, (int) str.charAt((int) pos));
+                        return;
+                    }
+                    case "string.add": {
+                        String str1 = stringObjects.get(readSrc(curInst.args.get(0)));
+                        String str2 = stringObjects.get(readSrc(curInst.args.get(1)));
+                        String resStr = str1 + str2;
+                        registerWrite(curInst.dest, staticStringCnt);
+                        stringObjects.put(staticStringCnt++, resStr);
+                        return;
+                    }
+                    case "string.lt": {
+                        String str1 = stringObjects.get(readSrc(curInst.args.get(0)));
+                        String str2 = stringObjects.get(readSrc(curInst.args.get(1)));
+                        registerWrite(curInst.dest, str1.compareTo(str2) < 0 ? 1 : 0);
+                        return;
+                    }
+                    case "string.leq": {
+                        String str1 = stringObjects.get(readSrc(curInst.args.get(0)));
+                        String str2 = stringObjects.get(readSrc(curInst.args.get(1)));
+                        registerWrite(curInst.dest, str1.compareTo(str2) <= 0 ? 1 : 0);
+                        return;
+                    }
+                    case "string.eq": {
+                        String str1 = stringObjects.get(readSrc(curInst.args.get(0)));
+                        String str2 = stringObjects.get(readSrc(curInst.args.get(1)));
+                        registerWrite(curInst.dest, str1.compareTo(str2) == 0 ? 1 : 0);
+                        return;
+                    }
+                    case "string.geq": {
+                        String str1 = stringObjects.get(readSrc(curInst.args.get(0)));
+                        String str2 = stringObjects.get(readSrc(curInst.args.get(1)));
+                        registerWrite(curInst.dest, str1.compareTo(str2) >= 0 ? 1 : 0);
+                        return;
+                    }
+                    case "string.gt": {
+                        String str1 = stringObjects.get(readSrc(curInst.args.get(0)));
+                        String str2 = stringObjects.get(readSrc(curInst.args.get(1)));
+                        registerWrite(curInst.dest, str1.compareTo(str2) > 0 ? 1 : 0);
+                        return;
+                    }
+                    case "string.neq": {
+                        String str1 = stringObjects.get(readSrc(curInst.args.get(0)));
+                        String str2 = stringObjects.get(readSrc(curInst.args.get(1)));
+                        registerWrite(curInst.dest, str1.compareTo(str2) != 0 ? 1 : 0);
+                        return;
+                    }
+                    case "print": {
+                        String str = stringObjects.get(readSrc(curInst.args.get(0)));
+                        data_out.writeChars(str);
+                        return;
+                    }
+                    case "println": {
+                        String str = stringObjects.get(readSrc(curInst.args.get(0)));
+                        data_out.writeChars(str);
+                        data_out.writeChar('\n');
+                        return;
+                    }
+                    case "getString": {
+                        String resStr = scanner.nextLine();
+                        registerWrite(curInst.dest, staticStringCnt);
+                        stringObjects.put(staticStringCnt++, resStr);
+                        return;
+                    }
+                    case "getInt": {
+                        registerWrite(curInst.dest, scanner.nextInt());
+                        return;
+                    }
+                    case "toString": {
+                        long i = readSrc(curInst.args.get(0));
+                        String resStr = String.valueOf(i);
+                        registerWrite(curInst.dest, staticStringCnt);
+                        stringObjects.put(staticStringCnt++, resStr);
+                        return;
+                    }
+                    default:
+                        break;
+                }
                 if (func == null) throw new RuntimeError("cannot resolve function `" + curInst.op1 + "`");
                 if (curInst.dest != null && !func.hasReturnValue)
                     throw new RuntimeError("function `" + func.name + "` has not return value");
                 Map<String, Register> regs = new HashMap<>();
                 if (curInst.args.size() != func.args.size()) throw new RuntimeError("argument size cannot match");
+                //This loop passes reg values in this function to correspondent function values & build new register table
                 for (int i = 0; i < curInst.args.size(); ++i) {
                     String name = func.args.get(i);
                     Register reg = regs.get(name);
@@ -331,7 +480,7 @@ public class IRInterpreter {
                 BasicBlock bakLastBB = lastBB;
                 Instruction bakCurInst = curInst;
                 Function bakCurFunc = curFunc;
-                registers = regs;
+                registers = regs; // 'registers' is used as the only register table for a function
 
                 runFunction(func);
 
@@ -349,7 +498,7 @@ public class IRInterpreter {
                 registerWrite(curInst.dest, readSrc(curInst.op1) / readSrc(curInst.op2));
                 return;
 
-            case "rem":
+            case "mod":
                 if (readSrc(curInst.op2) == 0) throw new RuntimeError("mod by zero");
                 registerWrite(curInst.dest, readSrc(curInst.op1) % readSrc(curInst.op2));
                 return;
@@ -413,7 +562,7 @@ public class IRInterpreter {
 
     //====== Exceptions
 
-    private void runFunction(Function func) throws RuntimeError {
+    private void runFunction(Function func) throws RuntimeError, IOException {
         curFunc = func;
         curBB = func.entry;
         if (curBB == null) throw new RuntimeError("no entry block for function `" + func.name + "`");
@@ -433,11 +582,11 @@ public class IRInterpreter {
                     if (regName == null) {
                         throw new RuntimeError("this phi node has no value from incoming block `" + lastBB.name + "`");
                     } else {
-                        int value = regName.equals("undef") ? (int) (Math.random() * Integer.MAX_VALUE) : readSrc(regName);
+                        long value = regName.equals("undef") ? (int) (Math.random() * Integer.MAX_VALUE) : readSrc(regName);
                         tmpRegister.put(phi.dest, value);
                     }
                 }
-                for (Map.Entry<String, Integer> e : tmpRegister.entrySet()) {
+                for (Map.Entry<String, Long> e : tmpRegister.entrySet()) {
                     registerWrite(e.getKey(), e.getValue());
                 }
             }
@@ -451,13 +600,15 @@ public class IRInterpreter {
         }
     }
 
+    //====== public methods
+
     public void run() {
         try {
             if (!isReady) throw new RuntimeException("not ready");
-            Function main = functions.get("main");
-            if (main == null) throw new RuntimeError("cannot find `main` function");
+            Function init = functions.get("__init");
+            if (init == null) throw new RuntimeError("cannot find `__init` function");
             registers = new HashMap<>();
-            runFunction(main);
+            runFunction(init);
             exitcode = retValue;
             exception = false;
         } catch (RuntimeError e) {
@@ -465,11 +616,11 @@ public class IRInterpreter {
             System.err.println("    " + e.getMessage());
             exitcode = -1;
             exception = true;
+        } catch (IOException e) {
+            e.printStackTrace();
         }
         isReady = false;
     }
-
-    //====== public methods
 
     public void setInstructionLimit(int instLimit) {
         this.instLimit = instLimit;
@@ -479,7 +630,7 @@ public class IRInterpreter {
         return isReady;
     }
 
-    public int getExitcode() {
+    public long getExitcode() {
         return exitcode;
     }
 
@@ -492,8 +643,8 @@ public class IRInterpreter {
         String dest;        // used as `cond` for `br`
         String op1;
         String op2;
-        int size;           // for `load` / `store`
-        int offset;         // for `load` / `store`
+        long size;           // for `load` / `store`
+        long offset;         // for `load` / `store`
         List<String> args;  // for `call` / `phi`
 
         int lineno;
@@ -531,7 +682,7 @@ public class IRInterpreter {
     }
 
     private static class Register {
-        int value;
+        long value;
         int timestamp;
     }
 

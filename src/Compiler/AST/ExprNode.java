@@ -7,12 +7,12 @@ import Compiler.Symbol.Type;
 import Compiler.Utils.Position;
 
 public abstract class ExprNode extends ASTNode {
-    public enum Category {
-        VARIABLE, CLASS, FUNCTION, NONLVALUE, THIS
-    }
-
     //for Semantic Check
-    private Category category;//VARIABLE, NONLVALUE, THIS, CLASS, FUNCTION
+    private Category category;//LVALUE, RVALUE, THIS, CLASS, FUNCTION
+
+    public boolean isIntegerVaribale() {
+        return (category == Category.LVALUE && type.getTypeName().equals("int"));
+    }
     private Type type; //PrimitiveType, ClassSymbol, ArrayType, NullType
     private FunctionSymbol functionSymbol;
 
@@ -72,27 +72,27 @@ public abstract class ExprNode extends ASTNode {
         this.elseBB = elseBB;
     }
 
-    public boolean isIntegerVaribale() {
-        return (category == Category.VARIABLE && type.getTypeName().equals("int"));
-    }
-
     public boolean isBooleanVariable() {
-        return (category == Category.VARIABLE && type.getTypeName().equals("bool"));
+        return (category == Category.LVALUE && type.getTypeName().equals("bool"));
     }
 
     public boolean isString(){
-        return (category == Category.VARIABLE || category == Category.NONLVALUE)
+        return (category == Category.LVALUE || category == Category.RVALUE)
                 && type.getTypeName().equals("string");
     }
 
     public boolean isInteger() {
-        return (category == Category.VARIABLE || category == Category.NONLVALUE)
+        return (category == Category.LVALUE || category == Category.RVALUE)
                 && type.getTypeName().equals("int");
     }
 
     public boolean isBoolean() {
-        return (category == Category.VARIABLE || category == Category.NONLVALUE)
+        return (category == Category.LVALUE || category == Category.RVALUE)
                 && type.getTypeName().equals("bool");
+    }
+
+    public boolean isAssignable() {
+        return (category == Category.LVALUE);
     }
 
     public boolean isCallable() {
@@ -103,16 +103,16 @@ public abstract class ExprNode extends ASTNode {
         return (isValue() && type.isClassType());
     }
 
-    public boolean isAssignable() {
-        return (category == Category.VARIABLE);
+    public boolean isNullable() {
+        return (category == Category.LVALUE && (type.isClassType() || type.isArrayType())) || type.isNullType();
     }
 
-    public boolean isValue(){
+    public boolean isValue() {
         return category != Category.CLASS && category != Category.FUNCTION;
     }
 
-    public boolean isNullable(){
-        return (category == Category.VARIABLE && (type.isClassType() || type.isArrayType())) || type.isNullType();
+    public enum Category {
+        LVALUE, RVALUE, CLASS, FUNCTION,
     }
 
     public boolean isNull(){

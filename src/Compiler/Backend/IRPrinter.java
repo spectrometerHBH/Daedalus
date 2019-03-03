@@ -5,6 +5,7 @@ import Compiler.IR.Function;
 import Compiler.IR.IRRoot;
 import Compiler.IR.IRVisitor;
 import Compiler.IR.Instruction.*;
+import Compiler.IR.Operand.GlobalVariable;
 import Compiler.IR.Operand.Immediate;
 import Compiler.IR.Operand.StaticString;
 import Compiler.IR.Operand.Storage;
@@ -33,7 +34,8 @@ public class IRPrinter implements IRVisitor {
 
     @Override
     public void visit(Function function) {
-        out.print("define func @" + function.getName() + "() ");
+        boolean isVoid = function.getReturnInstList().get(0).getReturnValue() == null;
+        out.print("define " + (isVoid ? "void " : "i64 ") + "@" + function.getName() + " ");
         if (function.getReferenceForClassMethod() != null) function.getReferenceForClassMethod().accept(this);
         function.getParameterList().forEach(x -> {
             x.accept(this);
@@ -245,7 +247,8 @@ public class IRPrinter implements IRVisitor {
 
     @Override
     public void visit(Storage storage) {
-        out.print("%" + getName(storage));
+        if (storage instanceof GlobalVariable) out.print("@" + getName(storage));
+        else out.print("%" + getName(storage));
     }
 
     @Override
@@ -263,7 +266,7 @@ public class IRPrinter implements IRVisitor {
 
     private String getName(Storage storage) {
         String name = storageStringMap.get(storage);
-        return name != null ? name : createName(storage, storage.getName() == null ? "__tmp" : storage.getName());
+        return name != null ? name : createName(storage, storage.getName() == null ? "t" : storage.getName());
     }
 
     private String createLabel(BasicBlock basicBlock, String name) {

@@ -155,7 +155,7 @@ public class SemanticChecker implements ASTVisitor {
         //if (array.isAssignable()) {
         if (array.getType().isArrayType()) {
             if (index.isInteger()) {
-                node.setCategory(ExprNode.Category.VARIABLE);
+                node.setCategory(ExprNode.Category.LVALUE);
                 node.setType(((ArrayType) array.getType()).getDims() == 1
                         ? ((ArrayType) array.getType()).getBaseType()
                         : new ArrayType(((ArrayType) array.getType()).getBaseType(), ((ArrayType) array.getType()).getDims() - 1));
@@ -181,17 +181,17 @@ public class SemanticChecker implements ASTVisitor {
             case XOR:
             case OR: {
                 if (lhs.isInteger() && rhs.isInteger()) {
-                    node.setCategory(ExprNode.Category.NONLVALUE);
+                    node.setCategory(ExprNode.Category.RVALUE);
                     node.setType(intTypeSymbol);
                 } else throw new SemanticError("Operands ought to be integers", node.getPosition());
                 break;
             }
             case ADD: {
                 if (lhs.isString() && rhs.isString()) {
-                    node.setCategory(ExprNode.Category.VARIABLE);
+                    node.setCategory(ExprNode.Category.RVALUE);
                     node.setType(stringTypeSymbol);
                 } else if (lhs.isInteger() && rhs.isInteger()) {
-                    node.setCategory(ExprNode.Category.NONLVALUE);
+                    node.setCategory(ExprNode.Category.RVALUE);
                     node.setType(intTypeSymbol);
                 } else throw new SemanticError("Operands ought to be both integers or strings", node.getPosition());
                 break;
@@ -201,10 +201,10 @@ public class SemanticChecker implements ASTVisitor {
             case GEQ:
             case LT: {
                 if (lhs.isString() && rhs.isString()) {
-                    node.setCategory(ExprNode.Category.VARIABLE);
+                    node.setCategory(ExprNode.Category.LVALUE);
                     node.setType(boolTypeSymbol);
                 } else if (lhs.isInteger() && rhs.isInteger()) {
-                    node.setCategory(ExprNode.Category.NONLVALUE);
+                    node.setCategory(ExprNode.Category.RVALUE);
                     node.setType(boolTypeSymbol);
                 } else throw new SemanticError("Operands ought to be both integers or strings", node.getPosition());
                 break;
@@ -216,7 +216,7 @@ public class SemanticChecker implements ASTVisitor {
                         || (lhs.isBoolean() && rhs.isBoolean())
                         || (lhs.isNullable() && rhs.isNull())
                         || (lhs.isNull() && rhs.isNullable())) {
-                    node.setCategory(ExprNode.Category.NONLVALUE);
+                    node.setCategory(ExprNode.Category.RVALUE);
                     node.setType(boolTypeSymbol);
                 } else
                     throw new SemanticError("Operands ought to be both integers or strings", node.getPosition());
@@ -225,7 +225,7 @@ public class SemanticChecker implements ASTVisitor {
             case ANDL:
             case ORL: {
                 if (lhs.isBoolean() && rhs.isBoolean()) {
-                    node.setCategory(ExprNode.Category.NONLVALUE);
+                    node.setCategory(ExprNode.Category.RVALUE);
                     node.setType(boolTypeSymbol);
                 } else throw new SemanticError("Operands ought to be both booleans", node.getPosition());
                 break;
@@ -233,7 +233,7 @@ public class SemanticChecker implements ASTVisitor {
             case ASSIGN: {
                 if (lhs.isAssignable() && rhs.isValue()) {
                     lhs.getType().compatible(rhs.getType(), node.getPosition());
-                    node.setCategory(ExprNode.Category.NONLVALUE);
+                    node.setCategory(ExprNode.Category.RVALUE);
                     node.setType(voidTypeSymbol);
                 } else throw new SemanticError("Expression ought to be lvalue", node.getPosition());
             }
@@ -248,7 +248,7 @@ public class SemanticChecker implements ASTVisitor {
             Symbol memberSymbol = classSymbol.resolveMember(node.getIdentifier(), node.getPosition());
             node.setSymbol(memberSymbol);
             if (memberSymbol.isVariableSymbol()) {
-                node.setCategory(ExprNode.Category.VARIABLE);
+                node.setCategory(ExprNode.Category.LVALUE);
                 node.setType(memberSymbol.getType());
             } else if (memberSymbol.isFunctionSymbol()) {
                 node.setCategory(ExprNode.Category.FUNCTION);
@@ -278,7 +278,7 @@ public class SemanticChecker implements ASTVisitor {
                     VariableSymbol variableSymbol = entry.getValue();
                     variableSymbol.getType().compatible(iterator.next().getType(), node.getPosition());
                 }
-                node.setCategory(function.getFunctionSymbol().getType().isClassType() ? ExprNode.Category.VARIABLE : ExprNode.Category.NONLVALUE);
+                node.setCategory(ExprNode.Category.RVALUE);
                 node.setType(function.getFunctionSymbol().getType());
             } else
                 throw new SemanticError("Function call expression error, parameter list length not match", node.getPosition());
@@ -289,7 +289,7 @@ public class SemanticChecker implements ASTVisitor {
     public void visit(IDExprNode node) {
         Symbol symbol = node.getSymbol();
         if (symbol.isVariableSymbol()) {
-            node.setCategory(ExprNode.Category.VARIABLE);
+            node.setCategory(ExprNode.Category.LVALUE);
             node.setType(symbol.getType());
         } else if (symbol.isClassSymbol()) {
             node.setCategory(ExprNode.Category.CLASS);
@@ -311,31 +311,31 @@ public class SemanticChecker implements ASTVisitor {
         if (node.getNumDims() == 0) {
             if (type.isClassType()) {
                 if (type.getTypeName().equals("string")) {
-                    node.setCategory(ExprNode.Category.VARIABLE);
+                    node.setCategory(ExprNode.Category.RVALUE);
                     node.setType(type);
                 } else {
                     if (((ClassSymbol) type).getConstructor() == null) {
-                        node.setCategory(ExprNode.Category.VARIABLE);
+                        node.setCategory(ExprNode.Category.RVALUE);
                         node.setType(type);
                     } else {
-                        node.setCategory(ExprNode.Category.VARIABLE);
+                        node.setCategory(ExprNode.Category.RVALUE);
                         node.setType(type);
                         node.setFunctionSymbol(((ClassSymbol) type).getConstructor());
                     }
                 }
             } else {
-                node.setCategory(ExprNode.Category.VARIABLE);
+                node.setCategory(ExprNode.Category.RVALUE);
                 node.setType(type);
             }
         } else {
-            node.setCategory(ExprNode.Category.VARIABLE);
+            node.setCategory(ExprNode.Category.RVALUE);
             node.setType(new ArrayType(type, node.getNumDims()));
         }
     }
 
     @Override
     public void visit(ThisExprNode node) {
-        node.setCategory(ExprNode.Category.THIS);
+        node.setCategory(ExprNode.Category.RVALUE);
         node.setType((ClassSymbol) node.getScope());
     }
 
@@ -346,7 +346,7 @@ public class SemanticChecker implements ASTVisitor {
             case PRE_INC:
             case PRE_DEC:{
                 if (node.getExpression().isIntegerVaribale()) {
-                    node.setCategory(ExprNode.Category.VARIABLE);
+                    node.setCategory(ExprNode.Category.LVALUE);
                     node.setType(intTypeSymbol);
                 } else throw new SemanticError("Non-int variable", node.getPosition());
                 break;
@@ -354,7 +354,7 @@ public class SemanticChecker implements ASTVisitor {
             case SUF_INC:
             case SUF_DEC: {
                 if (node.getExpression().isIntegerVaribale()) {
-                    node.setCategory(ExprNode.Category.NONLVALUE);
+                    node.setCategory(ExprNode.Category.RVALUE);
                     node.setType(intTypeSymbol);
                 } else throw new SemanticError("Non-int variable", node.getPosition());
                 break;
@@ -363,14 +363,14 @@ public class SemanticChecker implements ASTVisitor {
             case NEG:
             case NOT: {
                 if (node.getExpression().isInteger()) {
-                    node.setCategory(ExprNode.Category.NONLVALUE);
+                    node.setCategory(ExprNode.Category.RVALUE);
                     node.setType(intTypeSymbol);
                 } else throw new SemanticError("Non_int expression", node.getPosition());
                 break;
             }
             case NOTL: {
                 if (node.getExpression().isBoolean()) {
-                    node.setCategory(ExprNode.Category.NONLVALUE);
+                    node.setCategory(ExprNode.Category.RVALUE);
                     node.setType(boolTypeSymbol);
                 }
                 break;
@@ -382,25 +382,25 @@ public class SemanticChecker implements ASTVisitor {
 
     @Override
     public void visit(IntLiteralNode node) {
-        node.setCategory(ExprNode.Category.NONLVALUE);
+        node.setCategory(ExprNode.Category.RVALUE);
         node.setType(intTypeSymbol);
     }
 
     @Override
     public void visit(BoolLiteralNode node) {
-        node.setCategory(ExprNode.Category.NONLVALUE);
+        node.setCategory(ExprNode.Category.RVALUE);
         node.setType(boolTypeSymbol);
     }
 
     @Override
     public void visit(NullLiteralNode node) {
-        node.setCategory(ExprNode.Category.NONLVALUE);
+        node.setCategory(ExprNode.Category.RVALUE);
         node.setType(new NullType());
     }
 
     @Override
     public void visit(StringLiteralNode node) {
-        node.setCategory(ExprNode.Category.NONLVALUE);
+        node.setCategory(ExprNode.Category.RVALUE);
         node.setType(stringTypeSymbol);
     }
 }
