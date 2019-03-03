@@ -31,7 +31,7 @@ public class Main {
 
     public static void main(String... args) throws Exception {
         InputStream in = new FileInputStream("test.txt");
-        PrintStream out_test = new PrintStream(new FileOutputStream("test_out.txt"));
+        PrintStream ir_out = new PrintStream(new FileOutputStream("ir_out.txt"));
 
         try {
             //Parser & Lexer
@@ -47,7 +47,8 @@ public class Main {
             IRBuilder irBuilder = new IRBuilder(globalScope);
             irBuilder.visit(ast);
             IRRoot irRoot = irBuilder.getIrRoot();
-            new IRPrinter(out_test).visit(irRoot);
+            //IR test phase
+            new IRPrinter(ir_out).visit(irRoot);
             //Optimization
 
             //Code generation
