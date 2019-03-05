@@ -13,10 +13,7 @@ import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTree;
 
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.InputStream;
-import java.io.PrintStream;
+import java.io.*;
 
 public class Main {
     private static ProgramNode buildAST(InputStream in) throws Exception {
@@ -31,7 +28,13 @@ public class Main {
 
     public static void main(String... args) throws Exception {
         InputStream in = new FileInputStream("test.txt");
-        PrintStream ir_out = new PrintStream(new FileOutputStream("ir_out.txt"));
+        //for ir_out
+        //PrintStream ir_out = new PrintStream(System.out);
+        PrintStream ir_out = new PrintStream("ir_out.txt");
+        //for interpreter
+        FileInputStream ir_test_in = new FileInputStream("ir_out.txt");
+        DataInputStream ir_data_in = new DataInputStream(System.in);
+        PrintStream ir_data_out = new PrintStream(new FileOutputStream("ir_test_out.txt"));
 
         try {
             //Parser & Lexer
@@ -43,12 +46,16 @@ public class Main {
             new ClassMemberScanner(globalScope).visit(ast);
             new SymbolTableBuilder(globalScope).visit(ast);
             new SemanticChecker(globalScope).visit(ast);
+
             //IR Construction(Explicit CFG with Quad & Explicit Variables without SSA form)
             IRBuilder irBuilder = new IRBuilder(globalScope);
             irBuilder.visit(ast);
             IRRoot irRoot = irBuilder.getIrRoot();
+
             //IR test phase
             new IRPrinter(ir_out).visit(irRoot);
+            //new IRInterpreter(ir_test_in, false, ir_data_in, ir_data_out).run();
+
             //Optimization
 
             //Code generation

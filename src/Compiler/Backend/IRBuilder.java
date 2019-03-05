@@ -89,7 +89,7 @@ public class IRBuilder implements ASTVisitor {
                     ret.getCurrentBB().appendInst(new Move(currentBB, ret.getReturnValue(), returnOperand));
                 ret.getCurrentBB().terminate(new Jump(currentBB, exitBB));
             });
-            exitBB.appendInst(new Return(exitBB, returnOperand));
+            exitBB.terminate(new Return(exitBB, returnOperand));
         } else currentFunction.setExitBlock(currentFunction.getReturnInstList().get(0).getCurrentBB());
 
         currentFunction = null;
@@ -506,7 +506,7 @@ public class IRBuilder implements ASTVisitor {
         Call call = new Call(currentBB, functionSymbol.getFunction(), node.getResultOperand());
         node.getParameterList().forEach(x -> {
             x.accept(this);
-            call.appendParameterList(x.getResultOperand());
+            call.appendParameterList(getOperandForValueUse(currentBB, x.getResultOperand()));
         });
         if (functionSymbol.isMemberFunction()) {
             //is member function, need pass class reference
@@ -555,6 +555,13 @@ public class IRBuilder implements ASTVisitor {
         if (node.getNumDims() == 0) {
             //new an object
             currentBB.appendInst(new Alloc(currentBB, new Immediate(((ClassSymbol) type).getObjectSize()), node.getResultOperand()));
+            ClassSymbol classSymbol = (ClassSymbol) type;
+            if (classSymbol.getConstructor() != null) {
+                //call default constructor
+                Call call = new Call(currentBB, classSymbol.getConstructor().getFunction(), null);
+                call.setObjectPointer(node.getResultOperand());
+                currentBB.appendInst(call);
+            }
         } else {
             //new an array
             arrayAllocation(node, node.getResultOperand(), 0);
@@ -711,14 +718,12 @@ public class IRBuilder implements ASTVisitor {
         } else {
             rhsExpr.accept(this);
             if (rhsExpr.getResultOperand() instanceof Pointer) {
-                if (lhs instanceof Pointer) {
-                    I64Value tmp_value = new I64Value();
-                    currentBB.appendInst(new Load(currentBB, rhsExpr.getResultOperand(), tmp_value));
-                    currentBB.appendInst(new Store(currentBB, tmp_value, lhs));
-                } else currentBB.appendInst(new Move(currentBB, rhsExpr.getResultOperand(), lhs));
+                I64Value tmp_value = new I64Value();
+                currentBB.appendInst(new Load(currentBB, rhsExpr.getResultOperand(), tmp_value));
+                if (lhs instanceof Pointer) currentBB.appendInst(new Store(currentBB, tmp_value, lhs));
+                else currentBB.appendInst(new Move(currentBB, tmp_value, lhs));
             } else {
-                if (lhs instanceof Pointer)
-                    currentBB.appendInst(new Store(currentBB, rhsExpr.getResultOperand(), lhs));
+                if (lhs instanceof Pointer) currentBB.appendInst(new Store(currentBB, rhsExpr.getResultOperand(), lhs));
                 else currentBB.appendInst(new Move(currentBB, rhsExpr.getResultOperand(), lhs));
             }
         }
@@ -779,7 +784,7 @@ public class IRBuilder implements ASTVisitor {
             //generate cond
             currentBB = condBB;
             I64Value cmp = new I64Value();
-            condBB.appendInst(new Cmp(currentBB, Cmp.Op.EQ, nowPointer, endPointer, cmp));
+            condBB.appendInst(new Cmp(currentBB, Cmp.Op.LT, nowPointer, endPointer, cmp));
             condBB.terminate(new Branch(currentBB, cmp, bodyBB, mergeBB));
             //generate body
             currentBB = bodyBB;

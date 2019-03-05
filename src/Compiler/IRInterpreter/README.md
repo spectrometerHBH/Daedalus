@@ -3,10 +3,13 @@ Single file interpreter (or naive virtual machine) for my intermediate represent
 
 This project is inherited from Lequn Chen(abcdabcd987) and is modified by Bohan Hou(spectrometer). 
 
+Compared to last version, this version implemented global variables, static strings and builtin function calls, which is nearly fully compatible with LLVM-like IR. 
+
 ## API
 
-#### `IRInterpreter(InputStream in, boolean isSSAMode) throws IOException`
+#### `public IRInterpreter(InputStream in, boolean isSSAMode, DataInputStream data_in, DataOutputStream data_out) throws IOException`
 Read IR from `in` and build internal data structures. Enable SSA mode if `isSSAMode` is true. If nothing goes wrong, mark `isReady()` true.
+`data_in` and `data_out` are streams for print and read use in IR test.
 
 #### `void run()`
 Run the virtual machine.
@@ -29,10 +32,12 @@ Return true if the virtual machine is terminated by an exception.
 - Infinite number of registers.
 - Registers are writable if not in SSA Mode.
 - Global Registers' name start with `@`. e.g. `@N_1`, `@M_1`, `@str_1`, ...
+- Static Strings' : `@str = "aaaaaaa"` ...
 - Local Registers' name start with `%`. e.g. `%t1`, `%arr_addr`, `%arr.addr`, ...
 - Blocks' name starts without indent and ends with `:`. e.g. `entry:`, `if_true:`, `if.true:`, ...
 - A block must end with a jump instruction, i.e., fall-through is not allowed.
 - Function call: `%dest = call name %arg1 %arg2 ...`.
+--Builtin Function Name : s
 - Use `define i64/void @name %arg1 %arg2 ... {` to start a function definition. `func` can be replaced with `void` if no return value.
 - The entry block of a function is the first block in it.
 - Heap allocation: `%dest = alloc %size` will acquire `%size` bytes from heap.
@@ -107,12 +112,3 @@ Unary Instruction:
     %dest = not %src
     
 ```
-
-
-## To-do List
-
-- Void function support
-- Static data
-- `print`
-- `read`
-

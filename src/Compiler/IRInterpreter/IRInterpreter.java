@@ -1,5 +1,7 @@
 package Compiler.IRInterpreter;
 
+import org.apache.commons.text.StringEscapeUtils;
+
 import java.io.*;
 import java.util.*;
 
@@ -9,7 +11,7 @@ import java.util.*;
  * Modified by spectrometer on 2019-03-03.
  * Modified for adaption for My IR
  * Support global variables, static strings and builtin function call
- * Special thanks to Lequn Chen for his fundamental work
+ * Credits to Lequn Chen for his fundamental work
  */
 
 public class IRInterpreter {
@@ -34,7 +36,7 @@ public class IRInterpreter {
     private BasicBlock curBB = null;
     private Function curFunc = null;
     private Instruction curInst = null;
-    private boolean isSSAMode = true;
+    private boolean isSSAMode;
     private int lineno = 0;
 
     //====== read text IR
@@ -61,10 +63,10 @@ public class IRInterpreter {
     private int instLimit = Integer.MAX_VALUE;
 
     private DataInputStream data_in;
-    private DataOutputStream data_out;
+    private PrintStream data_out;
     private Scanner scanner;
 
-    public IRInterpreter(InputStream in, boolean isSSAMode, DataInputStream data_in, DataOutputStream data_out) throws IOException {
+    public IRInterpreter(InputStream in, boolean isSSAMode, DataInputStream data_in, PrintStream data_out) throws IOException {
         this.isSSAMode = isSSAMode;
         this.data_in = data_in;
         this.data_out = data_out;
@@ -92,15 +94,21 @@ public class IRInterpreter {
 
     public static void main(String[] args) throws IOException {
         boolean ssa = args.length > 0 && args[0].trim().equals("+ssa");
-        IRInterpreter vm = new IRInterpreter(System.in, ssa, new DataInputStream(System.in), new DataOutputStream(System.out));
-        if (ssa)
-            System.out.println("running with SSA mode");
-        else
-            System.out.println("running without SSA mode");
-        vm.setInstructionLimit(1 << 26);
-        vm.run();
-        System.out.println("exitcode:  " + vm.getExitcode());
-        System.out.println("exception: " + vm.exitException());
+        InputStream in = new FileInputStream("ir_out.txt");
+        IRInterpreter vm = new IRInterpreter(in, ssa, new DataInputStream(System.in), new PrintStream(System.out));
+        //if (ssa)
+        //    System.out.println("running with SSA mode");
+        //else
+        //    System.out.println("running without SSA mode");
+        //vm.setInstructionLimit(1 << 26);
+        try {
+            vm.run();
+        } catch (Exception e) {
+            System.err.println(vm.line);
+        }
+        System.exit((int) vm.getExitcode());
+        //System.out.println("exitcode:  " + vm.getExitcode());
+        //System.out.println("exception: " + vm.exitException());
     }
 
     private String readLine() throws IOException {
@@ -187,7 +195,7 @@ public class IRInterpreter {
                     String label = words.get(i);
                     String reg = words.get(i + 1);
                     if (!label.endsWith(":")) throw new SemanticError("label should end with `:`");
-                    if (!reg.startsWith("%") && !reg.equals("undef"))
+                    if (!reg.startsWith("%") && !reg.startsWith("@") && !reg.equals("undef"))
                         throw new SemanticError("source of a phi node should be a register or `undef`");
                     phi.paths.put(label, reg);
                 }
@@ -195,6 +203,7 @@ public class IRInterpreter {
                 return;
             default:
                 if (split.length == 2) inst.dest = split[0].trim();
+                if (inst.operator.equals("ret") && words.size() == 1) return;
                 inst.op1 = words.get(1);
                 if (opnum1.contains(inst.operator)) return;
                 inst.op2 = words.get(2);
@@ -223,10 +232,11 @@ public class IRInterpreter {
         if (!line.startsWith("@")) throw new RuntimeException("global variable should start with '@'");
         if (line.contains("=")) {
             //string
-            String[] words = line.split("=");
-            String name = words[0].substring(1).trim();
+            String[] words = line.split("=", 2);
+            String name = words[0].trim();
             words[1] = words[1].trim();
-            String val = words[1].substring(1, words[1].length() - 1);
+            String tmp = words[1].substring(1, words[1].length() - 1);
+            String val = StringEscapeUtils.unescapeJava(tmp);
             Register reg = new Register();
             reg.value = staticStringCnt;
             reg.timestamp = 0;
@@ -234,7 +244,7 @@ public class IRInterpreter {
             stringObjects.put(staticStringCnt++, val);
         } else {
             //other
-            String name = line.substring(1).trim();
+            String name = line.trim();
             Register reg = new Register();
             reg.value = 0;
             reg.timestamp = 0;
@@ -266,7 +276,8 @@ public class IRInterpreter {
     }
 
     private void memoryWrite(long addr, Byte value) throws RuntimeError {
-        if (!memory.containsKey(addr)) throw new RuntimeError("memory write violation");
+        if (!memory.containsKey(addr))
+            throw new RuntimeError("memory write violation");
         memory.put(addr, value);
     }
 
@@ -283,14 +294,24 @@ public class IRInterpreter {
     }
 
     private void registerWrite(String name, long value) throws RuntimeError {
-        if (!name.startsWith("%")) throw new RuntimeError("not a register");
-        Register reg = registers.get(name);
-        if (reg == null) {
-            reg = new Register();
-            registers.put(name, reg);
+        if (!name.startsWith("@") && !name.startsWith("%")) throw new RuntimeError("not a register");
+        if (name.startsWith("@")) {
+            Register reg = globalRegisters.get(name);
+            if (reg == null) {
+                reg = new Register();
+                globalRegisters.put(name, reg);
+            }
+            reg.value = value;
+            reg.timestamp = cntInst;
+        } else {
+            Register reg = registers.get(name);
+            if (reg == null) {
+                reg = new Register();
+                registers.put(name, reg);
+            }
+            reg.value = value;
+            reg.timestamp = cntInst;
         }
-        reg.value = value;
-        reg.timestamp = cntInst;
     }
 
     private long readSrc(String name) throws RuntimeError {
@@ -308,6 +329,9 @@ public class IRInterpreter {
     }
 
     private void runInstruction() throws RuntimeError, IOException {
+        if (cntInst + 1 == 29527834) {
+            System.err.print("break point");
+        }
         if (++cntInst >= instLimit) throw new RuntimeError("instruction limit exceeded");
         switch (curInst.operator) {
             case "load":
@@ -331,12 +355,13 @@ public class IRInterpreter {
             case "alloc":
                 long size = readSrc(curInst.op1);
                 registerWrite(curInst.dest, heapTop);
-                for (int i = 0; i < size; ++i) memory.put(heapTop + i, (byte) (Math.random() * 256));
+                for (int i = 0; i < size; ++i) memory.put(heapTop + i, (byte) (0));
+                heapTop += size;
                 heapTop += (int) (Math.random() * 4096);
                 return;
 
             case "ret":
-                retValue = readSrc(curInst.op1);
+                if (curInst.op1 != null) retValue = readSrc(curInst.op1);
                 ret = true;
                 return;
 
@@ -351,7 +376,7 @@ public class IRInterpreter {
 
             case "call":
                 Function func = functions.get(curInst.op1);
-                switch (func.name) {
+                switch (curInst.op1) {
                     case "string.length": {
                         String str = stringObjects.get(readSrc(curInst.args.get(0)));
                         registerWrite(curInst.dest, str.length());
@@ -361,7 +386,7 @@ public class IRInterpreter {
                         String str = stringObjects.get(readSrc(curInst.args.get(0)));
                         long left = readSrc(curInst.args.get(1));
                         long right = readSrc(curInst.args.get(2));
-                        String resStr = str.substring((int) left, (int) right + 1);
+                        String resStr = str.substring((int) left, (int) right);
                         registerWrite(curInst.dest, staticStringCnt);
                         stringObjects.put(staticStringCnt++, resStr);
                         return;
@@ -429,17 +454,17 @@ public class IRInterpreter {
                     }
                     case "print": {
                         String str = stringObjects.get(readSrc(curInst.args.get(0)));
-                        data_out.writeChars(str);
+                        data_out.print(str);
                         return;
                     }
                     case "println": {
                         String str = stringObjects.get(readSrc(curInst.args.get(0)));
-                        data_out.writeChars(str);
-                        data_out.writeChar('\n');
+                        data_out.print(str);
+                        data_out.print('\n');
                         return;
                     }
                     case "getString": {
-                        String resStr = scanner.nextLine();
+                        String resStr = scanner.next();
                         registerWrite(curInst.dest, staticStringCnt);
                         stringObjects.put(staticStringCnt++, resStr);
                         return;
@@ -614,11 +639,21 @@ public class IRInterpreter {
         } catch (RuntimeError e) {
             System.err.println("Runtime Error");
             System.err.println("    " + e.getMessage());
+            System.err.println(curInst.text);
+            System.err.println(curInst.lineno);
+            System.err.println(cntInst);
             exitcode = -1;
             exception = true;
         } catch (IOException e) {
             e.printStackTrace();
+        } catch (RuntimeException e) {
+            System.err.println(curInst.text);
+            System.err.println(curInst.lineno);
+            System.err.println(cntInst);
+            e.printStackTrace();
         }
+        System.err.println("exitcode:  " + exitcode);
+        System.err.println("exception: " + retValue);
         isReady = false;
     }
 
