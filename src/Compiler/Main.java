@@ -29,8 +29,8 @@ public class Main {
     public static void main(String... args) throws Exception {
         InputStream in = new FileInputStream("test.txt");
         //for ir_out
-        //PrintStream ir_out = new PrintStream(System.out);
-        PrintStream ir_out = new PrintStream("ir_out.txt");
+        PrintStream ir_out = new PrintStream(System.out);
+        //PrintStream ir_out = new PrintStream("ir_out.txt");
         //for interpreter
         FileInputStream ir_test_in = new FileInputStream("ir_out.txt");
         DataInputStream ir_data_in = new DataInputStream(System.in);

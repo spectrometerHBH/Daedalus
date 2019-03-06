@@ -11,7 +11,7 @@ import java.util.*;
  * Modified by spectrometer on 2019-03-03.
  * Modified for adaption for My IR
  * Support global variables, static strings and builtin function call
- * Credits to Lequn Chen for his fundamental work
+ * Special thanks to Lequn Chen for his fundamental work
  */
 
 public class IRInterpreter {
@@ -36,7 +36,7 @@ public class IRInterpreter {
     private BasicBlock curBB = null;
     private Function curFunc = null;
     private Instruction curInst = null;
-    private boolean isSSAMode;
+    private boolean isSSAMode = true;
     private int lineno = 0;
 
     //====== read text IR
@@ -101,11 +101,7 @@ public class IRInterpreter {
         //else
         //    System.out.println("running without SSA mode");
         //vm.setInstructionLimit(1 << 26);
-        try {
-            vm.run();
-        } catch (Exception e) {
-            System.err.println(vm.line);
-        }
+        vm.run();
         System.exit((int) vm.getExitcode());
         //System.out.println("exitcode:  " + vm.getExitcode());
         //System.out.println("exception: " + vm.exitException());
@@ -329,9 +325,9 @@ public class IRInterpreter {
     }
 
     private void runInstruction() throws RuntimeError, IOException {
-        if (cntInst + 1 == 29527834) {
-            System.err.print("break point");
-        }
+        //if (curInst.lineno == 14){
+        //    System.err.print("break point");
+        // }
         if (++cntInst >= instLimit) throw new RuntimeError("instruction limit exceeded");
         switch (curInst.operator) {
             case "load":
@@ -471,6 +467,7 @@ public class IRInterpreter {
                     }
                     case "getInt": {
                         registerWrite(curInst.dest, scanner.nextInt());
+                        //if (scanner.hasNextLine()) scanner.nextLine();
                         return;
                     }
                     case "toString": {
@@ -639,17 +636,9 @@ public class IRInterpreter {
         } catch (RuntimeError e) {
             System.err.println("Runtime Error");
             System.err.println("    " + e.getMessage());
-            System.err.println(curInst.text);
-            System.err.println(curInst.lineno);
-            System.err.println(cntInst);
             exitcode = -1;
             exception = true;
         } catch (IOException e) {
-            e.printStackTrace();
-        } catch (RuntimeException e) {
-            System.err.println(curInst.text);
-            System.err.println(curInst.lineno);
-            System.err.println(cntInst);
             e.printStackTrace();
         }
         System.err.println("exitcode:  " + exitcode);
@@ -733,3 +722,4 @@ public class IRInterpreter {
         }
     }
 }
+
