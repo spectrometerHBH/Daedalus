@@ -255,9 +255,10 @@ public class IRBuilder implements ASTVisitor {
         Operand indexValue = getOperandForValueUse(currentBB, node.getIndex().getResultOperand());
         node.setResultOperand(new I64Pointer());
         I64Value offset = new I64Value();
+        I64Value offset_2 = new I64Value();
         currentBB.appendInst(new Binary(currentBB, Binary.Op.MUL, indexValue, new Immediate(arrayType.getDims() > 1 ? Configuration.POINTER_SIZE() : arrayType.getBaseType().getTypeSize()), offset));
-        currentBB.appendInst(new Binary(currentBB, Binary.Op.ADD, offset, new Immediate(Configuration.REGISTER_SIZE), offset));
-        currentBB.appendInst(new Binary(currentBB, Binary.Op.ADD, baseAddress, offset, node.getResultOperand()));
+        currentBB.appendInst(new Binary(currentBB, Binary.Op.ADD, offset, new Immediate(Configuration.REGISTER_SIZE), offset_2));
+        currentBB.appendInst(new Binary(currentBB, Binary.Op.ADD, baseAddress, offset_2, node.getResultOperand()));
         //short-circuit evaluation
         if (node.getThenBB() != null) {
             I64Value tmp = new I64Value();

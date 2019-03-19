@@ -27,11 +27,12 @@ public class Main {
     }
 
     public static void main(String... args) throws Exception {
+        //for program to be compiled
         InputStream in = new FileInputStream("test.txt");
-        //for ir_out
-        PrintStream ir_out = new PrintStream(System.out);
-        //PrintStream ir_out = new PrintStream("ir_out.txt");
-        //for interpreter
+        //for text-ir output
+        //PrintStream ir_out = new PrintStream(System.out);
+        PrintStream ir_out = new PrintStream("ir_out.txt");
+        //for IR interpreter test use
         FileInputStream ir_test_in = new FileInputStream("ir_out.txt");
         DataInputStream ir_data_in = new DataInputStream(System.in);
         PrintStream ir_data_out = new PrintStream(new FileOutputStream("ir_test_out.txt"));
@@ -39,6 +40,7 @@ public class Main {
         try {
             //Parser & Lexer
             ProgramNode ast = buildAST(in);
+
             //Semantic Analysis
             GlobalScope globalScope = (new BuiltinSymbolsInitializer(ast)).getGlobalScope();
             new ClassDeclarationScanner(globalScope).visit(ast);
@@ -52,13 +54,12 @@ public class Main {
             irBuilder.visit(ast);
             IRRoot irRoot = irBuilder.getIrRoot();
 
-            //IR test phase
+            //IR test
             new IRPrinter(ir_out).visit(irRoot);
             //new IRInterpreter(ir_test_in, false, ir_data_in, ir_data_out).run();
 
-            //Optimization
+            //Codegen
 
-            //Code generation
 
         }catch (Exception e){
             e.printStackTrace();
