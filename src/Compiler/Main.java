@@ -50,12 +50,12 @@ public class Main {
             new SemanticChecker(globalScope).visit(ast);
 
             //IR Construction(Explicit CFG with Quad & Explicit Variables without SSA form)
-            IRBuilder irBuilder = new IRBuilder(globalScope);
-            irBuilder.visit(ast);
-            IRRoot irRoot = irBuilder.getIrRoot();
+            //IRBuilder irBuilder = new IRBuilder(globalScope);
+            //irBuilder.visit(ast);
+            //IRRoot irRoot = irBuilder.getIrRoot();
 
             //IR test
-            new IRPrinter(ir_out).visit(irRoot);
+            //new IRPrinter(ir_out).visit(irRoot);
             //new IRInterpreter(ir_test_in, false, ir_data_in, ir_data_out).run();
 
             //Codegen
