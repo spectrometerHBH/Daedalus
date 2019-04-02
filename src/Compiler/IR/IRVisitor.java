@@ -43,4 +43,6 @@ public interface IRVisitor {
     void visit(Storage storage);
 
     void visit(Immediate immediate);
+
+    void visit(Phi inst);
 }

@@ -2,9 +2,9 @@ package Compiler;
 
 import Compiler.AST.ProgramNode;
 import Compiler.Backend.IRBuilder;
-import Compiler.Backend.IRPrinter;
 import Compiler.Frontend.*;
 import Compiler.IR.IRRoot;
+import Compiler.Optim.*;
 import Compiler.Parser.MxstarErrorListener;
 import Compiler.Parser.MxstarLexer;
 import Compiler.Parser.MxstarParser;
@@ -49,17 +49,18 @@ public class Main {
             new SymbolTableBuilder(globalScope).visit(ast);
             new SemanticChecker(globalScope).visit(ast);
 
-            //IR Construction(Explicit CFG with Quad & Explicit Variables without SSA form)
-            //IRBuilder irBuilder = new IRBuilder(globalScope);
-            //irBuilder.visit(ast);
-            //IRRoot irRoot = irBuilder.getIrRoot();
+            //IR Construction (Explicit CFG with Quad & Explicit Variables without SSA form)
+            IRBuilder irBuilder = new IRBuilder(globalScope);
+            irBuilder.visit(ast);
+            IRRoot irRoot = irBuilder.getIrRoot();
 
-            //IR test
-            //new IRPrinter(ir_out).visit(irRoot);
-            //new IRInterpreter(ir_test_in, false, ir_data_in, ir_data_out).run();
+            //Optimization
+            Optimizer optimizer = new Optimizer(irRoot);
+            optimizer.simplifyCFG();
+            optimizer.SSAConstruction();
+            optimizer.SSADestruction();
 
             //Codegen
-
 
         }catch (Exception e){
             e.printStackTrace();

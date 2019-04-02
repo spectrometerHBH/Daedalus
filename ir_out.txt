@@ -1,0 +1,133 @@
+@str_1 = "news.learnmore"
+@str_2 = "+1s"
+
+define void @naive_naive %this_1 {
+naive_naive_entry_1:
+    %t_1 = add %this_1 0
+    %t_2 = mul 100 8
+    %t_2 = add %t_2 8
+    %t_3 = alloc %t_2
+    store 100 %t_3
+    store %t_3 %t_1
+    %t_4 = add %this_1 0
+    %t_5 = load %t_4
+    %t_6 = mul 1 8
+    %t_7 = add %t_6 8
+    %t_8 = add %t_5 %t_7
+    store 0 %t_8
+    %i_1 = move 0
+    %i_1 = move 1
+    jump naive_naive_for_cond_1
+
+naive_naive_for_cond_1:
+    %t_9 = slt %i_1 99
+    br %t_9 naive_naive_for_body_1 naive_naive_for_merge_1
+
+naive_naive_for_merge_1:
+    %t_10 = add %this_1 0
+    %t_11 = load %t_10
+    %t_12 = mul 99 8
+    %t_13 = add %t_12 8
+    %t_14 = add %t_11 %t_13
+    %t_15 = mul 1 8
+    %t_15 = add %t_15 8
+    %t_16 = alloc %t_15
+    store 1 %t_16
+    store %t_16 %t_14
+    ret 
+
+naive_naive_for_body_1:
+    %t_17 = add %this_1 0
+    %t_18 = load %t_17
+    %t_19 = mul %i_1 8
+    %t_20 = add %t_19 8
+    %t_21 = add %t_18 %t_20
+    %t_22 = mul 233 8
+    %t_22 = add %t_22 8
+    %t_23 = alloc %t_22
+    store 233 %t_23
+    store %t_23 %t_21
+    jump naive_naive_for_step_1
+
+naive_naive_for_step_1:
+    %t_24 = move %i_1
+    %i_1 = add %i_1 1
+    jump naive_naive_for_cond_1
+
+}
+
+define i64 @naive_Journalist %this_2 %news_1 {
+naive_Journalist_entry_1:
+    %t_25 = add %news_1 0
+    %t_26 = load %t_25
+    call println %t_26 
+    call println @str_1 
+    ret 0
+
+}
+
+define i64 @interesting_interesting %this_3 {
+interesting_interesting_entry_1:
+    %t_27 = add %this_3 8
+    store 0 %t_27
+    %t_28 = add %this_3 0
+    store @str_2 %t_28
+    %t_29 = add %this_3 8
+    %t_30 = add %this_3 0
+    %t_31 = load %t_30
+    %t_32 = call string.length %t_31 
+    %t_33 = add %this_3 8
+    %t_34 = load %t_33
+    %t_35 = add %t_32 %t_34
+    store %t_35 %t_29
+    ret 0
+
+}
+
+define i64 @main  {
+main_entry_1:
+    %t_36 = mul 233 8
+    %t_36 = add %t_36 8
+    %t_37 = alloc %t_36
+    store 233 %t_37
+    %Shanghai_1 = move %t_37
+    %t_38 = mul 12 8
+    %t_38 = add %t_38 8
+    %t_39 = alloc %t_38
+    store 12 %t_39
+    %t_40 = add %t_39 8
+    %t_41 = add %t_39 %t_38
+    jump main_for_cond_1
+
+main_for_cond_1:
+    %t_42 = slt %t_40 %t_41
+    br %t_42 main_for_body_1 main_for_merge_1
+
+main_for_merge_1:
+    %Beijing_1 = move %t_39
+    %t_43 = move 0
+    ret %t_43
+
+main_for_body_1:
+    %t_44 = mul 34 8
+    %t_44 = add %t_44 8
+    %t_45 = alloc %t_44
+    store 34 %t_45
+    store %t_45 %t_40
+    jump main_for_step_1
+
+main_for_step_1:
+    %t_46 = add %t_40 8
+    %t_40 = move %t_46
+    jump main_for_cond_1
+
+}
+
+define i64 @__init  {
+__init_entry_1:
+    %t_47 = call main 
+    %t_48 = move %t_47
+    ret %t_48
+
+}
+
