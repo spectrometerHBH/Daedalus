@@ -4,7 +4,7 @@ import Compiler.IR.BasicBlock;
 import Compiler.IR.IRVisitor;
 import Compiler.IR.Operand.Operand;
 
-public class Load extends IRInstruction{
+public class Load extends IRInstruction {
     private Operand src;
     private Operand dst;
 

@@ -34,20 +34,21 @@ public class ArrayType implements Type {
         return baseType.getTypeName() + " array";
     }
 
-    public String getBaseTypeName(){
+    public String getBaseTypeName() {
         return baseType.getTypeName();
     }
 
     @Override
     public void compatible(Type type, Position position) {
-        if (type.getTypeName().equals("null")){
+        if (type.getTypeName().equals("null")) {
 
-        } else if (type instanceof ArrayType){
+        } else if (type instanceof ArrayType) {
             baseType.compatible(((ArrayType) type).getBaseType(), position);
-            if (dims == ((ArrayType) type).getDims()){
+            if (dims == ((ArrayType) type).getDims()) {
 
-            }else throw new SemanticError("Dimension not match", position);
-        } else throw new SemanticError("Type " + getTypeName() + " is not compatible with type " + type.getTypeName(), position);
+            } else throw new SemanticError("Dimension not match", position);
+        } else
+            throw new SemanticError("Type " + getTypeName() + " is not compatible with type " + type.getTypeName(), position);
     }
 
     @Override
@@ -71,7 +72,9 @@ public class ArrayType implements Type {
     }
 
     @Override
-    public boolean isPointerType() { return true; }
+    public boolean isPointerType() {
+        return true;
+    }
 
     @Override
     public int getTypeSize() {

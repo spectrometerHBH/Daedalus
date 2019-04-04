@@ -417,7 +417,7 @@ public class ASTBuilder extends MxstarBaseVisitor<ASTNode> {
     }
 
     @Override
-    public ASTNode visitClassCreator(MxstarParser.ClassCreatorContext ctx){
+    public ASTNode visitClassCreator(MxstarParser.ClassCreatorContext ctx) {
         return new NewExprNode((TypeNode) visit(ctx.nonArrayType()),
                 0,
                 new ArrayList<>(),

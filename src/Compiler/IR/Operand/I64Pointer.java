@@ -2,7 +2,7 @@ package Compiler.IR.Operand;
 
 import Compiler.IR.IRVisitor;
 
-public class I64Pointer extends Pointer{
+public class I64Pointer extends Pointer {
     public I64Pointer() {
     }
 

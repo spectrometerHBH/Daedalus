@@ -5,10 +5,6 @@ import Compiler.IR.IRVisitor;
 import Compiler.IR.Operand.Operand;
 
 public class Cmp extends IRInstruction {
-    public enum Op{
-        LT, LEQ, EQ, GEQ, GT, NEQ
-    }
-
     private Op op;
     private Operand lhs;
     private Operand rhs;
@@ -41,5 +37,9 @@ public class Cmp extends IRInstruction {
     @Override
     public void accept(IRVisitor irVisitor) {
         irVisitor.visit(this);
+    }
+
+    public enum Op {
+        LT, LEQ, EQ, GEQ, GT, NEQ
     }
 }

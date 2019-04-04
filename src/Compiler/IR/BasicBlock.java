@@ -1,20 +1,17 @@
 package Compiler.IR;
 
-import Compiler.IR.Instruction.Branch;
-import Compiler.IR.Instruction.IRInstruction;
-import Compiler.IR.Instruction.Jump;
-import Compiler.IR.Instruction.Return;
+import Compiler.IR.Instruction.*;
 
-import java.util.LinkedList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 public class BasicBlock {
     public IRInstruction head;
     public IRInstruction tail;
     private Function currentFunction;
     private String name;
-    private List<BasicBlock> predecessors = new LinkedList<>();
-    private List<BasicBlock> successors = new LinkedList<>();
+    private Set<BasicBlock> predecessors = new HashSet<>();
+    private Set<BasicBlock> successors = new HashSet<>();
     private boolean terminated;
 
     public BasicBlock(Function currentFunction, String name) {
@@ -26,11 +23,11 @@ public class BasicBlock {
         return currentFunction.getName() + "_" + name;
     }
 
-    public List<BasicBlock> getPredecessors() {
+    public Set<BasicBlock> getPredecessors() {
         return predecessors;
     }
 
-    public List<BasicBlock> getSuccessors() {
+    public Set<BasicBlock> getSuccessors() {
         return successors;
     }
 
@@ -49,7 +46,17 @@ public class BasicBlock {
     private void removeSuccessor(BasicBlock BB) {
         if (BB == null) return;
         successors.remove(BB);
-        BB.predecessors.remove(this);
+    }
+
+    private void removePredecessor(BasicBlock BB) {
+        if (BB == null) return;
+        predecessors.remove(BB);
+    }
+
+    private void replacePredecessor(BasicBlock oldBB, BasicBlock newBB) {
+        predecessors.remove(oldBB);
+        predecessors.add(newBB);
+        newBB.successors.add(this);
     }
 
     public void appendInst(IRInstruction irInstruction) {
@@ -98,5 +105,36 @@ public class BasicBlock {
             currentFunction.appendReturnList((Return) irInstruction);
         }
         terminated = true;
+    }
+
+    public void removeSelf() {
+        getSuccessors().forEach(successor -> {
+            for (IRInstruction irInstruction = successor.head; ; irInstruction = irInstruction.getNextInstruction()) {
+                if (irInstruction instanceof Phi) ((Phi) irInstruction).removePath(this);
+                else break;
+                if (!irInstruction.hasNextInstruction()) break;
+            }
+        });
+        getSuccessors().forEach(successor -> successor.removePredecessor(this));
+        getPredecessors().forEach(predecessor -> predecessor.removeSuccessor(this));
+    }
+
+    public void mergeBB(BasicBlock newBasicBlock) {
+        getSuccessors().forEach(successor -> {
+            for (IRInstruction irInstruction = successor.head; ; irInstruction = irInstruction.getNextInstruction()) {
+                if (irInstruction instanceof Phi) ((Phi) irInstruction).replacePath(this, newBasicBlock);
+                else break;
+                if (!irInstruction.hasNextInstruction()) break;
+            }
+        });
+        getSuccessors().forEach(successor -> successor.replacePredecessor(this, newBasicBlock));
+        newBasicBlock.removeInst();
+        newBasicBlock.appendInst(this.head);
+        newBasicBlock.tail = this.tail;
+        newBasicBlock.terminated = true;
+        for (IRInstruction irInstruction = this.head; ; irInstruction = irInstruction.getNextInstruction()) {
+            irInstruction.setCurrentBB(newBasicBlock);
+            if (!irInstruction.hasNextInstruction()) break;
+        }
     }
 }

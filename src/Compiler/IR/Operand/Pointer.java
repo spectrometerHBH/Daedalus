@@ -1,6 +1,6 @@
 package Compiler.IR.Operand;
 
-public abstract class Pointer extends VirtualRegister{
+public abstract class Pointer extends VirtualRegister {
     public Pointer() {
     }
 

@@ -15,7 +15,8 @@ public class VarDeclNode extends DeclNode {
     private VariableSymbol variableSymbol;
     private boolean isGlobalVariable = false;
     private boolean isParameterVariable = false;
-    public VarDeclNode(TypeNode type, ExprNode expr, String identifier, Position position){
+
+    public VarDeclNode(TypeNode type, ExprNode expr, String identifier, Position position) {
         super(position);
         this.type = type;
         this.expr = expr;
@@ -28,10 +29,6 @@ public class VarDeclNode extends DeclNode {
 
     public void setVariableSymbol(VariableSymbol variableSymbol) {
         this.variableSymbol = variableSymbol;
-    }
-
-    public void setType(TypeNode type){
-        this.type = type;
     }
 
     public boolean isGlobalVariable() {
@@ -54,6 +51,10 @@ public class VarDeclNode extends DeclNode {
         return type;
     }
 
+    public void setType(TypeNode type) {
+        this.type = type;
+    }
+
     public String getIdentifier() {
         return identifier;
     }
@@ -70,7 +71,8 @@ public class VarDeclNode extends DeclNode {
         this.typeAfterResolve = typeAfterResolve;
     }
 
-    @Override public void accept(ASTVisitor visitor){
+    @Override
+    public void accept(ASTVisitor visitor) {
         visitor.visit(this);
     }
 }

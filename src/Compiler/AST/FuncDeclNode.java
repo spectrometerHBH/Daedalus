@@ -12,7 +12,7 @@ public class FuncDeclNode extends DeclNode {
     private BlockStmtNode block;
     private FunctionSymbol functionSymbol;
 
-    public FuncDeclNode(TypeNode type, String identifier, List<VarDeclNode> parameterList, BlockStmtNode block, Position position){
+    public FuncDeclNode(TypeNode type, String identifier, List<VarDeclNode> parameterList, BlockStmtNode block, Position position) {
         super(position);
         this.type = type;
         this.identifier = identifier;
@@ -45,7 +45,8 @@ public class FuncDeclNode extends DeclNode {
         this.functionSymbol = functionSymbol;
     }
 
-    @Override public void accept(ASTVisitor visitor){
+    @Override
+    public void accept(ASTVisitor visitor) {
         visitor.visit(this);
     }
 }

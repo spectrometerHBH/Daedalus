@@ -10,7 +10,7 @@ public abstract class TypeNode extends ASTNode {
         this.typeIdentifier = typeIdentifier;
     }
 
-    public String getTypeIdentifier(){
+    public String getTypeIdentifier() {
         return typeIdentifier;
     }
 }

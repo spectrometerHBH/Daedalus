@@ -43,7 +43,7 @@ public class IRPrinter implements IRVisitor {
             out.print(" ");
         });
         out.println("{");
-        function.getPostOrderDFSBBList().forEach(this::visit);
+        function.getReversePostOrderDFSBBList().forEach(this::visit);
         out.println("}");
         out.println();
     }
@@ -56,6 +56,7 @@ public class IRPrinter implements IRVisitor {
     @Override
     public void visit(BasicBlock basicBlock) {
         out.println(getLabel(basicBlock) + ":");
+        //out.println(String.format("%d %d\n", basicBlock.getPredecessors().size(), basicBlock.getSuccessors().size()));
         for (IRInstruction irInstruction = basicBlock.head; irInstruction != null; irInstruction = irInstruction.getNextInstruction()) {
             out.print("    ");
             irInstruction.accept(this);
@@ -255,6 +256,11 @@ public class IRPrinter implements IRVisitor {
     @Override
     public void visit(Immediate immediate) {
         out.print(immediate.getImmediate());
+    }
+
+    @Override
+    public void visit(Phi inst) {
+
     }
 
     private String createName(Storage storage, String name) {

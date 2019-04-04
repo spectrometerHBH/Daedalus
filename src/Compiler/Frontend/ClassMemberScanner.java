@@ -31,7 +31,7 @@ public class ClassMemberScanner implements ASTVisitor {
     @Override
     public void visit(FuncDeclNode node) {
         Type returnType = node.getType() == null
-                ? (ClassSymbol)currentScope :
+                ? (ClassSymbol) currentScope :
                 Util.TypeNode2Type(node.getType(), globalScope);
         FunctionSymbol functionSymbol = new FunctionSymbol(node.getIdentifier(), returnType, node, currentScope);
         node.setFunctionSymbol(functionSymbol);
@@ -43,7 +43,7 @@ public class ClassMemberScanner implements ASTVisitor {
                         throw new SemanticError("Duplicated constructors", node.getPosition());
                     ((ClassSymbol) currentScope).setConstructor(functionSymbol);
                 } else throw new SemanticError("Wrong type for constructor", node.getPosition());
-            }else if (node.getType() == null) throw new SemanticError("Return type missing", node.getPosition());
+            } else if (node.getType() == null) throw new SemanticError("Return type missing", node.getPosition());
         }
         currentScope = functionSymbol;
         node.getParameterList().forEach(x -> x.accept(this));

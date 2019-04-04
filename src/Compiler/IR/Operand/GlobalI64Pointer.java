@@ -2,7 +2,7 @@ package Compiler.IR.Operand;
 
 import Compiler.IR.IRVisitor;
 
-public class GlobalI64Pointer extends Pointer implements GlobalVariable{
+public class GlobalI64Pointer extends Pointer implements GlobalVariable {
     public GlobalI64Pointer() {
     }
 

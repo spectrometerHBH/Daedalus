@@ -7,16 +7,17 @@ import java.util.List;
 public class ProgramNode extends ASTNode {
     private List<DeclNode> declNodeList;
 
-    public ProgramNode(List<DeclNode> declNodesList, Position position){
+    public ProgramNode(List<DeclNode> declNodesList, Position position) {
         super(position);
         this.declNodeList = declNodesList;
     }
 
-    public List<DeclNode> getDeclNodeList(){
+    public List<DeclNode> getDeclNodeList() {
         return this.declNodeList;
     }
 
-    @Override public void accept(ASTVisitor visitor){
+    @Override
+    public void accept(ASTVisitor visitor) {
         visitor.visit(this);
     }
 }

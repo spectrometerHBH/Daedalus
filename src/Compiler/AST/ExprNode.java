@@ -9,19 +9,18 @@ import Compiler.Utils.Position;
 public abstract class ExprNode extends ASTNode {
     //for Semantic Check
     private Category category;//LVALUE, RVALUE, THIS, CLASS, FUNCTION
-
-    public boolean isIntegerVaribale() {
-        return (category == Category.LVALUE && type.getTypeName().equals("int"));
-    }
     private Type type; //PrimitiveType, ClassSymbol, ArrayType, NullType
     private FunctionSymbol functionSymbol;
-
     //for IR
     private BasicBlock thenBB, elseBB;
     private Operand resultOperand;
 
     public ExprNode(Position position) {
         super(position);
+    }
+
+    public boolean isIntegerVaribale() {
+        return (category == Category.LVALUE && type.getTypeName().equals("int"));
     }
 
     public Category getCategory() {
@@ -76,7 +75,7 @@ public abstract class ExprNode extends ASTNode {
         return (category == Category.LVALUE && type.getTypeName().equals("bool"));
     }
 
-    public boolean isString(){
+    public boolean isString() {
         return (category == Category.LVALUE || category == Category.RVALUE)
                 && type.getTypeName().equals("string");
     }
@@ -111,11 +110,11 @@ public abstract class ExprNode extends ASTNode {
         return category != Category.CLASS && category != Category.FUNCTION;
     }
 
-    public enum Category {
-        LVALUE, RVALUE, CLASS, FUNCTION,
+    public boolean isNull() {
+        return type.isNullType();
     }
 
-    public boolean isNull(){
-        return type.isNullType();
+    public enum Category {
+        LVALUE, RVALUE, CLASS, FUNCTION,
     }
 }

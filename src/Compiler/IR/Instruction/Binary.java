@@ -5,10 +5,6 @@ import Compiler.IR.IRVisitor;
 import Compiler.IR.Operand.Operand;
 
 public class Binary extends IRInstruction {
-    public enum Op{
-        ADD, SUB, MUL, DIV, MOD, SHL, SHR, AND, OR, XOR
-    }
-
     private Op op;
     private Operand src1, src2, dest;
 
@@ -39,5 +35,9 @@ public class Binary extends IRInstruction {
     @Override
     public void accept(IRVisitor irVisitor) {
         irVisitor.visit(this);
+    }
+
+    public enum Op {
+        ADD, SUB, MUL, DIV, MOD, SHL, SHR, AND, OR, XOR
     }
 }

@@ -5,7 +5,7 @@ import Compiler.Utils.Position;
 public class VarDeclStmtNode extends StmtNode {
     private VarDeclListNode varDeclList;
 
-    public VarDeclStmtNode(VarDeclListNode varDeclList, Position position){
+    public VarDeclStmtNode(VarDeclListNode varDeclList, Position position) {
         super(position);
         this.varDeclList = varDeclList;
     }
@@ -14,7 +14,8 @@ public class VarDeclStmtNode extends StmtNode {
         return varDeclList;
     }
 
-    @Override public void accept(ASTVisitor visitor){
+    @Override
+    public void accept(ASTVisitor visitor) {
         visitor.visit(this);
     }
 }

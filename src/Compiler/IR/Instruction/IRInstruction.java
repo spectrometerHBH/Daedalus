@@ -4,7 +4,7 @@ import Compiler.IR.BasicBlock;
 import Compiler.IR.IRVisitor;
 
 public abstract class IRInstruction {
-    private BasicBlock currentBB;
+    protected BasicBlock currentBB;
     private IRInstruction lastInstruction;
     private IRInstruction nextInstruction;
 
@@ -16,6 +16,14 @@ public abstract class IRInstruction {
         return currentBB;
     }
 
+    public void setCurrentBB(BasicBlock currentBB) {
+        this.currentBB = currentBB;
+    }
+
+    public boolean hasLastInstruction() {
+        return lastInstruction != null;
+    }
+
     public IRInstruction getLastInstruction() {
         return lastInstruction;
     }
@@ -24,12 +32,21 @@ public abstract class IRInstruction {
         this.lastInstruction = lastInstruction;
     }
 
+    public boolean hasNextInstruction() {
+        return nextInstruction != null;
+    }
+
     public IRInstruction getNextInstruction() {
         return nextInstruction;
     }
 
     public void setNextInstruction(IRInstruction nextInstruction) {
         this.nextInstruction = nextInstruction;
+    }
+
+    public void replaceInstruction(IRInstruction newInstruction) {
+        if (hasLastInstruction()) getLastInstruction().setNextInstruction(newInstruction);
+        if (hasNextInstruction()) getNextInstruction().setLastInstruction(newInstruction);
     }
 
     public abstract void accept(IRVisitor irVisitor);

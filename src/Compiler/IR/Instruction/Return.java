@@ -4,7 +4,7 @@ import Compiler.IR.BasicBlock;
 import Compiler.IR.IRVisitor;
 import Compiler.IR.Operand.Operand;
 
-public class Return extends IRInstruction{
+public class Return extends IRInstruction {
     private Operand returnValue;
 
     public Return(BasicBlock currentBB, Operand returnValue) {

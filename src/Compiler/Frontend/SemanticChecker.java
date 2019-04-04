@@ -344,7 +344,7 @@ public class SemanticChecker implements ASTVisitor {
         node.getExpression().accept(this);
         switch (node.getOp()) {
             case PRE_INC:
-            case PRE_DEC:{
+            case PRE_DEC: {
                 if (node.getExpression().isIntegerVaribale()) {
                     node.setCategory(ExprNode.Category.LVALUE);
                     node.setType(intTypeSymbol);

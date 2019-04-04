@@ -1,9 +1,6 @@
 package Compiler.AST;
 
-import Compiler.Symbol.ClassSymbol;
-import Compiler.Symbol.Type;
 import Compiler.Utils.Position;
-import Compiler.Utils.SemanticError;
 
 public class ClassTypeNode extends TypeNode {
     private String identifier;
@@ -13,7 +10,8 @@ public class ClassTypeNode extends TypeNode {
         this.identifier = identifier;
     }
 
-    @Override public void accept(ASTVisitor visitor){
+    @Override
+    public void accept(ASTVisitor visitor) {
         visitor.visit(this);
     }
 }

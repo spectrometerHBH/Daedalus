@@ -5,7 +5,7 @@ import Compiler.Utils.Position;
 public class BoolLiteralNode extends ConstExprNode {
     private boolean val;
 
-    public BoolLiteralNode(boolean val, Position position){
+    public BoolLiteralNode(boolean val, Position position) {
         super(position);
         this.val = val;
     }
@@ -14,7 +14,8 @@ public class BoolLiteralNode extends ConstExprNode {
         return val;
     }
 
-    @Override public void accept(ASTVisitor visitor){
+    @Override
+    public void accept(ASTVisitor visitor) {
         visitor.visit(this);
     }
 }

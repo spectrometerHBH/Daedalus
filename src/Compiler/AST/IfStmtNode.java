@@ -7,7 +7,7 @@ public class IfStmtNode extends StmtNode {
     private StmtNode thenStmt;
     private StmtNode elseStmt;
 
-    public IfStmtNode(ExprNode expression, StmtNode thenStmt, StmtNode elseStmt, Position position){
+    public IfStmtNode(ExprNode expression, StmtNode thenStmt, StmtNode elseStmt, Position position) {
         super(position);
         this.expression = expression;
         this.thenStmt = thenStmt;
@@ -26,7 +26,8 @@ public class IfStmtNode extends StmtNode {
         return elseStmt;
     }
 
-    @Override public void accept(ASTVisitor visitor){
+    @Override
+    public void accept(ASTVisitor visitor) {
         visitor.visit(this);
     }
 }

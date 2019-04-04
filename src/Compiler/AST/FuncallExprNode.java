@@ -9,7 +9,7 @@ public class FuncallExprNode extends ExprNode {
     private ExprNode function;
     private List<ExprNode> parameterList = new ArrayList<>();
 
-    public FuncallExprNode(ExprNode function, List<ExprNode> parameterList, Position position){
+    public FuncallExprNode(ExprNode function, List<ExprNode> parameterList, Position position) {
         super(position);
         this.function = function;
         this.parameterList = parameterList;
@@ -23,7 +23,8 @@ public class FuncallExprNode extends ExprNode {
         return parameterList;
     }
 
-    @Override public void accept(ASTVisitor visitor){
+    @Override
+    public void accept(ASTVisitor visitor) {
         visitor.visit(this);
     }
 }

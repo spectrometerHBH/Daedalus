@@ -2,9 +2,10 @@ package Compiler;
 
 import Compiler.AST.ProgramNode;
 import Compiler.Backend.IRBuilder;
+import Compiler.Backend.IRPrinter;
 import Compiler.Frontend.*;
 import Compiler.IR.IRRoot;
-import Compiler.Optim.*;
+import Compiler.Optim.Optimizer;
 import Compiler.Parser.MxstarErrorListener;
 import Compiler.Parser.MxstarLexer;
 import Compiler.Parser.MxstarParser;
@@ -30,8 +31,9 @@ public class Main {
         //for program to be compiled
         InputStream in = new FileInputStream("test.txt");
         //for text-ir output
-        //PrintStream ir_out = new PrintStream(System.out);
-        PrintStream ir_out = new PrintStream("ir_out.txt");
+        PrintStream ir_out_transformed = new PrintStream(System.out);
+        PrintStream ir_out_raw = new PrintStream("ir_out.txt");
+        //PrintStream ir_out_transformed = new PrintStream("ir_out_t.txt");
         //for IR interpreter test use
         FileInputStream ir_test_in = new FileInputStream("ir_out.txt");
         DataInputStream ir_data_in = new DataInputStream(System.in);
@@ -54,15 +56,21 @@ public class Main {
             irBuilder.visit(ast);
             IRRoot irRoot = irBuilder.getIrRoot();
 
+            //new IRPrinter(ir_out_raw).visit(irRoot);
+
             //Optimization
             Optimizer optimizer = new Optimizer(irRoot);
             optimizer.simplifyCFG();
-            optimizer.SSAConstruction();
-            optimizer.SSADestruction();
+            //optimizer.SSAConstruction();
+            //optimizer.SSADestruction();
+
+            new IRPrinter(ir_out_transformed).visit(irRoot);
+            //IRInterpreter irInterpreter = new IRInterpreter(ir_test_in, false, ir_data_in, ir_data_out);
+            //irInterpreter.run();
 
             //Codegen
 
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
             System.err.println(e.getMessage());
             throw new RuntimeException();

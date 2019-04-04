@@ -1,70 +1,53 @@
+//考察点：section 8 语句，包括if,while,for,break,continue,return等
+//算法：线性筛法求欧拉函数
+//样例输入：10
+//样例输出：
+//1
+//2
+//2
+//4
+//2
+//6
+//4
+//6
+//4
 
-class naive
-{
-    interesting[][] HongKong;
-    naive()
-    {
-        HongKong = new interesting[100][];
-        HongKong[1] = null;
-        int i = 0;
-        for(i = 1; i < 99; i ++)
-        {
-            HongKong[i] = new interesting[233];
-        }
-        HongKong[99] = new interesting[1];
-        return;
-    }
+int N;
+int M = 0;
+bool[] check;
 
-    int Journalist(interesting news)
-    {
-        println(news.learnmore);
-        println("news.learnmore");
-    }
-
-}
-
-class interesting
-{
-     string learnmore;
-     int second;
-
-     interesting()
-     {
-        second = 0;
-        learnmore = "+1s";
-        second = learnmore.length() + second;
-     }
-}
-
-int main()
-{
-  naive[] Shanghai = new naive[233];
-  interesting[][] Beijing = new interesting[12][34];
-  // ++Beijing[1][1].second = ((Beijing[0][0].second))*(((((((((((((((((((((23333)))))))))))))))))))));
-  // ++++++++--------++++++------++++++++Beijing[2][2].second ;
-  {}
-  {
-  {}
-  {
-
-  }
-  }
-  return 0;
+int main() {
+    N = getInt();
+	check = new bool[N+5];
+	int i = 0;
+	while ( i <= N ) check[i++] = true;
+	int[] phi = new int[N+5];
+	int[] P = new int[N+5];
+	phi[1] = 1;
+	for (i = 2; ; ++i ) {
+		if ( i > N ) break;
+		if ( check[i] ) {
+			P[++M] = i;
+			phi[i] = i - 1;
+		}
+		int k = i;
+		int i;
+		for (i = 1; i <= M && (k * P[i] <= N); i++) {
+			int tmp = k * P[i];
+			if ( tmp > N ) continue;
+			check[tmp] = false;
+			if ( k % P[i] == 0) {
+				phi[tmp] = phi[k] * P[i];
+				break;
+			}
+			else {
+				phi[k * P[i]] = phi[k] * (P[i] - 1);
+			}
+		}
+		println(toString(phi[k]));
+	}
+    return 0;
 }
 
 
-
-
-/*!! metadata:
-=== comment ===
-class-testcase-515030910592-lijinning.txt
-Test class and construction function. And expression.
-=== assert ===
-success_compile
-=== phase ===
-semantic extended
-=== is_public ===
-True
-
-!!*/
 

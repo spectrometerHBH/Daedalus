@@ -11,7 +11,7 @@ public class Function {
     private List<Return> returnInstList = new ArrayList<>();
     private Storage referenceForClassMethod = null;
     private List<Storage> parameterList = new ArrayList<>();
-    private List<BasicBlock> postOrderDFSBBList = null;
+    private List<BasicBlock> reversePostOrderDFSBBList = null;
     private Set<BasicBlock> visit = null;
 
     private String name;
@@ -24,7 +24,7 @@ public class Function {
         returnInstList.add(irInstruction);
     }
 
-    public void appendParameterList(Storage storage){
+    public void appendParameterList(Storage storage) {
         parameterList.add(storage);
     }
 
@@ -48,12 +48,12 @@ public class Function {
         this.exitBlock = exitBlock;
     }
 
-    public void setReferenceForClassMethod(Storage referenceForClassMethod) {
-        this.referenceForClassMethod = referenceForClassMethod;
-    }
-
     public Storage getReferenceForClassMethod() {
         return referenceForClassMethod;
+    }
+
+    public void setReferenceForClassMethod(Storage referenceForClassMethod) {
+        this.referenceForClassMethod = referenceForClassMethod;
     }
 
     public List<Return> getReturnInstList() {
@@ -64,17 +64,20 @@ public class Function {
         return parameterList;
     }
 
-    public List<BasicBlock> getPostOrderDFSBBList() {
-        if (postOrderDFSBBList == null) calcPostOrderDFSBBList();
-        return postOrderDFSBBList;
+    public List<BasicBlock> getReversePostOrderDFSBBList() {
+        if (reversePostOrderDFSBBList == null) calcReversePostOrderDFSBBList();
+        return reversePostOrderDFSBBList;
     }
 
-    private void calcPostOrderDFSBBList() {
-        postOrderDFSBBList = new ArrayList<>();
+    public void recalcReversePostOrderDFSBBList() {
+        calcReversePostOrderDFSBBList();
+    }
+
+    private void calcReversePostOrderDFSBBList() {
+        reversePostOrderDFSBBList = new ArrayList<>();
         visit = new HashSet<>();
         postOrderDFS(entryBlock);
-        Collections.reverse(postOrderDFSBBList);
-        visit = null;
+        Collections.reverse(reversePostOrderDFSBBList);
     }
 
     private void postOrderDFS(BasicBlock nowBB) {
@@ -82,7 +85,11 @@ public class Function {
         nowBB.getSuccessors().forEach(x -> {
             if (!visit.contains(x)) postOrderDFS(x);
         });
-        postOrderDFSBBList.add(nowBB);
+        reversePostOrderDFSBBList.add(nowBB);
+    }
+
+    public boolean reachable(BasicBlock basicBlock) {
+        return visit.contains(basicBlock);
     }
 
     public void accept(IRVisitor irVisitor) {

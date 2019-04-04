@@ -5,7 +5,7 @@ import Compiler.Utils.Position;
 public class StringLiteralNode extends ConstExprNode {
     private String val;
 
-    public StringLiteralNode(String val, Position position){
+    public StringLiteralNode(String val, Position position) {
         super(position);
         this.val = val;
     }
@@ -14,7 +14,8 @@ public class StringLiteralNode extends ConstExprNode {
         return val;
     }
 
-    @Override public void accept(ASTVisitor visitor){
+    @Override
+    public void accept(ASTVisitor visitor) {
         visitor.visit(this);
     }
 }

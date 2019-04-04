@@ -7,7 +7,7 @@ public class ReturnNode extends StmtNode {
     private ExprNode expression;
     private FunctionSymbol functionSymbol;
 
-    public ReturnNode(ExprNode expression, Position position){
+    public ReturnNode(ExprNode expression, Position position) {
         super(position);
         this.expression = expression;
     }
@@ -24,7 +24,8 @@ public class ReturnNode extends StmtNode {
         this.functionSymbol = functionSymbol;
     }
 
-    @Override public void accept(ASTVisitor visitor){
+    @Override
+    public void accept(ASTVisitor visitor) {
         visitor.visit(this);
     }
 }

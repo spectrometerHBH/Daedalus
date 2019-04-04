@@ -5,7 +5,7 @@ import Compiler.Utils.Position;
 public class ExprStmtNode extends StmtNode {
     private ExprNode expr;
 
-    public ExprStmtNode(ExprNode expr, Position position){
+    public ExprStmtNode(ExprNode expr, Position position) {
         super(position);
         this.expr = expr;
     }
@@ -14,7 +14,8 @@ public class ExprStmtNode extends StmtNode {
         return expr;
     }
 
-    @Override public void accept(ASTVisitor visitor){
+    @Override
+    public void accept(ASTVisitor visitor) {
         visitor.visit(this);
     }
 }

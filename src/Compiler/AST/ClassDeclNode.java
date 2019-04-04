@@ -5,20 +5,21 @@ import Compiler.Utils.Position;
 
 import java.util.List;
 
-public class ClassDeclNode extends DeclNode{
+public class ClassDeclNode extends DeclNode {
     private String identifier;
     private List<FuncDeclNode> funcDeclList;
     private List<VarDeclNode> varDecList;
     private ClassSymbol classSymbol;
 
-    public ClassDeclNode(String identifier, List<FuncDeclNode> funcDeclList, List<VarDeclNode> varDecList, Position position){
+    public ClassDeclNode(String identifier, List<FuncDeclNode> funcDeclList, List<VarDeclNode> varDecList, Position position) {
         super(position);
         this.identifier = identifier;
         this.funcDeclList = funcDeclList;
         this.varDecList = varDecList;
     }
 
-    @Override public void accept(ASTVisitor visitor){
+    @Override
+    public void accept(ASTVisitor visitor) {
         visitor.visit(this);
     }
 

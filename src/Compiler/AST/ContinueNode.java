@@ -5,11 +5,12 @@ import Compiler.Utils.Position;
 public class ContinueNode extends StmtNode {
     private Loop currentLoop;
 
-    public ContinueNode(Position position){
+    public ContinueNode(Position position) {
         super(position);
     }
 
-    @Override public void accept(ASTVisitor visitor){
+    @Override
+    public void accept(ASTVisitor visitor) {
         visitor.visit(this);
     }
 

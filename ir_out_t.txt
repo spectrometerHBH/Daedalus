@@ -1,0 +1,175 @@
+@n_1
+@str_1 = "2"
+@str_2 = " "
+@str_3 = "1"
+@str_4 = "3"
+@str_5 = " "
+@str_6 = " "
+
+define void @init  {
+init_entry_1:
+    %t_1 = call getInt 
+    @n_1 = move %t_1
+    ret 
+
+}
+
+define i64 @is_prime  %x_1 {
+is_prime_entry_1:
+    %t_2 = seq %x_1 1
+    br %t_2 is_prime_if_then_1 is_prime_if_merge_1
+
+is_prime_if_merge_1:
+    %i_1 = move 2
+    jump is_prime_for_cond_1
+
+is_prime_for_cond_1:
+    %t_3 = mul %i_1 %i_1
+    %t_4 = sle %t_3 %x_1
+    br %t_4 is_prime_for_body_1 is_prime_for_merge_1
+
+is_prime_for_merge_1:
+    %t_5 = move 1
+    %t_6 = move %t_5
+    jump is_prime_exit_1
+
+is_prime_for_body_1:
+    %t_7 = mod %x_1 %i_1
+    %t_8 = seq %t_7 0
+    br %t_8 is_prime_if_then_2 is_prime_if_merge_2
+
+is_prime_if_merge_2:
+    %t_9 = move %i_1
+    %i_1 = add %i_1 1
+    jump is_prime_for_cond_1
+
+is_prime_if_then_2:
+    %t_10 = move 0
+    %t_6 = move %t_10
+    jump is_prime_exit_1
+
+is_prime_if_then_1:
+    %t_11 = move 0
+    %t_6 = move %t_11
+    jump is_prime_exit_1
+
+is_prime_exit_1:
+    ret %t_6
+
+}
+
+define void @find  %x_2 %pre_1 {
+find_entry_1:
+    %t_12 = call is_prime %x_2 
+    br %t_12 find_if_then_1 find_if_merge_1
+
+find_if_then_1:
+    %t_13 = sgt %pre_1 0
+    br %t_13 find_if_then_2 find_if_else_1
+
+find_if_then_2:
+    call println @str_1 
+    %t_14 = call toString %pre_1 
+    %t_15 = call string.add %t_14 @str_2 
+    %t_16 = call toString %x_2 
+    %t_17 = call string.add %t_15 %t_16 
+    call println %t_17 
+    jump find_if_merge_2
+
+find_if_else_1:
+    call println @str_3 
+    %t_18 = call toString %x_2 
+    call println %t_18 
+    jump find_if_merge_2
+
+find_if_merge_2:
+    jump find_exit_1
+
+find_if_merge_1:
+    %i_2 = move 5
+    %t_19 = neg 1
+    %t_20 = seq %pre_1 %t_19
+    br %t_20 find_if_then_3 find_if_else_2
+
+find_if_then_3:
+    %i_3 = move 6
+    %t_21 = sub %x_2 2
+    %i_3 = move %t_21
+    jump find_for_body_1
+
+find_for_body_1:
+    %t_22 = call is_prime %i_3 
+    br %t_22 find_if_then_4 find_if_merge_3
+
+find_if_then_4:
+    %t_23 = sub %x_2 %i_3
+    call find %t_23 %i_3 
+    jump find_exit_1
+
+find_if_merge_3:
+    %t_24 = move %i_3
+    %i_3 = sub %i_3 1
+    jump find_for_body_1
+
+find_if_else_2:
+    %t_25 = sub %x_2 1
+    %i_3 = move %t_25
+    jump find_for_body_2
+
+find_for_body_2:
+    %t_26 = call is_prime %i_3 
+    br %t_26 find_lhs_then_1 find_if_merge_4
+
+find_lhs_then_1:
+    %t_27 = sub %x_2 %i_3
+    %t_28 = call is_prime %t_27 
+    br %t_28 find_if_then_5 find_if_merge_4
+
+find_if_merge_4:
+    %t_29 = move %i_3
+    %i_3 = sub %i_3 1
+    jump find_for_body_2
+
+find_if_then_5:
+    call println @str_4 
+    %t_30 = call toString %pre_1 
+    %t_31 = call string.add %t_30 @str_5 
+    %t_32 = call toString %i_3 
+    %t_33 = call string.add %t_31 %t_32 
+    %t_34 = call string.add %t_33 @str_6 
+    %t_35 = sub %x_2 %i_3
+    %t_36 = call toString %t_35 
+    %t_37 = call string.add %t_34 %t_36 
+    call println %t_37 
+    jump find_exit_1
+
+find_exit_1:
+    ret 
+
+}
+
+define void @work  {
+work_entry_1:
+    %t_38 = neg 1
+    call find @n_1 %t_38 
+    ret 
+
+}
+
+define i64 @main  {
+main_entry_1:
+    call init 
+    call work 
+    %t_39 = move 0
+    ret %t_39
+
+}
+
+define i64 @__init  {
+__init_entry_1:
+    %t_40 = call main 
+    %t_41 = move %t_40
+    ret %t_41
+
+}
+

@@ -2,7 +2,7 @@ package Compiler.IR.Operand;
 
 import Compiler.IR.IRVisitor;
 
-public class GlobalI64Value extends Value implements GlobalVariable{
+public class GlobalI64Value extends Value implements GlobalVariable {
     public GlobalI64Value() {
     }
 

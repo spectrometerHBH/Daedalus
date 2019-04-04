@@ -8,7 +8,7 @@ import Compiler.Utils.SemanticError;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-public class FunctionSymbol extends Symbol implements Scope{
+public class FunctionSymbol extends Symbol implements Scope {
     private Scope enclosingScope;
     private Function function;
     private Map<String, VariableSymbol> arguments = new LinkedHashMap<>();
@@ -53,7 +53,8 @@ public class FunctionSymbol extends Symbol implements Scope{
 
     @Override
     public void defineVariable(VariableSymbol symbol) {
-        if (arguments.containsKey(symbol.getSymbolName())) throw new SemanticError("duplicate name variables", symbol.getDef().getPosition());
+        if (arguments.containsKey(symbol.getSymbolName()))
+            throw new SemanticError("duplicate name variables", symbol.getDef().getPosition());
         else arguments.put(symbol.getSymbolName(), symbol);
         symbol.setScope(this);
     }

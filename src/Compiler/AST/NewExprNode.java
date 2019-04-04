@@ -39,7 +39,8 @@ public class NewExprNode extends ExprNode {
         this.baseTypeAfterResolve = baseTypeAfterResolve;
     }
 
-    @Override public void accept(ASTVisitor visitor){
+    @Override
+    public void accept(ASTVisitor visitor) {
         visitor.visit(this);
     }
 }

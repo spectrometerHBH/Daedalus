@@ -3,7 +3,7 @@ package Compiler.AST;
 import Compiler.IR.BasicBlock;
 import Compiler.Utils.Position;
 
-public class ForStmtNode extends StmtNode implements Loop{
+public class ForStmtNode extends StmtNode implements Loop {
     private ExprNode init;
     private ExprNode cond;
     private ExprNode step;
@@ -13,7 +13,7 @@ public class ForStmtNode extends StmtNode implements Loop{
     private BasicBlock stepBB;
     private BasicBlock mergeBB;
 
-    public ForStmtNode(ExprNode init, ExprNode cond, ExprNode step, StmtNode statement, Position position){
+    public ForStmtNode(ExprNode init, ExprNode cond, ExprNode step, StmtNode statement, Position position) {
         super(position);
         this.init = init;
         this.cond = cond;
@@ -37,16 +37,9 @@ public class ForStmtNode extends StmtNode implements Loop{
         return statement;
     }
 
-    @Override public void accept(ASTVisitor visitor){
+    @Override
+    public void accept(ASTVisitor visitor) {
         visitor.visit(this);
-    }
-
-    public void setStepBB(BasicBlock stepBB) {
-        this.stepBB = stepBB;
-    }
-
-    public void setMergeBB(BasicBlock mergeBB) {
-        this.mergeBB = mergeBB;
     }
 
     @Override
@@ -54,8 +47,16 @@ public class ForStmtNode extends StmtNode implements Loop{
         return stepBB;
     }
 
+    public void setStepBB(BasicBlock stepBB) {
+        this.stepBB = stepBB;
+    }
+
     @Override
     public BasicBlock getMergeBB() {
         return mergeBB;
+    }
+
+    public void setMergeBB(BasicBlock mergeBB) {
+        this.mergeBB = mergeBB;
     }
 }

@@ -8,7 +8,7 @@ public class ClassMemberNode extends ExprNode {
     private String identifier;
     private Symbol symbol;
 
-    public ClassMemberNode(ExprNode expression, String identifier, Position position){
+    public ClassMemberNode(ExprNode expression, String identifier, Position position) {
         super(position);
         this.expression = expression;
         this.identifier = identifier;
@@ -30,7 +30,8 @@ public class ClassMemberNode extends ExprNode {
         this.symbol = symbol;
     }
 
-    @Override public void accept(ASTVisitor visitor){
+    @Override
+    public void accept(ASTVisitor visitor) {
         visitor.visit(this);
     }
 }

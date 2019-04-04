@@ -5,10 +5,6 @@ import Compiler.IR.IRVisitor;
 import Compiler.IR.Operand.Operand;
 
 public class Unary extends IRInstruction {
-    public enum Op{
-        NOT, NEG, INC, DEC, POS, NOTL
-    }
-
     private Op op;
     private Operand Src;
     private Operand Dst;
@@ -35,5 +31,9 @@ public class Unary extends IRInstruction {
     @Override
     public void accept(IRVisitor irVisitor) {
         irVisitor.visit(this);
+    }
+
+    public enum Op {
+        NOT, NEG, INC, DEC, POS, NOTL
     }
 }

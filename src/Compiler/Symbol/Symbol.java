@@ -14,11 +14,11 @@ public class Symbol {
         this.define = define;
     }
 
-    public String getSymbolName(){
+    public String getSymbolName() {
         return this.name;
     }
 
-    public ASTNode getDef(){
+    public ASTNode getDef() {
         return define;
     }
 
@@ -34,7 +34,15 @@ public class Symbol {
         this.scope = scope;
     }
 
-    public boolean isVariableSymbol(){ return false; }
-    public boolean isClassSymbol(){ return false; }
-    public boolean isFunctionSymbol(){ return false; }
+    public boolean isVariableSymbol() {
+        return false;
+    }
+
+    public boolean isClassSymbol() {
+        return false;
+    }
+
+    public boolean isFunctionSymbol() {
+        return false;
+    }
 }

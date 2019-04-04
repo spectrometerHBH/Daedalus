@@ -5,11 +5,12 @@ import Compiler.Utils.Position;
 public class BreakNode extends StmtNode {
     private Loop currentLoop;
 
-    public BreakNode(Position position){
+    public BreakNode(Position position) {
         super(position);
     }
 
-    @Override public void accept(ASTVisitor visitor){
+    @Override
+    public void accept(ASTVisitor visitor) {
         visitor.visit(this);
     }
 

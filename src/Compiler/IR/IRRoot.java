@@ -9,38 +9,6 @@ import java.util.List;
 import java.util.Map;
 
 public class IRRoot {
-    private Map<String, Function> functionMap = new LinkedHashMap<>();
-    private List<StaticString> staticStringList = new ArrayList<>();
-    private List<GlobalVariable> globalVariableList = new ArrayList<>();
-
-    public IRRoot(){
-
-    }
-
-    public void addFunction(Function function){
-        functionMap.put(function.getName(), function);
-    }
-
-    public void addStaticString(StaticString staticString){
-        staticStringList.add(staticString);
-    }
-
-    public void addGlobalVariable(GlobalVariable globalVariable){
-        globalVariableList.add(globalVariable);
-    }
-
-    public Map<String, Function> getFunctionMap() {
-        return functionMap;
-    }
-
-    public List<StaticString> getStaticStringList() {
-        return staticStringList;
-    }
-
-    public List<GlobalVariable> getGlobalVariableList() {
-        return globalVariableList;
-    }
-
     public Function builtinStringLength = new Function("string.length");
     public Function builtinSubstring = new Function("string.substring");
     public Function builtinParseInt = new Function("string.parseInt");
@@ -57,4 +25,35 @@ public class IRRoot {
     public Function builtinStringGEQ = new Function("string.geq");
     public Function builtinStringGT = new Function("string.gt");
     public Function builtinStringNEQ = new Function("string.neq");
+    private Map<String, Function> functionMap = new LinkedHashMap<>();
+    private List<StaticString> staticStringList = new ArrayList<>();
+    private List<GlobalVariable> globalVariableList = new ArrayList<>();
+
+    public IRRoot() {
+
+    }
+
+    public void addFunction(Function function) {
+        functionMap.put(function.getName(), function);
+    }
+
+    public void addStaticString(StaticString staticString) {
+        staticStringList.add(staticString);
+    }
+
+    public void addGlobalVariable(GlobalVariable globalVariable) {
+        globalVariableList.add(globalVariable);
+    }
+
+    public Map<String, Function> getFunctionMap() {
+        return functionMap;
+    }
+
+    public List<StaticString> getStaticStringList() {
+        return staticStringList;
+    }
+
+    public List<GlobalVariable> getGlobalVariableList() {
+        return globalVariableList;
+    }
 }
