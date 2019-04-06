@@ -3,10 +3,7 @@ package Compiler.IR;
 import Compiler.IR.Operand.GlobalVariable;
 import Compiler.IR.Operand.StaticString;
 
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class IRRoot {
     public Function builtinStringLength = new Function("string.length");
@@ -25,6 +22,7 @@ public class IRRoot {
     public Function builtinStringGEQ = new Function("string.geq");
     public Function builtinStringGT = new Function("string.gt");
     public Function builtinStringNEQ = new Function("string.neq");
+
     private Map<String, Function> functionMap = new LinkedHashMap<>();
     private List<StaticString> staticStringList = new ArrayList<>();
     private List<GlobalVariable> globalVariableList = new ArrayList<>();
@@ -55,5 +53,24 @@ public class IRRoot {
 
     public List<GlobalVariable> getGlobalVariableList() {
         return globalVariableList;
+    }
+
+    public void calcRecursiveCalleeSet() {
+        functionMap.values().forEach(function -> function.recursiveCalleeSet.clear());
+        Set<Function> newRecursiveCalleeSet = new HashSet<>();
+        boolean changed = true;
+        while (changed) {
+            changed = false;
+            for (Function function : functionMap.values()) {
+                newRecursiveCalleeSet.clear();
+                newRecursiveCalleeSet.addAll(function.calleeSet);
+                function.calleeSet.forEach(callee -> newRecursiveCalleeSet.addAll(callee.recursiveCalleeSet));
+                if (!newRecursiveCalleeSet.equals(function.recursiveCalleeSet)) {
+                    function.recursiveCalleeSet.clear();
+                    function.recursiveCalleeSet.addAll(newRecursiveCalleeSet);
+                    changed = true;
+                }
+            }
+        }
     }
 }

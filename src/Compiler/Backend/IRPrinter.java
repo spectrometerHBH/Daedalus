@@ -107,7 +107,7 @@ public class IRPrinter implements IRVisitor {
                 op = "xor";
                 break;
         }
-        inst.getDest().accept(this);
+        inst.getDst().accept(this);
         out.printf(" = %s ", op);
         inst.getSrc1().accept(this);
         out.print(" ");
@@ -163,7 +163,7 @@ public class IRPrinter implements IRVisitor {
                 op = "sne";
                 break;
         }
-        inst.getDest().accept(this);
+        inst.getDst().accept(this);
         out.print(" = " + op + " ");
         inst.getLhs().accept(this);
         out.print(" ");
@@ -186,9 +186,9 @@ public class IRPrinter implements IRVisitor {
 
     @Override
     public void visit(Move inst) {
-        inst.getDstOperand().accept(this);
+        inst.getDst().accept(this);
         out.print(" = move ");
-        inst.getSrcOperand().accept(this);
+        inst.getSrc().accept(this);
         out.println();
     }
 
@@ -248,19 +248,22 @@ public class IRPrinter implements IRVisitor {
     }
 
     @Override
+    public void visit(Phi inst) {
+        inst.getDst().accept(this);
+        out.print(" = phi ");
+        out.println();
+    }
+
+    @Override
     public void visit(Storage storage) {
         if (storage instanceof GlobalVariable) out.print("@" + getName(storage));
+        else if (storage.getName() != null && storage.getName().equals("__str_const")) out.print("@" + getName(storage));
         else out.print("%" + getName(storage));
     }
 
     @Override
     public void visit(Immediate immediate) {
         out.print(immediate.getImmediate());
-    }
-
-    @Override
-    public void visit(Phi inst) {
-
     }
 
     private String createName(Storage storage, String name) {

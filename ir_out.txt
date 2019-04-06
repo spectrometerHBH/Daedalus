@@ -1,0 +1,370 @@
+@startnumber_1
+@BB_1
+@__str_const_1 = "King of God no one escape"
+@__str_const_2 = "infinite military"
+@__str_const_3 = "magicpower burst out(thunder)"
+@__str_const_4 = "special killer"
+@__str_const_5 = "Attack"
+@__str_const_6 = "215\n\"\\abcdfk52215214"
+
+define i64 @AA  {
+AA_entry_1:
+    %t_1 = call toString 52215214 
+    call println %t_1 
+    %t_2 = move 215
+    ret %t_2
+
+}
+
+define i64 @randomnumber  {
+randomnumber_entry_1:
+    %t_3 = mul @startnumber_1 214
+    %t_4 = mod %t_3 215
+    @startnumber_1 = move %t_4
+    %t_5 = move @startnumber_1
+    ret %t_5
+
+}
+
+define i64 @Minamoto_Yorimitsu_Minamoto_Yorimitsu %this_1 {
+Minamoto_Yorimitsu_Minamoto_Yorimitsu_entry_1:
+    %t_6 = add %this_1 0
+    %t_7 = mul 3 8
+    %t_7 = add %t_7 8
+    %t_8 = alloc %t_7
+    store 3 %t_8
+    store %t_8 %t_6
+    %t_9 = add %this_1 8
+    %t_10 = mul 3 8
+    %t_10 = add %t_10 8
+    %t_11 = alloc %t_10
+    store 3 %t_11
+    store %t_11 %t_9
+    %t_12 = add %this_1 16
+    store @__str_const_1 %t_12
+    %t_13 = add %this_1 0
+    %t_14 = load %t_13
+    %t_15 = mul 0 8
+    %t_16 = add %t_15 8
+    %t_17 = add %t_14 %t_16
+    store @__str_const_2 %t_17
+    %t_18 = add %this_1 0
+    %t_19 = load %t_18
+    %t_20 = mul 1 8
+    %t_21 = add %t_20 8
+    %t_22 = add %t_19 %t_21
+    store @__str_const_3 %t_22
+    %t_23 = add %this_1 0
+    %t_24 = load %t_23
+    %t_25 = mul 2 8
+    %t_26 = add %t_25 8
+    %t_27 = add %t_24 %t_26
+    store @__str_const_4 %t_27
+    %t_28 = add %this_1 8
+    %t_29 = load %t_28
+    %t_30 = mul 0 8
+    %t_31 = add %t_30 8
+    %t_32 = add %t_29 %t_31
+    store 1 %t_32
+    %t_33 = add %this_1 8
+    %t_34 = load %t_33
+    %t_35 = mul 1 8
+    %t_36 = add %t_35 8
+    %t_37 = add %t_34 %t_36
+    store 1 %t_37
+    %t_38 = add %this_1 8
+    %t_39 = load %t_38
+    %t_40 = mul 2 8
+    %t_41 = add %t_40 8
+    %t_42 = add %t_39 %t_41
+    store 1 %t_42
+    %t_43 = add %this_1 24
+    store 0 %t_43
+    ret 0
+
+}
+
+define void @Minamoto_Yorimitsu_levelup %this_2 %which_1 {
+Minamoto_Yorimitsu_levelup_entry_1:
+    %t_44 = add %this_2 8
+    %t_45 = load %t_44
+    %t_46 = mul %which_1 8
+    %t_47 = add %t_46 8
+    %t_48 = add %t_45 %t_47
+    %t_49 = load %t_48
+    %t_50 = add %t_49 1
+    store %t_50 %t_48
+    ret 
+
+}
+
+define void @Minamoto_Yorimitsu_npup %this_3 %energy_1 {
+Minamoto_Yorimitsu_npup_entry_1:
+    %t_51 = add %this_3 24
+    %t_52 = add %this_3 24
+    %t_53 = load %t_52
+    %t_54 = add %t_53 %energy_1
+    store %t_54 %t_51
+    ret 
+
+}
+
+define void @Minamoto_Yorimitsu_Out %this_4 {
+Minamoto_Yorimitsu_Out_entry_1:
+    %t_55 = add %this_4 24
+    %t_56 = load %t_55
+    %t_57 = sge %t_56 100
+    br %t_57 Minamoto_Yorimitsu_Out_if_then_1 Minamoto_Yorimitsu_Out_if_else_1
+
+Minamoto_Yorimitsu_Out_if_else_1:
+    call println @__str_const_5 
+    jump Minamoto_Yorimitsu_Out_if_merge_1
+
+Minamoto_Yorimitsu_Out_if_then_1:
+    %t_58 = add %this_4 16
+    %t_59 = load %t_58
+    call println %t_59 
+    %t_60 = add %this_4 24
+    store 0 %t_60
+    jump Minamoto_Yorimitsu_Out_if_merge_1
+
+Minamoto_Yorimitsu_Out_if_merge_1:
+    ret 
+
+}
+
+define i64 @main  {
+main_entry_1:
+    %t_61 = call getInt 
+    %n_1 = move %t_61
+    %t_62 = mul 10 8
+    %t_62 = add %t_62 8
+    %t_63 = alloc %t_62
+    store 10 %t_63
+    %now_1 = move %t_63
+    %i_1 = move 0
+    jump main_for_cond_1
+
+main_for_cond_1:
+    %t_64 = slt %i_1 10
+    br %t_64 main_for_body_1 main_for_merge_1
+
+main_for_body_1:
+    %t_65 = mul %i_1 8
+    %t_66 = add %t_65 8
+    %t_67 = add %now_1 %t_66
+    %t_68 = mul 10 8
+    %t_68 = add %t_68 8
+    %t_69 = alloc %t_68
+    store 10 %t_69
+    store %t_69 %t_67
+    jump main_for_step_1
+
+main_for_step_1:
+    %t_70 = move %i_1
+    %i_1 = add %i_1 1
+    jump main_for_cond_1
+
+main_for_merge_1:
+    %i_1 = move 0
+    jump main_for_cond_2
+
+main_for_cond_2:
+    %t_71 = slt %i_1 10
+    br %t_71 main_for_body_2 main_for_merge_2
+
+main_for_body_2:
+    %j_1 = move 0
+    jump main_for_cond_3
+
+main_for_cond_3:
+    %t_72 = slt %j_1 10
+    br %t_72 main_for_body_3 main_for_merge_3
+
+main_for_merge_3:
+    jump main_for_step_2
+
+main_for_step_2:
+    %t_73 = move %i_1
+    %i_1 = add %i_1 1
+    jump main_for_cond_2
+
+main_for_body_3:
+    %t_74 = seq %i_1 0
+    br %t_74 main_if_then_1 main_if_else_1
+
+main_if_else_1:
+    %t_75 = seq %j_1 0
+    br %t_75 main_if_then_2 main_if_else_2
+
+main_if_else_2:
+    %temp_1 = move @__str_const_6
+    %t_76 = call string.substring %temp_1 1 7 
+    call println %t_76 
+    %t_77 = mul %i_1 8
+    %t_78 = add %t_77 8
+    %t_79 = add %now_1 %t_78
+    %t_80 = load %t_79
+    %t_81 = mul %j_1 8
+    %t_82 = add %t_81 8
+    %t_83 = add %t_80 %t_82
+    %t_84 = call string.parseInt %temp_1 
+    %t_85 = call string.length %temp_1 
+    %t_86 = mul %t_84 %t_85
+    %t_87 = call string.ord %temp_1 5 
+    %t_88 = mul %t_86 %t_87
+    %t_89 = call randomnumber 
+    %t_90 = mul %t_88 %t_89
+    %t_91 = mod %t_90 215
+    store %t_91 %t_83
+    jump main_if_merge_1
+
+main_if_then_2:
+    %t_92 = mul %i_1 8
+    %t_93 = add %t_92 8
+    %t_94 = add %now_1 %t_93
+    %t_95 = load %t_94
+    %t_96 = mul %j_1 8
+    %t_97 = add %t_96 8
+    %t_98 = add %t_95 %t_97
+    %t_99 = call randomnumber 
+    store %t_99 %t_98
+    jump main_if_merge_1
+
+main_if_merge_1:
+    jump main_if_merge_2
+
+main_if_then_1:
+    %A_1 = move 214
+    %t_100 = call AA 
+    %t_101 = call toString %t_100 
+    call print %t_101 
+    %t_102 = mul %i_1 8
+    %t_103 = add %t_102 8
+    %t_104 = add %now_1 %t_103
+    %t_105 = load %t_104
+    %t_106 = mul %j_1 8
+    %t_107 = add %t_106 8
+    %t_108 = add %t_105 %t_107
+    %t_109 = call randomnumber 
+    store %t_109 %t_108
+    jump main_if_merge_2
+
+main_if_merge_2:
+    jump main_for_step_3
+
+main_for_step_3:
+    %t_110 = move %j_1
+    %j_1 = add %j_1 1
+    jump main_for_cond_3
+
+main_for_merge_2:
+    %t_111 = mul 15 8
+    %t_111 = add %t_111 8
+    %t_112 = alloc %t_111
+    store 15 %t_112
+    %Jeand_1 = move %t_112
+    %t_113 = mul 0 8
+    %t_114 = add %t_113 8
+    %t_115 = add %Jeand_1 %t_114
+    %t_116 = call getString 
+    store %t_116 %t_115
+    %cnt_1 = move 0
+    jump main_while_cond_1
+
+main_while_cond_1:
+    %t_117 = mul %cnt_1 8
+    %t_118 = add %t_117 8
+    %t_119 = add %Jeand_1 %t_118
+    %t_120 = load %t_119
+    %t_121 = call string.length %t_120 
+    %t_122 = sne %t_121 0
+    br %t_122 main_while_body_1 main_while_merge_1
+
+main_while_body_1:
+    %cnt_1 = add %cnt_1 1
+    %t_123 = mul %cnt_1 8
+    %t_124 = add %t_123 8
+    %t_125 = add %Jeand_1 %t_124
+    %t_126 = call getString 
+    store %t_126 %t_125
+    %t_127 = sgt %cnt_1 10
+    br %t_127 main_if_then_3 main_if_merge_3
+
+main_if_then_3:
+    jump main_while_merge_1
+
+main_if_merge_3:
+    jump main_while_cond_1
+
+main_while_merge_1:
+    call testclass 
+    %t_128 = move 0
+    ret %t_128
+
+}
+
+define void @testclass  {
+testclass_entry_1:
+    %t_129 = alloc 32
+    call Minamoto_Yorimitsu_Minamoto_Yorimitsu %t_129 
+    %onecard_1 = move %t_129
+    %i_2 = move 0
+    %i_2 = move 0
+    jump testclass_for_cond_1
+
+testclass_for_cond_1:
+    %t_130 = slt %i_2 10
+    br %t_130 testclass_for_body_1 testclass_for_merge_1
+
+testclass_for_merge_1:
+    %i_2 = move 0
+    jump testclass_for_cond_2
+
+testclass_for_cond_2:
+    %t_131 = slt %i_2 10
+    br %t_131 testclass_for_body_2 testclass_for_merge_2
+
+testclass_for_merge_2:
+    call Minamoto_Yorimitsu_Out %onecard_1 
+    ret 
+
+testclass_for_body_2:
+    %t_132 = call getInt 
+    %t_133 = call randomnumber 
+    %t_134 = mul %t_132 %t_133
+    %t_135 = mod %t_134 3
+    %which_2 = move %t_135
+    call Minamoto_Yorimitsu_levelup %onecard_1 %which_2 
+    jump testclass_for_step_1
+
+testclass_for_step_1:
+    %t_136 = move %i_2
+    %i_2 = add %i_2 1
+    jump testclass_for_cond_2
+
+testclass_for_body_1:
+    %t_137 = call randomnumber 
+    %t_138 = mod %t_137 15
+    call Minamoto_Yorimitsu_npup %onecard_1 %t_138 
+    jump testclass_for_step_2
+
+testclass_for_step_2:
+    %t_139 = move %i_2
+    %i_2 = add %i_2 1
+    jump testclass_for_cond_1
+
+}
+
+define i64 @__init  {
+__init_entry_1:
+    @startnumber_1 = move 435
+    %t_140 = alloc 32
+    call Minamoto_Yorimitsu_Minamoto_Yorimitsu %t_140 
+    @BB_1 = move %t_140
+    %t_141 = call main 
+    %t_142 = move %t_141
+    ret %t_142
+
+}
+

@@ -1,6 +1,7 @@
 package Compiler;
 
 import Compiler.AST.ProgramNode;
+import Compiler.Backend.GlobalVariableResolver;
 import Compiler.Backend.IRBuilder;
 import Compiler.Backend.IRPrinter;
 import Compiler.Frontend.*;
@@ -30,17 +31,20 @@ public class Main {
     public static void main(String... args) throws Exception {
         //for program to be compiled
         InputStream in = new FileInputStream("test.txt");
+
         //for text-ir output
-        PrintStream ir_out_transformed = new PrintStream(System.out);
+        //PrintStream ir_out_transformed = new PrintStream(System.out);
+        PrintStream ir_out_transformed = new PrintStream("ir_out_t.txt");
         PrintStream ir_out_raw = new PrintStream("ir_out.txt");
-        //PrintStream ir_out_transformed = new PrintStream("ir_out_t.txt");
+
         //for IR interpreter test use
+        //FileInputStream ir_test_in = new FileInputStream("ir_out_t.txt");
         FileInputStream ir_test_in = new FileInputStream("ir_out.txt");
         DataInputStream ir_data_in = new DataInputStream(System.in);
         PrintStream ir_data_out = new PrintStream(new FileOutputStream("ir_test_out.txt"));
 
         try {
-            //Parser & Lexer
+            //Syntax Analysis
             ProgramNode ast = buildAST(in);
 
             //Semantic Analysis
@@ -55,18 +59,15 @@ public class Main {
             IRBuilder irBuilder = new IRBuilder(globalScope);
             irBuilder.visit(ast);
             IRRoot irRoot = irBuilder.getIrRoot();
-
-            //new IRPrinter(ir_out_raw).visit(irRoot);
+            new IRPrinter(ir_out_raw).visit(irRoot);
+            new GlobalVariableResolver(irRoot).run();
 
             //Optimization
-            Optimizer optimizer = new Optimizer(irRoot);
-            optimizer.simplifyCFG();
+            //Optimizer optimizer = new Optimizer(irRoot);
+            //optimizer.simplifyCFG();
             //optimizer.SSAConstruction();
             //optimizer.SSADestruction();
-
             new IRPrinter(ir_out_transformed).visit(irRoot);
-            //IRInterpreter irInterpreter = new IRInterpreter(ir_test_in, false, ir_data_in, ir_data_out);
-            //irInterpreter.run();
 
             //Codegen
 

@@ -42,6 +42,8 @@ public class IRBuilder implements ASTVisitor {
             }
         });
         node.getDeclNodeList().forEach(x -> x.accept(this));
+        irRoot.getFunctionMap().values().forEach(Function::updateCalleeSet);
+        irRoot.calcRecursiveCalleeSet();
     }
 
     @Override
@@ -692,7 +694,7 @@ public class IRBuilder implements ASTVisitor {
 
     @Override
     public void visit(StringLiteralNode node) {
-        StaticString staticString = new StaticString(new GlobalI64Value("str"), node.getVal());
+        StaticString staticString = new StaticString(new I64Value("__str_const"), node.getVal());
         node.setResultOperand(staticString.getPointer());
         irRoot.addStaticString(staticString);
     }

@@ -3,6 +3,9 @@ package Compiler.IR.Instruction;
 import Compiler.IR.BasicBlock;
 import Compiler.IR.IRVisitor;
 import Compiler.IR.Operand.Operand;
+import Compiler.IR.Operand.Register;
+
+import java.util.Map;
 
 public class Branch extends IRInstruction {
     private Operand cond;
@@ -14,6 +17,7 @@ public class Branch extends IRInstruction {
         this.cond = cond;
         this.thenBB = thenBB;
         this.elseBB = elseBB;
+        updateUseRegisters();
     }
 
     public BasicBlock getThenBB() {
@@ -31,5 +35,26 @@ public class Branch extends IRInstruction {
     @Override
     public void accept(IRVisitor irVisitor) {
         irVisitor.visit(this);
+    }
+
+    @Override
+    public void updateUseRegisters() {
+        useRegisters.clear();
+        if (cond instanceof Register) useRegisters.add((Register) cond);
+    }
+
+    @Override
+    public void setUseRegisters(Map<Register, Register> renameMap) {
+        if (cond instanceof Register) cond = renameMap.get(cond);
+    }
+
+    @Override
+    public Register getDefRegister() {
+        return null;
+    }
+
+    @Override
+    public void setDefRegister(Register newRegister) {
+
     }
 }

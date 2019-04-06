@@ -8,6 +8,10 @@ import java.util.Set;
 public class BasicBlock {
     public IRInstruction head;
     public IRInstruction tail;
+    public BasicBlock IDOM;
+    public int postOrderNumber;
+    public Set<BasicBlock> DF;
+
     private Function currentFunction;
     private String name;
     private Set<BasicBlock> predecessors = new HashSet<>();
@@ -66,6 +70,16 @@ public class BasicBlock {
             tail.setNextInstruction(irInstruction);
             irInstruction.setLastInstruction(tail);
             tail = irInstruction;
+        }
+    }
+
+    public void appendFront(IRInstruction irInstruction) {
+        if (tail == null) {
+            head = tail = irInstruction;
+        } else {
+            irInstruction.setNextInstruction(head);
+            head.setLastInstruction(irInstruction);
+            head = irInstruction;
         }
     }
 

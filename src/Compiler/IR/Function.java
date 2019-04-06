@@ -1,11 +1,19 @@
 package Compiler.IR;
 
+import Compiler.IR.Instruction.Call;
+import Compiler.IR.Instruction.IRInstruction;
 import Compiler.IR.Instruction.Return;
+import Compiler.IR.Operand.GlobalVariable;
 import Compiler.IR.Operand.Storage;
+import Compiler.IR.Operand.VirtualRegister;
 
 import java.util.*;
 
 public class Function {
+    public Set<Function> calleeSet = new HashSet<>();
+    public Set<Function> recursiveCalleeSet = new HashSet<>();
+    public FunctionInfo functionInfo;
+
     private BasicBlock entryBlock = new BasicBlock(this, "entry");
     private BasicBlock exitBlock = new BasicBlock(this, "exit");
     private List<Return> returnInstList = new ArrayList<>();
@@ -13,11 +21,12 @@ public class Function {
     private List<Storage> parameterList = new ArrayList<>();
     private List<BasicBlock> reversePostOrderDFSBBList = null;
     private Set<BasicBlock> visit = null;
-
+    private Set<VirtualRegister> globals = new HashSet<>();
     private String name;
 
     public Function(String name) {
         this.name = name;
+        this.functionInfo = new FunctionInfo();
     }
 
     public void appendReturnList(Return irInstruction) {
@@ -26,6 +35,10 @@ public class Function {
 
     public void appendParameterList(Storage storage) {
         parameterList.add(storage);
+    }
+
+    public void appendGlobals(VirtualRegister virtualRegister) {
+        globals.add(virtualRegister);
     }
 
     public String getName() {
@@ -46,6 +59,10 @@ public class Function {
 
     public void setExitBlock(BasicBlock exitBlock) {
         this.exitBlock = exitBlock;
+    }
+
+    public Set<VirtualRegister> getGlobals() {
+        return globals;
     }
 
     public Storage getReferenceForClassMethod() {
@@ -77,6 +94,9 @@ public class Function {
         reversePostOrderDFSBBList = new ArrayList<>();
         visit = new HashSet<>();
         postOrderDFS(entryBlock);
+        for (int i = 0; i < reversePostOrderDFSBBList.size(); i++) {
+            reversePostOrderDFSBBList.get(i).postOrderNumber = i;
+        }
         Collections.reverse(reversePostOrderDFSBBList);
     }
 
@@ -92,7 +112,23 @@ public class Function {
         return visit.contains(basicBlock);
     }
 
+    public void updateCalleeSet() {
+        calleeSet.clear();
+        getReversePostOrderDFSBBList().forEach(basicBlock -> {
+            for (IRInstruction irInstruction = basicBlock.head; irInstruction != null; irInstruction = irInstruction.getNextInstruction())
+                if (irInstruction instanceof Call) calleeSet.add(((Call) irInstruction).getCallee());
+        });
+    }
+
     public void accept(IRVisitor irVisitor) {
         irVisitor.visit(this);
     }
+
+    public static class FunctionInfo {
+        public Set<GlobalVariable> defGlobalVariable = new HashSet<>();
+        public Set<GlobalVariable> recursiveUseGlobalVariable = new HashSet<>();
+        public Set<GlobalVariable> recursiveDefGlobalVariable = new HashSet<>();
+        public Map<GlobalVariable, VirtualRegister> globalTemporal = new HashMap<>();
+    }
 }
+

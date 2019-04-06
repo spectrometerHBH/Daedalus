@@ -3,22 +3,32 @@ package Compiler.IR.Instruction;
 import Compiler.IR.BasicBlock;
 import Compiler.IR.IRVisitor;
 import Compiler.IR.Operand.Operand;
+import Compiler.IR.Operand.Register;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class Phi extends IRInstruction {
-    private Operand dest;
+    private Operand dst;
     private Map<BasicBlock, Operand> paths = new LinkedHashMap<>();
 
-    public Phi(BasicBlock currentBB) {
+    public Phi(BasicBlock currentBB, Operand dst) {
         super(currentBB);
+        this.dst = dst;
+    }
+
+    public Operand getDst() {
+        return dst;
+    }
+
+    public Map<BasicBlock, Operand> getPaths() {
+        return paths;
     }
 
     public void removePath(BasicBlock basicBlock) {
         paths.remove(basicBlock);
         if (paths.size() == 1) {
-            IRInstruction newInstruction = new Move(currentBB, paths.values().iterator().next(), dest);
+            IRInstruction newInstruction = new Move(currentBB, paths.values().iterator().next(), dst);
             replaceInstruction(newInstruction);
             if (this == currentBB.head) currentBB.head = newInstruction;
             if (this == currentBB.tail) currentBB.tail = newInstruction;
@@ -34,5 +44,25 @@ public class Phi extends IRInstruction {
     @Override
     public void accept(IRVisitor irVisitor) {
         irVisitor.visit(this);
+    }
+
+    @Override
+    public void updateUseRegisters() {
+
+    }
+
+    @Override
+    public Register getDefRegister() {
+        return null;
+    }
+
+    @Override
+    public void setDefRegister(Register newRegister) {
+
+    }
+
+    @Override
+    public void setUseRegisters(Map<Register, Register> renameMap) {
+
     }
 }
