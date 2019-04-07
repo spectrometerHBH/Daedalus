@@ -25,6 +25,7 @@ public class Call extends IRInstruction {
 
     public void appendParameterList(Operand operand) {
         parameterList.add(operand);
+        updateUseRegisters();
     }
 
     public List<Operand> getParameterList() {
@@ -37,6 +38,7 @@ public class Call extends IRInstruction {
 
     public void setObjectPointer(Operand objectPointer) {
         this.objectPointer = objectPointer;
+        updateUseRegisters();
     }
 
     public Function getCallee() {
@@ -58,6 +60,7 @@ public class Call extends IRInstruction {
         parameterList.forEach(parameter -> {
             if (parameter instanceof Register) useRegisters.add((Register) parameter);
         });
+        if (objectPointer instanceof Register) useRegisters.add((Register) objectPointer);
     }
 
     @Override
@@ -73,9 +76,11 @@ public class Call extends IRInstruction {
 
     @Override
     public void setUseRegisters(Map<Register, Register> renameMap) {
-        parameterList.forEach(parameter -> {
-            if (parameter instanceof Register) parameter = renameMap.get(parameter);
-        });
+        for (int i = 0; i < parameterList.size(); i++) {
+            Operand parameter = parameterList.get(i);
+            if (parameter instanceof Register) parameterList.set(i, renameMap.get(parameter));
+        }
+        if (objectPointer instanceof Register) objectPointer = renameMap.get(objectPointer);
         updateUseRegisters();
     }
 }

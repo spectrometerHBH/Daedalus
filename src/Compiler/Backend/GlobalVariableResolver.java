@@ -23,6 +23,9 @@ public class GlobalVariableResolver {
                             (irInstruction instanceof Store && ((Store) irInstruction).isInsertedForGlobalVariable()))
                         continue;
 
+                    if (irInstruction instanceof Call) {
+                        System.err.println("fuck you leather man");
+                    }
                     List<Register> useRegisters = irInstruction.getUseRegisters();
                     Register defRegister = irInstruction.getDefRegister();
                     if (!useRegisters.isEmpty()) {
@@ -56,28 +59,28 @@ public class GlobalVariableResolver {
 
         Set<GlobalVariable> reloadSet = new HashSet<>();
         irRoot.getFunctionMap().forEach((name, function) -> {
-             Set<GlobalVariable> useGlobalVariable = function.functionInfo.globalTemporal.keySet();
-             if (!useGlobalVariable.isEmpty()) {
-                 function.getReversePostOrderDFSBBList().forEach(basicBlock -> {
-                     for (IRInstruction irInstruction = basicBlock.head; irInstruction != null; irInstruction = irInstruction.getNextInstruction()) {
-                         if (!(irInstruction instanceof Call)) continue;
-                         Function callee = ((Call) irInstruction).getCallee();
+            Set<GlobalVariable> useGlobalVariable = function.functionInfo.globalTemporal.keySet();
+            if (!useGlobalVariable.isEmpty()) {
+                function.getReversePostOrderDFSBBList().forEach(basicBlock -> {
+                    for (IRInstruction irInstruction = basicBlock.head; irInstruction != null; irInstruction = irInstruction.getNextInstruction()) {
+                        if (!(irInstruction instanceof Call)) continue;
+                        Function callee = ((Call) irInstruction).getCallee();
 
-                         for (GlobalVariable defGlobalVariable : function.functionInfo.defGlobalVariable) {
-                             if (callee.functionInfo.recursiveUseGlobalVariable.contains(defGlobalVariable))
-                                 irInstruction.prependInstruction(new Store(basicBlock, function.functionInfo.globalTemporal.get(defGlobalVariable), (GlobalI64Value) defGlobalVariable, true));
-                         }
+                        for (GlobalVariable defGlobalVariable : function.functionInfo.defGlobalVariable) {
+                            if (callee.functionInfo.recursiveUseGlobalVariable.contains(defGlobalVariable))
+                                irInstruction.prependInstruction(new Store(basicBlock, function.functionInfo.globalTemporal.get(defGlobalVariable), (GlobalI64Value) defGlobalVariable, true));
+                        }
 
-                         if (callee.functionInfo.recursiveDefGlobalVariable.isEmpty()) continue;
-                         reloadSet.clear();
-                         reloadSet.addAll(callee.functionInfo.recursiveDefGlobalVariable);
-                         reloadSet.retainAll(useGlobalVariable);
-                         for (GlobalVariable globalVariable : reloadSet)
-                             irInstruction.postpendInstruction(new Load(basicBlock, (GlobalI64Value) globalVariable, function.functionInfo.globalTemporal.get(globalVariable), true));
-                     }
-                 });
-             }
-         });
+                        if (callee.functionInfo.recursiveDefGlobalVariable.isEmpty()) continue;
+                        reloadSet.clear();
+                        reloadSet.addAll(callee.functionInfo.recursiveDefGlobalVariable);
+                        reloadSet.retainAll(useGlobalVariable);
+                        for (GlobalVariable globalVariable : reloadSet)
+                            irInstruction.postpendInstruction(new Load(basicBlock, (GlobalI64Value) globalVariable, function.functionInfo.globalTemporal.get(globalVariable), true));
+                    }
+                });
+            }
+        });
 
         irRoot.getFunctionMap().forEach((name, function) -> {
             Return ret = function.getReturnInstList().get(0);

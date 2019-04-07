@@ -257,7 +257,8 @@ public class IRPrinter implements IRVisitor {
     @Override
     public void visit(Storage storage) {
         if (storage instanceof GlobalVariable) out.print("@" + getName(storage));
-        else if (storage.getName() != null && storage.getName().equals("__str_const")) out.print("@" + getName(storage));
+        else if (storage.getName() != null && storage.getName().equals("__str_const"))
+            out.print("@" + getName(storage));
         else out.print("%" + getName(storage));
     }
 

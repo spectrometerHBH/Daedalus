@@ -89,6 +89,8 @@ public class IRInterpreter {
             System.err.println("    " + e.getMessage());
             exitcode = -1;
             exception = true;
+        } catch (RuntimeError runtimeError) {
+            runtimeError.printStackTrace();
         }
     }
 
@@ -224,7 +226,7 @@ public class IRInterpreter {
 
     }
 
-    private void readGlobalVariable() {
+    private void readGlobalVariable() throws RuntimeError {
         if (!line.startsWith("@")) throw new RuntimeException("global variable should start with '@'");
         if (line.contains("=")) {
             //string
@@ -239,12 +241,18 @@ public class IRInterpreter {
             globalRegisters.put(name, reg);
             stringObjects.put(staticStringCnt++, val);
         } else {
-            //other
+            //other, just alloc some space on heap for convenience
             String name = line.trim();
             Register reg = new Register();
             reg.value = 0;
             reg.timestamp = 0;
             globalRegisters.put(name, reg);
+
+            long size = 8;
+            registerWrite(name, heapTop);
+            for (int i = 0; i < size; ++i) memory.put(heapTop + i, (byte) (0));
+            heapTop += size;
+            heapTop += (int) (Math.random() * 4096);
         }
     }
 
