@@ -2,8 +2,10 @@ package Compiler.IR.Instruction;
 
 import Compiler.IR.BasicBlock;
 import Compiler.IR.IRVisitor;
+import Compiler.IR.Operand.GlobalVariable;
 import Compiler.IR.Operand.Operand;
 import Compiler.IR.Operand.Register;
+import Compiler.IR.Operand.VirtualRegister;
 
 import java.util.Map;
 
@@ -62,6 +64,21 @@ public class Binary extends IRInstruction {
     public void setUseRegisters(Map<Register, Register> renameMap) {
         if (src1 instanceof Register) src1 = renameMap.get(src1);
         if (src2 instanceof Register) src2 = renameMap.get(src2);
+        updateUseRegisters();
+    }
+
+    @Override
+    public void renameDefRegister() {
+        if (!(dst instanceof GlobalVariable))
+            dst = ((VirtualRegister) dst).getSSARenameRegister(((VirtualRegister) dst).getNewId());
+    }
+
+    @Override
+    public void renameUseRegisters() {
+        if (src1 instanceof VirtualRegister && !(src1 instanceof GlobalVariable))
+            src1 = ((VirtualRegister) src1).getSSARenameRegister(((VirtualRegister) src1).info.stack.peek());
+        if (src2 instanceof VirtualRegister && !(src2 instanceof GlobalVariable))
+            src2 = ((VirtualRegister) src2).getSSARenameRegister(((VirtualRegister) src2).info.stack.peek());
         updateUseRegisters();
     }
 

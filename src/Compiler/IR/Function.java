@@ -4,7 +4,7 @@ import Compiler.IR.Instruction.Call;
 import Compiler.IR.Instruction.IRInstruction;
 import Compiler.IR.Instruction.Return;
 import Compiler.IR.Operand.GlobalVariable;
-import Compiler.IR.Operand.Storage;
+import Compiler.IR.Operand.Register;
 import Compiler.IR.Operand.VirtualRegister;
 
 import java.util.*;
@@ -17,8 +17,8 @@ public class Function {
     private BasicBlock entryBlock = new BasicBlock(this, "entry");
     private BasicBlock exitBlock = new BasicBlock(this, "exit");
     private List<Return> returnInstList = new ArrayList<>();
-    private Storage referenceForClassMethod = null;
-    private List<Storage> parameterList = new ArrayList<>();
+    private Register referenceForClassMethod = null;
+    private List<Register> parameterList = new ArrayList<>();
     private List<BasicBlock> reversePostOrderDFSBBList = null;
     private Set<BasicBlock> visit = null;
     private Set<VirtualRegister> globals = new HashSet<>();
@@ -33,8 +33,8 @@ public class Function {
         returnInstList.add(irInstruction);
     }
 
-    public void appendParameterList(Storage storage) {
-        parameterList.add(storage);
+    public void appendParameterList(Register register) {
+        parameterList.add(register);
     }
 
     public void appendGlobals(VirtualRegister virtualRegister) {
@@ -65,11 +65,11 @@ public class Function {
         return globals;
     }
 
-    public Storage getReferenceForClassMethod() {
+    public Register getReferenceForClassMethod() {
         return referenceForClassMethod;
     }
 
-    public void setReferenceForClassMethod(Storage referenceForClassMethod) {
+    public void setReferenceForClassMethod(Register referenceForClassMethod) {
         this.referenceForClassMethod = referenceForClassMethod;
     }
 
@@ -77,7 +77,7 @@ public class Function {
         return returnInstList;
     }
 
-    public List<Storage> getParameterList() {
+    public List<Register> getParameterList() {
         return parameterList;
     }
 

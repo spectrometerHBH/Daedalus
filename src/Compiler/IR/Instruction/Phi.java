@@ -21,6 +21,10 @@ public class Phi extends IRInstruction {
         return dst;
     }
 
+    public void setDst(Operand dst) {
+        this.dst = dst;
+    }
+
     public Map<BasicBlock, Operand> getPaths() {
         return paths;
     }
@@ -63,6 +67,16 @@ public class Phi extends IRInstruction {
 
     @Override
     public void setUseRegisters(Map<Register, Register> renameMap) {
+
+    }
+
+    @Override
+    public void renameDefRegister() {
+
+    }
+
+    @Override
+    public void renameUseRegisters() {
 
     }
 }

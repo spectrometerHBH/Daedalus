@@ -43,4 +43,14 @@ public class Jump extends IRInstruction {
     public void setDefRegister(Register newRegister) {
 
     }
+
+    @Override
+    public void renameDefRegister() {
+
+    }
+
+    @Override
+    public void renameUseRegisters() {
+
+    }
 }

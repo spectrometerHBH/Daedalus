@@ -2,8 +2,10 @@ package Compiler.IR.Instruction;
 
 import Compiler.IR.BasicBlock;
 import Compiler.IR.IRVisitor;
+import Compiler.IR.Operand.GlobalVariable;
 import Compiler.IR.Operand.Operand;
 import Compiler.IR.Operand.Register;
+import Compiler.IR.Operand.VirtualRegister;
 
 import java.util.Map;
 
@@ -56,5 +58,17 @@ public class Branch extends IRInstruction {
     @Override
     public void setDefRegister(Register newRegister) {
 
+    }
+
+    @Override
+    public void renameDefRegister() {
+
+    }
+
+    @Override
+    public void renameUseRegisters() {
+        if (cond instanceof VirtualRegister && !(cond instanceof GlobalVariable))
+            cond = ((VirtualRegister) cond).getSSARenameRegister(((VirtualRegister) cond).info.stack.peek());
+        updateUseRegisters();
     }
 }

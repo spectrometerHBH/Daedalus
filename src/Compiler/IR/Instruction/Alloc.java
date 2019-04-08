@@ -2,8 +2,10 @@ package Compiler.IR.Instruction;
 
 import Compiler.IR.BasicBlock;
 import Compiler.IR.IRVisitor;
+import Compiler.IR.Operand.GlobalVariable;
 import Compiler.IR.Operand.Operand;
 import Compiler.IR.Operand.Register;
+import Compiler.IR.Operand.VirtualRegister;
 
 import java.util.Map;
 
@@ -51,5 +53,18 @@ public class Alloc extends IRInstruction {
     @Override
     public void setDefRegister(Register newRegister) {
         pointer = newRegister;
+    }
+
+    @Override
+    public void renameDefRegister() {
+        if (pointer instanceof VirtualRegister && !(pointer instanceof GlobalVariable))
+            pointer = ((VirtualRegister) pointer).getSSARenameRegister(((VirtualRegister) pointer).getNewId());
+    }
+
+    @Override
+    public void renameUseRegisters() {
+        if (size instanceof VirtualRegister && !(size instanceof GlobalVariable))
+            size = ((VirtualRegister) size).getSSARenameRegister(((VirtualRegister) size).info.stack.peek());
+        updateUseRegisters();
     }
 }

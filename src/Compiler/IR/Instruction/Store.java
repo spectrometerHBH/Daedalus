@@ -2,8 +2,10 @@ package Compiler.IR.Instruction;
 
 import Compiler.IR.BasicBlock;
 import Compiler.IR.IRVisitor;
+import Compiler.IR.Operand.GlobalVariable;
 import Compiler.IR.Operand.Operand;
 import Compiler.IR.Operand.Register;
+import Compiler.IR.Operand.VirtualRegister;
 
 import java.util.Map;
 
@@ -66,6 +68,20 @@ public class Store extends IRInstruction {
     public void setUseRegisters(Map<Register, Register> renameMap) {
         if (src instanceof Register) src = renameMap.get(src);
         if (dst instanceof Register) dst = renameMap.get(dst);
+        updateUseRegisters();
+    }
+
+    @Override
+    public void renameDefRegister() {
+
+    }
+
+    @Override
+    public void renameUseRegisters() {
+        if (src instanceof VirtualRegister && !(src instanceof GlobalVariable))
+            src = ((VirtualRegister) src).getSSARenameRegister(((VirtualRegister) src).info.stack.peek());
+        if (dst instanceof VirtualRegister && !(dst instanceof GlobalVariable))
+            dst = ((VirtualRegister) dst).getSSARenameRegister(((VirtualRegister) dst).info.stack.peek());
         updateUseRegisters();
     }
 }

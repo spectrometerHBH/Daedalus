@@ -2,8 +2,10 @@ package Compiler.IR.Instruction;
 
 import Compiler.IR.BasicBlock;
 import Compiler.IR.IRVisitor;
+import Compiler.IR.Operand.GlobalVariable;
 import Compiler.IR.Operand.Operand;
 import Compiler.IR.Operand.Register;
+import Compiler.IR.Operand.VirtualRegister;
 
 import java.util.Map;
 
@@ -44,6 +46,18 @@ public class Return extends IRInstruction {
     @Override
     public void setUseRegisters(Map<Register, Register> renameMap) {
         if (returnValue instanceof Register) returnValue = renameMap.get(returnValue);
+        updateUseRegisters();
+    }
+
+    @Override
+    public void renameDefRegister() {
+
+    }
+
+    @Override
+    public void renameUseRegisters() {
+        if (returnValue instanceof VirtualRegister && !(returnValue instanceof GlobalVariable))
+            returnValue = ((VirtualRegister) returnValue).getSSARenameRegister(((VirtualRegister) returnValue).info.stack.peek());
         updateUseRegisters();
     }
 }

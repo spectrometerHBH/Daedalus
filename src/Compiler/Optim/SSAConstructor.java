@@ -1,5 +1,6 @@
 package Compiler.Optim;
 
+import Compiler.Backend.IRPrinter;
 import Compiler.IR.BasicBlock;
 import Compiler.IR.Function;
 import Compiler.IR.IRRoot;
@@ -8,6 +9,8 @@ import Compiler.IR.Instruction.Phi;
 import Compiler.IR.Operand.Register;
 import Compiler.IR.Operand.VirtualRegister;
 
+import java.io.FileNotFoundException;
+import java.io.PrintStream;
 import java.util.*;
 
 class SSAConstructor extends Pass {
@@ -15,7 +18,7 @@ class SSAConstructor extends Pass {
         super(irRoot);
     }
 
-    void run() {
+    void run() throws Exception{
         irRoot.getFunctionMap().forEach((name, function) -> {
             computeDominateTree(function);
             computeDominanceFrontier(function);
@@ -48,6 +51,8 @@ class SSAConstructor extends Pass {
                 }
             }
         }
+        RPO.forEach(basicBlock -> basicBlock.DTSuccessors = new HashSet<>());
+        basicBlockList.forEach(basicBlock -> basicBlock.IDOM.DTSuccessors.add(basicBlock));
     }
 
     private BasicBlock intersect(BasicBlock basicBlock1, BasicBlock basicBlock2) {
@@ -89,13 +94,12 @@ class SSAConstructor extends Pass {
                     if (useRegister instanceof VirtualRegister && !varKill.contains(useRegister))
                         function.appendGlobals((VirtualRegister) useRegister);
                     if (useRegister instanceof VirtualRegister && ((VirtualRegister) useRegister).info == null)
-                        ((VirtualRegister) useRegister).initRegisterInformation();
+                        ((VirtualRegister) useRegister).info = new VirtualRegister.RegisterInformation();
                 });
                 if (defRegister instanceof VirtualRegister) {
                     varKill.add((VirtualRegister) defRegister);
-                    if (((VirtualRegister) defRegister).info == null)
-                        ((VirtualRegister) defRegister).initRegisterInformation();
-                    ((VirtualRegister) defRegister).appendDefBB(basicBlock);
+                    if (((VirtualRegister) defRegister).info == null) ((VirtualRegister) defRegister).info = new VirtualRegister.RegisterInformation();
+                    ((VirtualRegister) defRegister).info.defBB.add(basicBlock);
                 }
                 if (!irInstruction.hasNextInstruction()) break;
             }
@@ -108,7 +112,7 @@ class SSAConstructor extends Pass {
         function.getGlobals().forEach(x -> {
             workList.clear();
             visited.clear();
-            workList.addAll(x.getDefBB());
+            workList.addAll(x.info.defBB);
             while (!workList.isEmpty()) {
                 BasicBlock b = workList.remove();
                 b.DF.forEach(d -> {
@@ -122,7 +126,42 @@ class SSAConstructor extends Pass {
         });
     }
 
-    private void renameVariables(Function function) {
+    private void rename(BasicBlock basicBlock) {
+        for (IRInstruction irInstruction = basicBlock.head; irInstruction != null; irInstruction = irInstruction.getNextInstruction()) {
+            if (!(irInstruction instanceof Phi)) break;
+            VirtualRegister dst = (VirtualRegister) ((Phi) irInstruction).getDst();
+            ((Phi) irInstruction).setDst(dst.getSSARenameRegister(dst.getNewId()));
+        }
 
+        for (IRInstruction irInstruction = basicBlock.head; irInstruction != null; irInstruction = irInstruction.getNextInstruction())
+            if (!(irInstruction instanceof Phi)) {
+                irInstruction.renameUseRegisters();
+                irInstruction.renameDefRegister();
+            }
+
+        for (BasicBlock successor : basicBlock.getSuccessors()) {
+            for (IRInstruction irInstruction = successor.head; irInstruction != null; irInstruction = irInstruction.getNextInstruction()) {
+                if (!(irInstruction instanceof Phi)) break;
+                VirtualRegister origin = ((VirtualRegister) ((Phi) irInstruction).getDst()).getOrigin();
+                VirtualRegister alias = origin.info.stack.empty() ? null : origin.getSSARenameRegister(origin.info.stack.peek());
+                ((Phi) irInstruction).getPaths().put(basicBlock, alias);
+            }
+        }
+
+        basicBlock.DTSuccessors.forEach(this::rename);
+
+        for (IRInstruction irInstruction = basicBlock.head; irInstruction != null; irInstruction = irInstruction.getNextInstruction()) {
+            VirtualRegister dst = (VirtualRegister) irInstruction.getDefRegister();
+            if (dst != null) dst.getOrigin().info.stack.pop();
+        }
+    }
+
+    private void renameVariables(Function function) {
+        for (int i = 0; i < function.getParameterList().size(); i++) {
+            VirtualRegister parameter = (VirtualRegister) function.getParameterList().get(i);
+            function.getParameterList().set(i, parameter.getSSARenameRegister(parameter.getNewId()));
+        }
+        rename(function.getEntryBlock());
+        function.getParameterList().forEach(parameter -> ((VirtualRegister) parameter).getOrigin().info.stack.pop());
     }
 }

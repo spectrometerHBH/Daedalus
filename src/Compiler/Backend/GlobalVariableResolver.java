@@ -23,21 +23,18 @@ public class GlobalVariableResolver {
                             (irInstruction instanceof Store && ((Store) irInstruction).isInsertedForGlobalVariable()))
                         continue;
 
-                    if (irInstruction instanceof Call) {
-                        System.err.println("fuck you leather man");
-                    }
                     List<Register> useRegisters = irInstruction.getUseRegisters();
                     Register defRegister = irInstruction.getDefRegister();
                     if (!useRegisters.isEmpty()) {
                         renameMap.clear();
                         for (Register useRegister : useRegisters)
-                            if (useRegister instanceof GlobalVariable)
+                            if (useRegister instanceof GlobalVariable && !((GlobalI64Value)useRegister).isString())
                                 renameMap.put(useRegister, getTemporal((GlobalVariable) useRegister, function.functionInfo.globalTemporal));
                             else
                                 renameMap.put(useRegister, useRegister);
                         irInstruction.setUseRegisters(renameMap);
                     }
-                    if (defRegister instanceof GlobalVariable) {
+                    if (defRegister instanceof GlobalVariable && !((GlobalI64Value)defRegister).isString()) {
                         irInstruction.setDefRegister(getTemporal((GlobalVariable) defRegister, function.functionInfo.globalTemporal));
                         function.functionInfo.defGlobalVariable.add((GlobalVariable) defRegister);
                     }

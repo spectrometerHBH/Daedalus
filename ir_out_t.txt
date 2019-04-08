@@ -1,319 +1,206 @@
-@N_1
-@h_1
-@i_1
-@j_1
-@k_1
-@total_1
+@N_1.-1
+@M_1.-1
+@check_1.-1
 
 define i64 @main  {
 main_entry_1:
-    %t_1 = load @i_1
-    %t_2 = load @N_1
-    %t_3 = load @j_1
-    %t_4 = load @k_1
-    %t_5 = load @h_1
-    %t_6 = load @total_1
-    %t_2 = move 6
-    %a_1 = move 1
+    %t_1.0 = load @M_1.-1
+    %t_2.0 = load @check_1.-1
+    %t_3.0 = load @N_1.-1
+    %t_4.0 = call getInt 
+    %t_3.1 = move %t_4.0
+    %t_5.0 = add %t_3.1 5
+    %t_6.0 = mul %t_5.0 8
+    %t_6.1 = add %t_6.0 8
+    %t_7.0 = alloc %t_6.1
+    store %t_5.0 %t_7.0
+    %t_2.1 = move %t_7.0
+    %i_1.0 = move 0
+    jump main_while_cond_1
+
+main_while_cond_1:
+    %i_1.1 = phi main_entry_1 %i_1.0 main_while_body_1 %i_1.5 
+    %t_8.0 = sle %i_1.1 %t_3.1
+    br %t_8.0 main_while_body_1 main_while_merge_1
+
+main_while_body_1:
+    %t_9.0 = move %i_1.2
+    %i_1.5 = add %i_1.2 1
+    %t_10.0 = mul %t_9.0 8
+    %t_11.0 = add %t_10.0 8
+    %t_12.0 = add %t_2.1 %t_11.0
+    store 1 %t_12.0
+    jump main_while_cond_1
+
+main_while_merge_1:
+    %t_13.0 = add %t_3.1 5
+    %t_14.0 = mul %t_13.0 8
+    %t_14.1 = add %t_14.0 8
+    %t_15.0 = alloc %t_14.1
+    store %t_13.0 %t_15.0
+    %phi_1.0 = move %t_15.0
+    %t_16.0 = add %t_3.1 5
+    %t_17.0 = mul %t_16.0 8
+    %t_17.1 = add %t_17.0 8
+    %t_18.0 = alloc %t_17.1
+    store %t_16.0 %t_18.0
+    %P_1.0 = move %t_18.0
+    %t_19.0 = mul 1 8
+    %t_20.0 = add %t_19.0 8
+    %t_21.0 = add %phi_1.0 %t_20.0
+    store 1 %t_21.0
+    %i_1.2 = move 2
+    jump main_for_body_1
+
+main_for_body_1:
+    %i_1.3 = phi main_while_merge_1 %i_1.2 main_for_merge_1 %i_1.4 
+    %k_1.0 = phi main_for_merge_1 %k_1.1 
+    %t_1.1 = phi main_while_merge_1 %t_1.0 main_for_merge_1 %t_1.2 
+    %i_2.0 = phi main_for_merge_1 %i_2.2 
+    %tmp_1.0 = phi main_for_merge_1 %tmp_1.2 
+    %t_22.0 = sgt %i_1.3 %t_3.1
+    br %t_22.0 main_if_then_1 main_if_merge_1
+
+main_if_then_1:
+    %t_23.0 = move 0
+    store %t_3.1 @N_1.-1
+    store %t_2.1 @check_1.-1
+    store %t_1.2 @M_1.-1
+    ret %t_23.0
+
+main_if_merge_1:
+    %t_24.0 = mul %i_1.3 8
+    %t_25.0 = add %t_24.0 8
+    %t_26.0 = add %t_2.1 %t_25.0
+    %t_27.0 = load %t_26.0
+    br %t_27.0 main_if_then_2 main_if_merge_2
+
+main_if_then_2:
+    %t_1.3 = add %t_1.2 1
+    %t_28.0 = mul %t_1.3 8
+    %t_29.0 = add %t_28.0 8
+    %t_30.0 = add %P_1.0 %t_29.0
+    store %i_1.3 %t_30.0
+    %t_31.0 = mul %i_1.3 8
+    %t_32.0 = add %t_31.0 8
+    %t_33.0 = add %phi_1.0 %t_32.0
+    %t_34.0 = sub %i_1.3 1
+    store %t_34.0 %t_33.0
+    jump main_if_merge_2
+
+main_if_merge_2:
+    %t_1.2 = phi main_if_merge_1 %t_1.1 main_if_then_2 %t_1.3 
+    %k_1.1 = move %i_1.3
+    %i_2.1 = move 1
     jump main_for_cond_1
 
 main_for_cond_1:
-    %t_7 = sle %a_1 %t_2
-    br %t_7 main_for_body_1 main_for_merge_1
+    %i_2.2 = phi main_if_merge_2 %i_2.1 main_for_step_1 %i_2.3 
+    %tmp_1.1 = phi main_if_merge_2 %tmp_1.0 main_for_step_1 %tmp_1.3 
+    %t_35.0 = sle %i_2.2 %t_1.2
+    br %t_35.0 main_lhs_then_1 main_for_merge_1
 
-main_for_merge_1:
-    %t_8 = call toString %t_6 
-    call println %t_8 
-    %t_9 = move 0
-    store %t_6 @total_1
-    store %t_2 @N_1
-    ret %t_9
-
-main_for_body_1:
-    %b_1 = move 1
-    jump main_for_cond_2
-
-main_for_cond_2:
-    %t_10 = sle %b_1 %t_2
-    br %t_10 main_for_body_2 main_for_merge_2
+main_lhs_then_1:
+    %t_36.0 = mul %i_2.2 8
+    %t_37.0 = add %t_36.0 8
+    %t_38.0 = add %P_1.0 %t_37.0
+    %t_39.0 = load %t_38.0
+    %t_40.0 = mul %k_1.1 %t_39.0
+    %t_41.0 = sle %t_40.0 %t_3.1
+    br %t_41.0 main_for_body_2 main_for_merge_1
 
 main_for_body_2:
-    %c_1 = move 1
-    jump main_for_cond_3
+    %t_42.0 = mul %i_2.2 8
+    %t_43.0 = add %t_42.0 8
+    %t_44.0 = add %P_1.0 %t_43.0
+    %t_45.0 = load %t_44.0
+    %t_46.0 = mul %k_1.1 %t_45.0
+    %tmp_1.3 = move %t_46.0
+    %t_47.0 = sgt %tmp_1.3 %t_3.1
+    br %t_47.0 main_if_then_3 main_if_merge_3
 
-main_for_cond_3:
-    %t_11 = sle %c_1 %t_2
-    br %t_11 main_for_body_3 main_for_merge_3
+main_if_merge_3:
+    %t_48.0 = mul %tmp_1.3 8
+    %t_49.0 = add %t_48.0 8
+    %t_50.0 = add %t_2.1 %t_49.0
+    store 0 %t_50.0
+    %t_51.0 = mul %i_2.2 8
+    %t_52.0 = add %t_51.0 8
+    %t_53.0 = add %P_1.0 %t_52.0
+    %t_54.0 = load %t_53.0
+    %t_55.0 = mod %k_1.1 %t_54.0
+    %t_56.0 = seq %t_55.0 0
+    br %t_56.0 main_if_then_4 main_if_else_1
 
-main_for_body_3:
-    %d_1 = move 1
-    jump main_for_cond_4
+main_if_else_1:
+    %t_57.0 = mul %i_2.2 8
+    %t_58.0 = add %t_57.0 8
+    %t_59.0 = add %P_1.0 %t_58.0
+    %t_60.0 = load %t_59.0
+    %t_61.0 = mul %k_1.1 %t_60.0
+    %t_62.0 = mul %t_61.0 8
+    %t_63.0 = add %t_62.0 8
+    %t_64.0 = add %phi_1.0 %t_63.0
+    %t_65.0 = mul %k_1.1 8
+    %t_66.0 = add %t_65.0 8
+    %t_67.0 = add %phi_1.0 %t_66.0
+    %t_68.0 = mul %i_2.2 8
+    %t_69.0 = add %t_68.0 8
+    %t_70.0 = add %P_1.0 %t_69.0
+    %t_71.0 = load %t_70.0
+    %t_72.0 = sub %t_71.0 1
+    %t_73.0 = load %t_67.0
+    %t_74.0 = mul %t_73.0 %t_72.0
+    store %t_74.0 %t_64.0
+    jump main_for_step_1
 
-main_for_cond_4:
-    %t_12 = sle %d_1 %t_2
-    br %t_12 main_for_body_4 main_for_merge_4
+main_if_then_4:
+    %t_75.0 = mul %tmp_1.3 8
+    %t_76.0 = add %t_75.0 8
+    %t_77.0 = add %phi_1.0 %t_76.0
+    %t_78.0 = mul %k_1.1 8
+    %t_79.0 = add %t_78.0 8
+    %t_80.0 = add %phi_1.0 %t_79.0
+    %t_81.0 = mul %i_2.2 8
+    %t_82.0 = add %t_81.0 8
+    %t_83.0 = add %P_1.0 %t_82.0
+    %t_84.0 = load %t_80.0
+    %t_85.0 = load %t_83.0
+    %t_86.0 = mul %t_84.0 %t_85.0
+    store %t_86.0 %t_77.0
+    jump main_for_merge_1
 
-main_for_merge_4:
+main_if_then_3:
     jump main_for_step_1
 
 main_for_step_1:
-    %t_13 = move %c_1
-    %c_1 = add %c_1 1
-    jump main_for_cond_3
-
-main_for_body_4:
-    %e_1 = move 1
-    jump main_for_cond_5
-
-main_for_cond_5:
-    %t_14 = sle %e_1 %t_2
-    br %t_14 main_for_body_5 main_for_merge_5
-
-main_for_merge_5:
-    jump main_for_step_2
-
-main_for_step_2:
-    %t_15 = move %d_1
-    %d_1 = add %d_1 1
-    jump main_for_cond_4
-
-main_for_body_5:
-    %f_1 = move 1
-    jump main_for_cond_6
-
-main_for_cond_6:
-    %t_16 = sle %f_1 %t_2
-    br %t_16 main_for_body_6 main_for_merge_6
-
-main_for_merge_6:
-    jump main_for_step_3
-
-main_for_step_3:
-    %t_17 = move %e_1
-    %e_1 = add %e_1 1
-    jump main_for_cond_5
-
-main_for_body_6:
-    %t_18 = sne %a_1 %b_1
-    br %t_18 main_lhs_then_1 main_if_merge_1
-
-main_lhs_then_1:
-    %t_19 = sne %a_1 %c_1
-    br %t_19 main_lhs_then_2 main_if_merge_1
-
-main_lhs_then_2:
-    %t_20 = sne %a_1 %d_1
-    br %t_20 main_lhs_then_3 main_if_merge_1
-
-main_lhs_then_3:
-    %t_21 = sne %a_1 %e_1
-    br %t_21 main_lhs_then_4 main_if_merge_1
-
-main_lhs_then_4:
-    %t_22 = sne %a_1 %f_1
-    br %t_22 main_lhs_then_5 main_if_merge_1
-
-main_lhs_then_5:
-    %t_23 = sne %a_1 %t_5
-    br %t_23 main_lhs_then_6 main_if_merge_1
-
-main_lhs_then_6:
-    %t_24 = sne %a_1 %t_1
-    br %t_24 main_lhs_then_7 main_if_merge_1
-
-main_lhs_then_7:
-    %t_25 = sne %a_1 %t_3
-    br %t_25 main_lhs_then_8 main_if_merge_1
-
-main_lhs_then_8:
-    %t_26 = sne %a_1 %t_4
-    br %t_26 main_lhs_then_9 main_if_merge_1
-
-main_lhs_then_9:
-    %t_27 = sne %b_1 %c_1
-    br %t_27 main_lhs_then_10 main_if_merge_1
-
-main_lhs_then_10:
-    %t_28 = sne %b_1 %d_1
-    br %t_28 main_lhs_then_11 main_if_merge_1
-
-main_lhs_then_11:
-    %t_29 = sne %b_1 %e_1
-    br %t_29 main_lhs_then_12 main_if_merge_1
-
-main_lhs_then_12:
-    %t_30 = sne %b_1 %f_1
-    br %t_30 main_lhs_then_13 main_if_merge_1
-
-main_lhs_then_13:
-    %t_31 = sne %b_1 %t_5
-    br %t_31 main_lhs_then_14 main_if_merge_1
-
-main_lhs_then_14:
-    %t_32 = sne %b_1 %t_1
-    br %t_32 main_lhs_then_15 main_if_merge_1
-
-main_lhs_then_15:
-    %t_33 = sne %b_1 %t_3
-    br %t_33 main_lhs_then_16 main_if_merge_1
-
-main_lhs_then_16:
-    %t_34 = sne %b_1 %t_4
-    br %t_34 main_lhs_then_17 main_if_merge_1
-
-main_lhs_then_17:
-    %t_35 = sne %c_1 %d_1
-    br %t_35 main_lhs_then_18 main_if_merge_1
-
-main_lhs_then_18:
-    %t_36 = sne %c_1 %e_1
-    br %t_36 main_lhs_then_19 main_if_merge_1
-
-main_lhs_then_19:
-    %t_37 = sne %c_1 %f_1
-    br %t_37 main_lhs_then_20 main_if_merge_1
-
-main_lhs_then_20:
-    %t_38 = sne %c_1 %t_5
-    br %t_38 main_lhs_then_21 main_if_merge_1
-
-main_lhs_then_21:
-    %t_39 = sne %c_1 %t_1
-    br %t_39 main_lhs_then_22 main_if_merge_1
-
-main_lhs_then_22:
-    %t_40 = sne %c_1 %t_3
-    br %t_40 main_lhs_then_23 main_if_merge_1
-
-main_lhs_then_23:
-    %t_41 = sne %c_1 %t_4
-    br %t_41 main_lhs_then_24 main_if_merge_1
-
-main_lhs_then_24:
-    %t_42 = sne %d_1 %e_1
-    br %t_42 main_lhs_then_25 main_if_merge_1
-
-main_lhs_then_25:
-    %t_43 = sne %d_1 %f_1
-    br %t_43 main_lhs_then_26 main_if_merge_1
-
-main_lhs_then_26:
-    %t_44 = sne %d_1 %t_5
-    br %t_44 main_lhs_then_27 main_if_merge_1
-
-main_lhs_then_27:
-    %t_45 = sne %d_1 %t_1
-    br %t_45 main_lhs_then_28 main_if_merge_1
-
-main_lhs_then_28:
-    %t_46 = sne %d_1 %t_3
-    br %t_46 main_lhs_then_29 main_if_merge_1
-
-main_lhs_then_29:
-    %t_47 = sne %d_1 %t_4
-    br %t_47 main_lhs_then_30 main_if_merge_1
-
-main_lhs_then_30:
-    %t_48 = sne %e_1 %f_1
-    br %t_48 main_lhs_then_31 main_if_merge_1
-
-main_lhs_then_31:
-    %t_49 = sne %e_1 %t_5
-    br %t_49 main_lhs_then_32 main_if_merge_1
-
-main_lhs_then_32:
-    %t_50 = sne %e_1 %t_1
-    br %t_50 main_lhs_then_33 main_if_merge_1
-
-main_lhs_then_33:
-    %t_51 = sne %e_1 %t_3
-    br %t_51 main_lhs_then_34 main_if_merge_1
-
-main_lhs_then_34:
-    %t_52 = sne %e_1 %t_4
-    br %t_52 main_lhs_then_35 main_if_merge_1
-
-main_lhs_then_35:
-    %t_53 = sne %f_1 %t_5
-    br %t_53 main_lhs_then_36 main_if_merge_1
-
-main_lhs_then_36:
-    %t_54 = sne %f_1 %t_1
-    br %t_54 main_lhs_then_37 main_if_merge_1
-
-main_lhs_then_37:
-    %t_55 = sne %f_1 %t_3
-    br %t_55 main_lhs_then_38 main_if_merge_1
-
-main_lhs_then_38:
-    %t_56 = sne %f_1 %t_4
-    br %t_56 main_lhs_then_39 main_if_merge_1
-
-main_lhs_then_39:
-    %t_57 = sne %t_1 %t_3
-    br %t_57 main_lhs_then_40 main_if_merge_1
-
-main_lhs_then_40:
-    %t_58 = sne %t_5 %t_4
-    br %t_58 main_if_then_1 main_if_merge_1
-
-main_if_then_1:
-    %t_59 = move %t_6
-    %t_6 = add %t_6 1
-    jump main_if_merge_1
-
-main_if_merge_1:
-    jump main_for_step_4
-
-main_for_step_4:
-    %t_60 = move %f_1
-    %f_1 = add %f_1 1
-    jump main_for_cond_6
-
-main_for_merge_3:
-    jump main_for_step_5
-
-main_for_step_5:
-    %t_61 = move %b_1
-    %b_1 = add %b_1 1
-    jump main_for_cond_2
-
-main_for_merge_2:
-    jump main_for_step_6
-
-main_for_step_6:
-    %t_62 = move %a_1
-    %a_1 = add %a_1 1
+    %t_87.0 = move %i_2.2
+    %i_2.3 = add %i_2.2 1
     jump main_for_cond_1
+
+main_for_merge_1:
+    %tmp_1.2 = phi main_for_cond_1 %tmp_1.1 main_lhs_then_1 %tmp_1.2 main_if_then_4 %tmp_1.3 
+    %t_88.0 = mul %k_1.1 8
+    %t_89.0 = add %t_88.0 8
+    %t_90.0 = add %phi_1.0 %t_89.0
+    %t_91.0 = load %t_90.0
+    %t_92.0 = call toString %t_91.0 
+    call println %t_92.0 
+    %i_1.4 = add %i_1.3 1
+    jump main_for_body_1
 
 }
 
 define i64 @__init  {
 __init_entry_1:
-    %t_63 = load @i_1
-    %t_64 = load @j_1
-    %t_65 = load @k_1
-    %t_66 = load @h_1
-    %t_67 = load @total_1
-    %t_66 = move 99
-    %t_63 = move 100
-    %t_64 = move 101
-    %t_65 = move 102
-    %t_67 = move 0
-    store %t_67 @total_1
-    store %t_66 @h_1
-    store %t_65 @k_1
-    store %t_64 @j_1
-    store %t_63 @i_1
-    %t_68 = call main 
-    %t_67 = load @total_1
-    %t_69 = move %t_68
-    store %t_67 @total_1
-    store %t_66 @h_1
-    store %t_65 @k_1
-    store %t_64 @j_1
-    store %t_63 @i_1
-    ret %t_69
+    %t_93.0 = load @M_1.-1
+    %t_93.1 = move 0
+    store %t_93.1 @M_1.-1
+    %t_94.0 = call main 
+    %t_93.2 = load @M_1.-1
+    %t_95.0 = move %t_94.0
+    store %t_93.2 @M_1.-1
+    ret %t_95.0
 
 }
 

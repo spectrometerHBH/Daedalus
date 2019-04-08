@@ -30,10 +30,6 @@ public interface IRVisitor {
 
     void visit(Move inst);
 
-    void visit(Pop inst);
-
-    void visit(Push inst);
-
     void visit(Return inst);
 
     void visit(Store inst);

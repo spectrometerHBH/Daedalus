@@ -11,6 +11,7 @@ public class BasicBlock {
     public BasicBlock IDOM;
     public int postOrderNumber;
     public Set<BasicBlock> DF;
+    public Set<BasicBlock> DTSuccessors;
 
     private Function currentFunction;
     private String name;

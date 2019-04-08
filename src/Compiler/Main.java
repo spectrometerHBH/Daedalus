@@ -6,7 +6,6 @@ import Compiler.Backend.IRBuilder;
 import Compiler.Backend.IRPrinter;
 import Compiler.Frontend.*;
 import Compiler.IR.IRRoot;
-import Compiler.IRInterpreter.IRInterpreter;
 import Compiler.Optim.Optimizer;
 import Compiler.Parser.MxstarErrorListener;
 import Compiler.Parser.MxstarLexer;
@@ -34,13 +33,13 @@ public class Main {
         InputStream in = new FileInputStream("test.txt");
 
         //for text-ir output
-        PrintStream ir_out_transformed = new PrintStream(System.out);
-        //PrintStream ir_out_transformed = new PrintStream("ir_out_t.txt");
-        //PrintStream ir_out_raw = new PrintStream("ir_out.txt");
+        //PrintStream ir_out_transformed = new PrintStream(System.out);
+        PrintStream ir_out_transformed = new PrintStream("ir_out_t.txt");
+        PrintStream ir_out_raw = new PrintStream("ir_out.txt");
 
         //for IR interpreter test use
-        FileInputStream ir_test_in = new FileInputStream("ir_out.txt");
-        //FileInputStream ir_test_in = new FileInputStream("ir_out_t.txt");
+        //FileInputStream ir_test_in = new FileInputStream("ir_out.txt");
+        FileInputStream ir_test_in = new FileInputStream("ir_out_t.txt");
         DataInputStream ir_data_in = new DataInputStream(System.in);
         PrintStream ir_data_out = new PrintStream(new FileOutputStream("ir_test_out.txt"));
 
@@ -60,13 +59,13 @@ public class Main {
             IRBuilder irBuilder = new IRBuilder(globalScope);
             irBuilder.visit(ast);
             IRRoot irRoot = irBuilder.getIrRoot();
-            //new IRPrinter(ir_out_raw).visit(irRoot);
+            new IRPrinter(ir_out_raw).visit(irRoot);
             new GlobalVariableResolver(irRoot).run();
 
             //Optimization
             Optimizer optimizer = new Optimizer(irRoot);
             optimizer.simplifyCFG();
-            //optimizer.SSAConstruction();
+            optimizer.SSAConstruction();
             //optimizer.SSADestruction();
             new IRPrinter(ir_out_transformed).visit(irRoot);
 

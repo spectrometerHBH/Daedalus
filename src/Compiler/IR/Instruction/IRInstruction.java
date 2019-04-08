@@ -79,9 +79,14 @@ public abstract class IRInstruction {
 
     public abstract void setDefRegister(Register newRegister);
 
+    public abstract void renameDefRegister();
+
     public List<Register> getUseRegisters() {
         return useRegisters;
     }
 
     public abstract void setUseRegisters(Map<Register, Register> renameMap);
+
+    public abstract void renameUseRegisters();
+
 }

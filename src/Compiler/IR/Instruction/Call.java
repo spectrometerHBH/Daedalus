@@ -3,8 +3,10 @@ package Compiler.IR.Instruction;
 import Compiler.IR.BasicBlock;
 import Compiler.IR.Function;
 import Compiler.IR.IRVisitor;
+import Compiler.IR.Operand.GlobalVariable;
 import Compiler.IR.Operand.Operand;
 import Compiler.IR.Operand.Register;
+import Compiler.IR.Operand.VirtualRegister;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -81,6 +83,24 @@ public class Call extends IRInstruction {
             if (parameter instanceof Register) parameterList.set(i, renameMap.get(parameter));
         }
         if (objectPointer instanceof Register) objectPointer = renameMap.get(objectPointer);
+        updateUseRegisters();
+    }
+
+    @Override
+    public void renameDefRegister() {
+        if (result != null && result instanceof VirtualRegister && !(result instanceof GlobalVariable))
+            result = ((VirtualRegister) result).getSSARenameRegister(((VirtualRegister) result).getNewId());
+    }
+
+    @Override
+    public void renameUseRegisters() {
+        for (int i = 0; i < parameterList.size(); i++) {
+            Operand parameter = parameterList.get(i);
+            if (parameter instanceof VirtualRegister && !(parameter instanceof GlobalVariable))
+                parameterList.set(i, ((VirtualRegister) parameter).getSSARenameRegister(((VirtualRegister) parameter).info.stack.peek()));
+        }
+        if (objectPointer instanceof VirtualRegister && !(objectPointer instanceof GlobalVariable))
+            objectPointer = ((VirtualRegister) objectPointer).getSSARenameRegister(((VirtualRegister) objectPointer).info.stack.peek());
         updateUseRegisters();
     }
 }

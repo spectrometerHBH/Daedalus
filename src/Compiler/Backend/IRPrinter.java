@@ -5,10 +5,7 @@ import Compiler.IR.Function;
 import Compiler.IR.IRRoot;
 import Compiler.IR.IRVisitor;
 import Compiler.IR.Instruction.*;
-import Compiler.IR.Operand.GlobalVariable;
-import Compiler.IR.Operand.Immediate;
-import Compiler.IR.Operand.StaticString;
-import Compiler.IR.Operand.Storage;
+import Compiler.IR.Operand.*;
 
 import java.io.PrintStream;
 import java.util.HashMap;
@@ -193,16 +190,6 @@ public class IRPrinter implements IRVisitor {
     }
 
     @Override
-    public void visit(Pop inst) {
-        //not now
-    }
-
-    @Override
-    public void visit(Push inst) {
-        //not now
-    }
-
-    @Override
     public void visit(Return inst) {
         out.print("ret ");
         if (inst.getReturnValue() != null) inst.getReturnValue().accept(this);
@@ -251,14 +238,19 @@ public class IRPrinter implements IRVisitor {
     public void visit(Phi inst) {
         inst.getDst().accept(this);
         out.print(" = phi ");
+        inst.getPaths().forEach((basicBlock, operand) -> {
+            if (operand != null) {
+                out.print(getLabel(basicBlock) + " ");
+                operand.accept(this);
+                out.print(" ");
+            }
+        });
         out.println();
     }
 
     @Override
     public void visit(Storage storage) {
         if (storage instanceof GlobalVariable) out.print("@" + getName(storage));
-        else if (storage.getName() != null && storage.getName().equals("__str_const"))
-            out.print("@" + getName(storage));
         else out.print("%" + getName(storage));
     }
 
@@ -276,8 +268,10 @@ public class IRPrinter implements IRVisitor {
     }
 
     private String getName(Storage storage) {
-        String name = storageStringMap.get(storage);
-        return name != null ? name : createName(storage, storage.getName() == null ? "t" : storage.getName());
+        VirtualRegister origin = ((VirtualRegister)storage).getOrigin();
+        String name = storageStringMap.get(origin);
+        name =  name != null ? name : createName(origin, origin.getName() == null ? "t" : origin.getName());
+        return name + "." + ((VirtualRegister)storage).getSSAID();
     }
 
     private String createLabel(BasicBlock basicBlock, String name) {

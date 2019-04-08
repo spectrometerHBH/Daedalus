@@ -151,10 +151,7 @@ public class IRInterpreter {
         inst.lineno = lineno;
         inst.text = line;
 
-        if (!inst.operator.equals("phi")) {
-            allowPhi = false;
-            curBB.instructions.add(inst);
-        }
+        curBB.instructions.add(inst);
 
         // save operands to variables
         switch (inst.operator) {

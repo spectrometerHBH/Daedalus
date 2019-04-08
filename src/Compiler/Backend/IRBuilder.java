@@ -694,7 +694,7 @@ public class IRBuilder implements ASTVisitor {
 
     @Override
     public void visit(StringLiteralNode node) {
-        StaticString staticString = new StaticString(new I64Value("__str_const"), node.getVal());
+        StaticString staticString = new StaticString(new GlobalI64Value("__str_const", true), node.getVal());
         node.setResultOperand(staticString.getPointer());
         irRoot.addStaticString(staticString);
     }

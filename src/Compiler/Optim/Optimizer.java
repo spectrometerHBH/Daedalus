@@ -19,7 +19,7 @@ public class Optimizer {
         cfgSimplifier.run();
     }
 
-    public void SSAConstruction() {
+    public void SSAConstruction() throws Exception {
         ssaConstructor.run();
     }
 
