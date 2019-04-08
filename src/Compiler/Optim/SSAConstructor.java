@@ -127,6 +127,7 @@ class SSAConstructor extends Pass {
     }
 
     private void rename(BasicBlock basicBlock) {
+        System.err.println(basicBlock.getName());
         for (IRInstruction irInstruction = basicBlock.head; irInstruction != null; irInstruction = irInstruction.getNextInstruction()) {
             if (!(irInstruction instanceof Phi)) break;
             VirtualRegister dst = (VirtualRegister) ((Phi) irInstruction).getDst();
@@ -150,18 +151,25 @@ class SSAConstructor extends Pass {
 
         basicBlock.DTSuccessors.forEach(this::rename);
 
+        //System.err.println(basicBlock.getName());
         for (IRInstruction irInstruction = basicBlock.head; irInstruction != null; irInstruction = irInstruction.getNextInstruction()) {
             VirtualRegister dst = (VirtualRegister) irInstruction.getDefRegister();
-            if (dst != null) dst.getOrigin().info.stack.pop();
+            if (dst != null) {
+                //System.err.println(dst.getOrigin().info.stack.peek());
+                dst.getOrigin().info.stack.pop();
+            }
         }
     }
 
     private void renameVariables(Function function) {
+        VirtualRegister _this = (VirtualRegister) function.getReferenceForClassMethod();
+        if (_this != null) function.setReferenceForClassMethod(_this.getSSARenameRegister(_this.getNewId()));
         for (int i = 0; i < function.getParameterList().size(); i++) {
             VirtualRegister parameter = (VirtualRegister) function.getParameterList().get(i);
             function.getParameterList().set(i, parameter.getSSARenameRegister(parameter.getNewId()));
         }
         rename(function.getEntryBlock());
+        if (_this != null) _this.getOrigin().info.stack.pop();
         function.getParameterList().forEach(parameter -> ((VirtualRegister) parameter).getOrigin().info.stack.pop());
     }
 }

@@ -57,7 +57,7 @@ public class Phi extends IRInstruction {
 
     @Override
     public Register getDefRegister() {
-        return null;
+        return (Register) dst;
     }
 
     @Override

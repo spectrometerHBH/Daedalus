@@ -151,7 +151,10 @@ public class IRInterpreter {
         inst.lineno = lineno;
         inst.text = line;
 
-        curBB.instructions.add(inst);
+        if (!inst.operator.equals("phi")) {
+            allowPhi = false;
+            curBB.instructions.add(inst);
+        }
 
         // save operands to variables
         switch (inst.operator) {
@@ -189,7 +192,7 @@ public class IRInterpreter {
                 for (int i = 1; i < words.size(); i += 2) {
                     String label = words.get(i);
                     String reg = words.get(i + 1);
-                    if (!label.endsWith(":")) throw new SemanticError("label should end with `:`");
+                    //if (!label.endsWith(":")) throw new SemanticError("label should end with `:`");
                     if (!reg.startsWith("%") && !reg.startsWith("@") && !reg.equals("undef"))
                         throw new SemanticError("source of a phi node should be a register or `undef`");
                     phi.paths.put(label, reg);

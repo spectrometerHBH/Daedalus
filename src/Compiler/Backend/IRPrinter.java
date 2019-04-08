@@ -239,11 +239,13 @@ public class IRPrinter implements IRVisitor {
         inst.getDst().accept(this);
         out.print(" = phi ");
         inst.getPaths().forEach((basicBlock, operand) -> {
+            out.print(getLabel(basicBlock) + " ");
             if (operand != null) {
-                out.print(getLabel(basicBlock) + " ");
                 operand.accept(this);
-                out.print(" ");
+            } else {
+                out.print("undef");
             }
+            out.print(" ");
         });
         out.println();
     }
