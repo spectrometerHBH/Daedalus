@@ -20,6 +20,7 @@ class CFGSimplifier extends Pass {
         super(irRoot);
     }
 
+    @Override
     void run() {
         irRoot.getFunctionMap().forEach((name, function) -> {
             convertClearBranch(function);

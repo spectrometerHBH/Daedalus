@@ -5,16 +5,14 @@
 define i64 @main  {
 main_entry_1:
     %t_1.0 = load @M_1.-1
-    %t_2.0 = load @check_1.-1
-    %t_3.0 = load @N_1.-1
-    %t_4.0 = call getInt 
-    %t_3.1 = move %t_4.0
-    %t_5.0 = add %t_3.1 5
-    %t_6.0 = mul %t_5.0 8
-    %t_6.1 = add %t_6.0 8
-    %t_7.0 = alloc %t_6.1
-    store %t_5.0 %t_7.0
-    %t_2.1 = move %t_7.0
+    %t_2.0 = call getInt 
+    %t_3.1 = move %t_2.0
+    %t_4.0 = add %t_3.1 5
+    %t_5.0 = mul %t_4.0 8
+    %t_5.1 = add %t_5.0 8
+    %t_6.0 = alloc %t_5.1
+    store %t_4.0 %t_6.0
+    %t_7.1 = move %t_6.0
     %i_1.0 = move 0
     jump main_while_cond_1
 
@@ -28,7 +26,7 @@ main_while_body_1:
     %i_1.5 = add %i_1.1 1
     %t_10.0 = mul %t_9.0 8
     %t_11.0 = add %t_10.0 8
-    %t_12.0 = add %t_2.1 %t_11.0
+    %t_12.0 = add %t_7.1 %t_11.0
     store 1 %t_12.0
     jump main_while_cond_1
 
@@ -54,8 +52,6 @@ main_while_merge_1:
 
 main_for_body_1:
     %tmp_1.0 = phi main_while_merge_1 undef main_for_merge_1 %tmp_1.2 
-    %k_1.0 = phi main_while_merge_1 undef main_for_merge_1 %k_1.1 
-    %i_2.0 = phi main_while_merge_1 undef main_for_merge_1 %i_2.2 
     %t_1.1 = phi main_while_merge_1 %t_1.0 main_for_merge_1 %t_1.2 
     %i_1.3 = phi main_while_merge_1 %i_1.2 main_for_merge_1 %i_1.4 
     %t_22.0 = sgt %i_1.3 %t_3.1
@@ -64,14 +60,14 @@ main_for_body_1:
 main_if_then_1:
     %t_23.0 = move 0
     store %t_3.1 @N_1.-1
-    store %t_2.1 @check_1.-1
+    store %t_7.1 @check_1.-1
     store %t_1.1 @M_1.-1
     ret %t_23.0
 
 main_if_merge_1:
     %t_24.0 = mul %i_1.3 8
     %t_25.0 = add %t_24.0 8
-    %t_26.0 = add %t_2.1 %t_25.0
+    %t_26.0 = add %t_7.1 %t_25.0
     %t_27.0 = load %t_26.0
     br %t_27.0 main_if_then_2 main_if_merge_2
 
@@ -122,7 +118,7 @@ main_for_body_2:
 main_if_merge_3:
     %t_48.0 = mul %tmp_1.3 8
     %t_49.0 = add %t_48.0 8
-    %t_50.0 = add %t_2.1 %t_49.0
+    %t_50.0 = add %t_7.1 %t_49.0
     store 0 %t_50.0
     %t_51.0 = mul %i_2.2 8
     %t_52.0 = add %t_51.0 8
@@ -174,18 +170,17 @@ main_if_then_3:
     jump main_for_step_1
 
 main_for_step_1:
-    %t_87.0 = move %i_2.2
     %i_2.3 = add %i_2.2 1
     jump main_for_cond_1
 
 main_for_merge_1:
     %tmp_1.2 = phi main_for_cond_1 %tmp_1.1 main_lhs_then_1 %tmp_1.1 main_if_then_4 %tmp_1.3 
-    %t_88.0 = mul %k_1.1 8
-    %t_89.0 = add %t_88.0 8
-    %t_90.0 = add %phi_1.0 %t_89.0
-    %t_91.0 = load %t_90.0
-    %t_92.0 = call toString %t_91.0 
-    call println %t_92.0 
+    %t_87.0 = mul %k_1.1 8
+    %t_88.0 = add %t_87.0 8
+    %t_89.0 = add %phi_1.0 %t_88.0
+    %t_90.0 = load %t_89.0
+    %t_91.0 = call toString %t_90.0 
+    call println %t_91.0 
     %i_1.4 = add %i_1.3 1
     jump main_for_body_1
 
@@ -193,14 +188,13 @@ main_for_merge_1:
 
 define i64 @__init  {
 __init_entry_1:
-    %t_93.0 = load @M_1.-1
-    %t_93.1 = move 0
-    store %t_93.1 @M_1.-1
-    %t_94.0 = call main 
-    %t_93.2 = load @M_1.-1
-    %t_95.0 = move %t_94.0
-    store %t_93.2 @M_1.-1
-    ret %t_95.0
+    %t_92.1 = move 0
+    store %t_92.1 @M_1.-1
+    %t_93.0 = call main 
+    %t_92.2 = load @M_1.-1
+    %t_94.0 = move %t_93.0
+    store %t_92.2 @M_1.-1
+    ret %t_94.0
 
 }
 

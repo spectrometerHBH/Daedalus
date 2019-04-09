@@ -1,6 +1,5 @@
 package Compiler.Optim;
 
-import Compiler.Backend.IRPrinter;
 import Compiler.IR.BasicBlock;
 import Compiler.IR.Function;
 import Compiler.IR.IRRoot;
@@ -9,8 +8,6 @@ import Compiler.IR.Instruction.Phi;
 import Compiler.IR.Operand.Register;
 import Compiler.IR.Operand.VirtualRegister;
 
-import java.io.FileNotFoundException;
-import java.io.PrintStream;
 import java.util.*;
 
 class SSAConstructor extends Pass {
@@ -18,7 +15,8 @@ class SSAConstructor extends Pass {
         super(irRoot);
     }
 
-    void run() throws Exception{
+    @Override
+    void run() {
         irRoot.getFunctionMap().forEach((name, function) -> {
             computeDominateTree(function);
             computeDominanceFrontier(function);
@@ -81,7 +79,6 @@ class SSAConstructor extends Pass {
         }
     }
 
-    //find all global variables that used in one BB but not defined in that BB
     private void findGlobalNames(Function function) {
         List<BasicBlock> basicBlockList = function.getReversePostOrderDFSBBList();
         Set<VirtualRegister> varKill = new HashSet<>();
@@ -98,7 +95,8 @@ class SSAConstructor extends Pass {
                 });
                 if (defRegister instanceof VirtualRegister) {
                     varKill.add((VirtualRegister) defRegister);
-                    if (((VirtualRegister) defRegister).info == null) ((VirtualRegister) defRegister).info = new VirtualRegister.RegisterInformation();
+                    if (((VirtualRegister) defRegister).info == null)
+                        ((VirtualRegister) defRegister).info = new VirtualRegister.RegisterInformation();
                     ((VirtualRegister) defRegister).info.defBB.add(basicBlock);
                 }
                 if (!irInstruction.hasNextInstruction()) break;
@@ -127,7 +125,6 @@ class SSAConstructor extends Pass {
     }
 
     private void rename(BasicBlock basicBlock) {
-        System.err.println(basicBlock.getName());
         for (IRInstruction irInstruction = basicBlock.head; irInstruction != null; irInstruction = irInstruction.getNextInstruction()) {
             if (!(irInstruction instanceof Phi)) break;
             VirtualRegister dst = (VirtualRegister) ((Phi) irInstruction).getDst();
@@ -151,11 +148,9 @@ class SSAConstructor extends Pass {
 
         basicBlock.DTSuccessors.forEach(this::rename);
 
-        //System.err.println(basicBlock.getName());
         for (IRInstruction irInstruction = basicBlock.head; irInstruction != null; irInstruction = irInstruction.getNextInstruction()) {
             VirtualRegister dst = (VirtualRegister) irInstruction.getDefRegister();
             if (dst != null) {
-                //System.err.println(dst.getOrigin().info.stack.peek());
                 dst.getOrigin().info.stack.pop();
             }
         }

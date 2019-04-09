@@ -7,12 +7,14 @@ public class Optimizer {
     private SSAConstructor ssaConstructor;
     private SSADestructor ssaDestructor;
     private CFGSimplifier cfgSimplifier;
+    private DeadCodeEliminator deadCodeEliminater;
 
     public Optimizer(IRRoot irRoot) {
         this.irRoot = irRoot;
         ssaConstructor = new SSAConstructor(irRoot);
         ssaDestructor = new SSADestructor(irRoot);
         cfgSimplifier = new CFGSimplifier(irRoot);
+        deadCodeEliminater = new DeadCodeEliminator(irRoot);
     }
 
     public void simplifyCFG() {
@@ -25,5 +27,9 @@ public class Optimizer {
 
     public void SSADestruction() {
         ssaDestructor.run();
+    }
+
+    public void DeadCodeElimination() {
+        deadCodeEliminater.run();
     }
 }

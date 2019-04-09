@@ -270,10 +270,10 @@ public class IRPrinter implements IRVisitor {
     }
 
     private String getName(Storage storage) {
-        VirtualRegister origin = ((VirtualRegister)storage).getOrigin();
+        VirtualRegister origin = ((VirtualRegister) storage).getOrigin();
         String name = storageStringMap.get(origin);
-        name =  name != null ? name : createName(origin, origin.getName() == null ? "t" : origin.getName());
-        return name + "." + ((VirtualRegister)storage).getSSAID();
+        name = name != null ? name : createName(origin, origin.getName() == null ? "t" : origin.getName());
+        return name + "." + ((VirtualRegister) storage).getSSAID();
     }
 
     private String createLabel(BasicBlock basicBlock, String name) {

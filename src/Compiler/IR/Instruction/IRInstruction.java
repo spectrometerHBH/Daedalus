@@ -71,6 +71,13 @@ public abstract class IRInstruction {
         setNextInstruction(newInstruction);
     }
 
+    public void removeSelf() {
+        if (this == currentBB.head) currentBB.head = this.getNextInstruction();
+        if (this == currentBB.tail) currentBB.tail = this.getLastInstruction();
+        if (hasLastInstruction()) getLastInstruction().setNextInstruction(this.nextInstruction);
+        if (hasNextInstruction()) getNextInstruction().setLastInstruction(this.lastInstruction);
+    }
+
     public abstract void accept(IRVisitor irVisitor);
 
     public abstract void updateUseRegisters();
@@ -82,6 +89,7 @@ public abstract class IRInstruction {
     public abstract void renameDefRegister();
 
     public List<Register> getUseRegisters() {
+        updateUseRegisters();
         return useRegisters;
     }
 

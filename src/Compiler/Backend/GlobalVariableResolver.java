@@ -28,13 +28,13 @@ public class GlobalVariableResolver {
                     if (!useRegisters.isEmpty()) {
                         renameMap.clear();
                         for (Register useRegister : useRegisters)
-                            if (useRegister instanceof GlobalVariable && !((GlobalI64Value)useRegister).isString())
+                            if (useRegister instanceof GlobalVariable && !((GlobalI64Value) useRegister).isString())
                                 renameMap.put(useRegister, getTemporal((GlobalVariable) useRegister, function.functionInfo.globalTemporal));
                             else
                                 renameMap.put(useRegister, useRegister);
                         irInstruction.setUseRegisters(renameMap);
                     }
-                    if (defRegister instanceof GlobalVariable && !((GlobalI64Value)defRegister).isString()) {
+                    if (defRegister instanceof GlobalVariable && !((GlobalI64Value) defRegister).isString()) {
                         irInstruction.setDefRegister(getTemporal((GlobalVariable) defRegister, function.functionInfo.globalTemporal));
                         function.functionInfo.defGlobalVariable.add((GlobalVariable) defRegister);
                     }

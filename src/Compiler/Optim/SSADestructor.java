@@ -7,6 +7,7 @@ class SSADestructor extends Pass {
         super(irRoot);
     }
 
+    @Override
     void run() {
 
     }
