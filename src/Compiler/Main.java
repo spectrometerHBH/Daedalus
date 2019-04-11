@@ -6,6 +6,7 @@ import Compiler.Backend.IRBuilder;
 import Compiler.Backend.IRPrinter;
 import Compiler.Frontend.*;
 import Compiler.IR.IRRoot;
+import Compiler.IRInterpreter.IRInterpreter;
 import Compiler.Optim.Optimizer;
 import Compiler.Parser.MxstarErrorListener;
 import Compiler.Parser.MxstarLexer;
@@ -40,7 +41,7 @@ public class Main {
 
         //for IR interpreter test use
         FileInputStream ir_test_in = new FileInputStream("ir_out.txt");
-        //FileInputStream ir_test_in = new FileInputStream("ir_out_t.txt");
+        //FileInputStream ir_test_in = new FileInputStream("ir_out_tt.txt");
         DataInputStream ir_data_in = new DataInputStream(System.in);
         PrintStream ir_data_out = new PrintStream(new FileOutputStream("ir_test_out.txt"));
 
@@ -64,11 +65,12 @@ public class Main {
             Optimizer optimizer = new Optimizer(irRoot);
             optimizer.simplifyCFG();
             optimizer.SSAConstruction();
-            //new IRPrinter(ir_out_afterSSAConstruction).visit(irRoot);
             optimizer.DeadCodeElimination();
+            //new IRPrinter(ir_out_afterSSAConstruction).visit(irRoot);
             optimizer.SSADestruction();
+            optimizer.simplifyCFG();
             new IRPrinter(ir_out_afterOptimization).visit(irRoot);
-            //IRInterpreter irInterpreter = new IRInterpreter(ir_test_in, true, ir_data_in, ir_data_out);
+            //IRInterpreter irInterpreter = new IRInterpreter(ir_test_in, false, ir_data_in, ir_data_out);
             //irInterpreter.run();
             //Codegen
 

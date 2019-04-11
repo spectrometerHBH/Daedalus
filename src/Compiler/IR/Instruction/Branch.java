@@ -30,6 +30,11 @@ public class Branch extends IRInstruction {
         return elseBB;
     }
 
+    public void replaceTarget(BasicBlock oldBB, BasicBlock newBB) {
+        if (thenBB == oldBB) thenBB = newBB;
+        else elseBB = newBB;
+    }
+
     public Operand getCond() {
         return cond;
     }
