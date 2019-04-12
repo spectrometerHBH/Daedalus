@@ -26,7 +26,7 @@ public abstract class IRInstruction {
         this.currentBB = currentBB;
     }
 
-    public boolean hasLastInstruction() {
+    private boolean hasLastInstruction() {
         return lastInstruction != null;
     }
 
@@ -51,8 +51,14 @@ public abstract class IRInstruction {
     }
 
     public void replaceInstruction(IRInstruction newInstruction) {
-        if (hasLastInstruction()) getLastInstruction().setNextInstruction(newInstruction);
-        if (hasNextInstruction()) getNextInstruction().setLastInstruction(newInstruction);
+        if (hasLastInstruction()) {
+            getLastInstruction().setNextInstruction(newInstruction);
+            newInstruction.setLastInstruction(getLastInstruction());
+        }
+        if (hasNextInstruction()) {
+            getNextInstruction().setLastInstruction(newInstruction);
+            newInstruction.setNextInstruction(getNextInstruction());
+        }
     }
 
     public void prependInstruction(IRInstruction newInstruction) {

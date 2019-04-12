@@ -5,7 +5,6 @@ import Compiler.IR.IRRoot;
 import Compiler.IR.Instruction.Alloc;
 import Compiler.IR.Instruction.Call;
 import Compiler.IR.Instruction.IRInstruction;
-import Compiler.IR.Instruction.Store;
 import Compiler.IR.Operand.Register;
 
 import java.util.HashSet;
@@ -19,7 +18,7 @@ import java.util.Set;
 
 //TODO aggressive DCE with control dependence graph
 
-class DeadCodeEliminator extends Pass{
+class DeadCodeEliminator extends Pass {
     DeadCodeEliminator(IRRoot irRoot) {
         super(irRoot);
     }

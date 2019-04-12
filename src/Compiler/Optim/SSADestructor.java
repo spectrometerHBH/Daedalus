@@ -12,15 +12,6 @@ import Compiler.IR.Operand.VirtualRegister;
 import java.util.*;
 
 class SSADestructor extends Pass {
-    static class ParallelCopy {
-        VirtualRegister dst;
-        Operand src;
-        ParallelCopy(VirtualRegister dst, Operand src) {
-            this.dst = dst;
-            this.src = src;
-        }
-    }
-
     private Map<BasicBlock, List<ParallelCopy>> parallelCopyInfo = new HashMap<>();
 
     SSADestructor(IRRoot irRoot) {
@@ -48,7 +39,7 @@ class SSADestructor extends Pass {
                 if (predecessor.getSuccessors().size() > 1) {
                     BasicBlock pcBB = new BasicBlock(function, "parallel_copy");
                     pcBB.terminate(new Jump(pcBB, basicBlock));
-                    ((Branch)predecessor.tail).replaceTarget(basicBlock, pcBB);
+                    ((Branch) predecessor.tail).replaceTarget(basicBlock, pcBB);
                     predecessor.getSuccessors().remove(basicBlock);
                     predecessor.getSuccessors().add(pcBB);
                     pcBB.getPredecessors().add(predecessor);
@@ -129,5 +120,15 @@ class SSADestructor extends Pass {
                     basicBlock.tail.prependInstruction(new Move(basicBlock, parallelCopy.src, parallelCopy.dst));
             });
         });
+    }
+
+    static class ParallelCopy {
+        VirtualRegister dst;
+        Operand src;
+
+        ParallelCopy(VirtualRegister dst, Operand src) {
+            this.dst = dst;
+            this.src = src;
+        }
     }
 }

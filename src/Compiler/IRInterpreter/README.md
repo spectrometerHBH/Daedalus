@@ -43,7 +43,6 @@ Return true if the virtual machine is terminated by an exception.
 - Heap allocation: `%dest = alloc %size` will acquire `%size` bytes from heap.
 
 ## Brief Introduction to SSA Mode
-//Not in use now 
 In SSA Mode,
 
 - A register can only be defined once statically (not dynamically).
@@ -73,9 +72,9 @@ Jump Instruction:
     br %cond ifTrue ifFalse
 
 Memory Access Instruction:
-    store %src %dest    // M[%dest] <- %src
-    %dest = load %addr  // %dest <- M[%addr] (I believe simplicity favours regularity)
-    %dest = alloc %size // Allocate %size byte memory in heap space and return top pointer
+    store %src %dest        // M[%dest] <- %src
+    %dest = load %addr      // %dest <- M[%addr] (I believe simplicity favours regularity)
+    %dest = alloc %size     // Allocate %size byte memory in heap space and return top pointer
 
 Function Call Instruction:
     call funcname %op1 %op2 %op3 ...
@@ -84,7 +83,7 @@ Function Call Instruction:
 Register Transfer Instruction:
     %dest = move %src
 
-Phi Instruction:(not in use now)
+Phi Instruction:
     %dest = phi block1 %reg1 block2 %reg2 ...
 
 Binary Instruction:

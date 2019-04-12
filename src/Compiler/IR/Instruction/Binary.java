@@ -30,12 +30,24 @@ public class Binary extends IRInstruction {
         return src1;
     }
 
+    public void setSrc1(Operand src1) {
+        this.src1 = src1;
+    }
+
     public Operand getSrc2() {
         return src2;
     }
 
+    public void setSrc2(Operand src2) {
+        this.src2 = src2;
+    }
+
     public Operand getDst() {
         return dst;
+    }
+
+    public void setDst(Operand dst) {
+        this.dst = dst;
     }
 
     @Override
@@ -80,6 +92,10 @@ public class Binary extends IRInstruction {
         if (src2 instanceof VirtualRegister && !(src2 instanceof GlobalVariable))
             src2 = ((VirtualRegister) src2).getSSARenameRegister(((VirtualRegister) src2).info.stack.peek());
         updateUseRegisters();
+    }
+
+    public boolean isCommutative() {
+        return op == Op.ADD || op == Op.MUL || op == Op.AND || op == Op.OR || op == Op.XOR;
     }
 
     public enum Op {
