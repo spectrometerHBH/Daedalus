@@ -1,6 +1,5 @@
 package Compiler.Optim;
 
-import Compiler.IR.Function;
 import Compiler.IR.IRRoot;
 import Compiler.IR.Instruction.Alloc;
 import Compiler.IR.Instruction.Call;
@@ -27,7 +26,7 @@ class DeadCodeEliminator extends Pass {
     void run() {
         irRoot.getFunctionMap().values().forEach(function -> {
             calcDefUseChain(function);
-            naiveDeadCodeElimination(function);
+            naiveDeadCodeElimination();
         });
     }
 
@@ -35,7 +34,7 @@ class DeadCodeEliminator extends Pass {
         return irInstruction instanceof Call || irInstruction instanceof Alloc;
     }
 
-    private void naiveDeadCodeElimination(Function function) {
+    private void naiveDeadCodeElimination() {
         LinkedList<Register> workList = new LinkedList<>(def.keySet());
         Set<Register> inQueue = new HashSet<>(def.keySet());
         while (!workList.isEmpty()) {

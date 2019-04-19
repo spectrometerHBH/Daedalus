@@ -5,15 +5,13 @@ import Compiler.IR.IRRoot;
 import Compiler.IR.Instruction.IRInstruction;
 import Compiler.IR.Operand.Register;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 public abstract class Pass {
     protected IRRoot irRoot;
     protected Map<Register, IRInstruction> def;
     protected Map<Register, Set<IRInstruction>> use;
+    protected LinkedList<IRInstruction> allStatements;
 
     Pass(IRRoot irRoot) {
         this.irRoot = irRoot;
@@ -37,5 +35,14 @@ public abstract class Pass {
                 }
             }
         });
+    }
+
+    LinkedList<IRInstruction> getAllStatements(Function function) {
+        allStatements = new LinkedList<>();
+        function.getReversePostOrderDFSBBList().forEach(basicBlock -> {
+            for (IRInstruction irInstruction = basicBlock.head; irInstruction != null; irInstruction = irInstruction.getNextInstruction())
+                allStatements.add(irInstruction);
+        });
+        return allStatements;
     }
 }

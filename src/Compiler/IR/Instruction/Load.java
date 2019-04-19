@@ -81,4 +81,10 @@ public class Load extends IRInstruction {
             src = ((VirtualRegister) src).getSSARenameRegister(((VirtualRegister) src).info.stack.peek());
         updateUseRegisters();
     }
+
+    @Override
+    public void replaceOperand(Operand oldOperand, Operand newOperand) {
+        if (src == oldOperand) src = newOperand;
+        updateUseRegisters();
+    }
 }

@@ -2,6 +2,7 @@ package Compiler.IR.Instruction;
 
 import Compiler.IR.BasicBlock;
 import Compiler.IR.IRVisitor;
+import Compiler.IR.Operand.Operand;
 import Compiler.IR.Operand.Register;
 
 import java.util.ArrayList;
@@ -54,11 +55,11 @@ public abstract class IRInstruction {
         if (hasLastInstruction()) {
             getLastInstruction().setNextInstruction(newInstruction);
             newInstruction.setLastInstruction(getLastInstruction());
-        }
+        } else currentBB.head = newInstruction;
         if (hasNextInstruction()) {
             getNextInstruction().setLastInstruction(newInstruction);
             newInstruction.setNextInstruction(getNextInstruction());
-        }
+        } else currentBB.tail = newInstruction;
     }
 
     public void prependInstruction(IRInstruction newInstruction) {
@@ -103,4 +104,5 @@ public abstract class IRInstruction {
 
     public abstract void renameUseRegisters();
 
+    public abstract void replaceOperand(Operand oldOperand, Operand newOperand);
 }

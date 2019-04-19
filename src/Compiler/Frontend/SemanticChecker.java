@@ -265,7 +265,7 @@ public class SemanticChecker implements ASTVisitor {
     }
 
     @Override
-    public void visit(FuncallExprNode node) {
+    public void visit(FuncCallExprNode node) {
         ExprNode function = node.getFunction();
         function.accept(this);
         node.getParameterList().forEach(x -> x.accept(this));

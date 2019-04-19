@@ -3,6 +3,11 @@ package Compiler.Optim;
 import Compiler.IR.BasicBlock;
 import Compiler.IR.Function;
 import Compiler.IR.IRRoot;
+import Compiler.IR.Instruction.Branch;
+import Compiler.IR.Instruction.IRInstruction;
+import Compiler.IR.Instruction.Jump;
+import Compiler.IR.Instruction.Phi;
+import Compiler.IR.Operand.Immediate;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -30,17 +35,32 @@ class CFGSimplifier extends Pass {
     }
 
     private void convertClearBranch(Function function) {
-
+        function.getReversePostOrderDFSBBList().forEach(basicBlock -> {
+            if (basicBlock.tail instanceof Branch) {
+                Branch branch = (Branch) basicBlock.tail;
+                if (branch.getThenBB() == branch.getElseBB()) {
+                    branch.replaceInstruction(new Jump(basicBlock, branch.getThenBB()));
+                } else if (branch.getCond() instanceof Immediate) {
+                    int cond = ((Immediate) branch.getCond()).getImmediate();
+                    BasicBlock target = cond == 1 ? branch.getThenBB() : branch.getElseBB();
+                    BasicBlock cut = cond == 1 ? branch.getElseBB() : branch.getThenBB();
+                    branch.replaceInstruction(new Jump(basicBlock, target));
+                    for (IRInstruction irInstruction = cut.head; irInstruction instanceof Phi; irInstruction = irInstruction.getNextInstruction())
+                        ((Phi) irInstruction).removePath(basicBlock);
+                    basicBlock.getSuccessors().remove(cut);
+                    cut.getPredecessors().remove(basicBlock);
+                }
+            }
+        });
+        function.recalcReversePostOrderDFSBBList();
     }
 
     private void RemoveUnreachableBB(Function function) {
         //RPO remove orphan
         List<BasicBlock> removeList = new LinkedList<>();
-        function.getReversePostOrderDFSBBList().forEach(basicBlock -> {
-            basicBlock.getPredecessors().forEach(predecessor -> {
-                if (!function.reachable(predecessor)) removeList.add(predecessor);
-            });
-        });
+        function.getReversePostOrderDFSBBList().forEach(basicBlock -> basicBlock.getPredecessors().forEach(predecessor -> {
+            if (!function.reachable(predecessor)) removeList.add(predecessor);
+        }));
         removeList.forEach(BasicBlock::removeSelf);
         function.recalcReversePostOrderDFSBBList();
     }

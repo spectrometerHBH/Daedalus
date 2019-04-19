@@ -4,7 +4,7 @@ import Compiler.AST.ProgramNode;
 import Compiler.Backend.GlobalVariableResolver;
 import Compiler.Backend.IRBuilder;
 import Compiler.Backend.IRPrinter;
-import Compiler.Backend.TwoAddressInstructionResolver;
+import Compiler.Backend.RegisterAllocator;
 import Compiler.Frontend.*;
 import Compiler.IR.IRRoot;
 import Compiler.Optim.Optimizer;
@@ -16,9 +16,7 @@ import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTree;
 
-import java.io.FileInputStream;
-import java.io.InputStream;
-import java.io.PrintStream;
+import java.io.*;
 
 public class Main {
     private static ProgramNode buildAST(InputStream in) throws Exception {
@@ -35,17 +33,16 @@ public class Main {
         InputStream in = new FileInputStream("test.txt");
 
         //for text-ir output
-        PrintStream ir_codegen = new PrintStream(System.out);
-        //PrintStream ir_out_raw = new PrintStream("ir_out.txt");
-        //PrintStream ir_out_afterSSAConstruction = new PrintStream("ir_out_t.txt");
-        //PrintStream ir_out_afterOptimization = new PrintStream("ir_out_tt.txt");
-        //PrintStream ir_codegen = new PrintStream("ir_out_ttt.txt");
+        //PrintStream ir_codegen = new PrintStream(System.out);
+        PrintStream ir_out_raw = new PrintStream("ir_raw.ll");
+        PrintStream ir_out_afterSSAConstruction = new PrintStream("ir_out_ssa_construct.ll");
+        PrintStream ir_out_afterOptimization = new PrintStream("ir_out_after_optim.ll");
+        PrintStream ir_codegen = new PrintStream("ir_out_after_codegen.ll");
 
         //for IR interpreter test use
-        //FileInputStream ir_test_in = new FileInputStream("ir_out.txt");
-        //FileInputStream ir_test_in = new FileInputStream("ir_out_tt.txt");
-        //DataInputStream ir_data_in = new DataInputStream(System.in);
-        //PrintStream ir_data_out = new PrintStream(new FileOutputStream("ir_test_out.txt"));
+        FileInputStream ir_test_in = new FileInputStream("ir_out_after_codegen.ll");
+        DataInputStream ir_data_in = new DataInputStream(System.in);
+        PrintStream ir_data_out = new PrintStream(new FileOutputStream("ir_test_out.txt"));
 
         try {
             //Syntax Analysis
@@ -62,18 +59,26 @@ public class Main {
             irBuilder.visit(ast);
             IRRoot irRoot = irBuilder.getIrRoot();
             new GlobalVariableResolver(irRoot).run();
-            //new IRPrinter(ir_out_raw).visit(irRoot);
+            new IRPrinter(ir_out_raw).visit(irRoot);
             //Optimization
             Optimizer optimizer = new Optimizer(irRoot);
             optimizer.simplifyCFG();
             optimizer.SSAConstruction();
-            //new IRPrinter(ir_out_afterSSAConstruction).visit(irRoot);
+            new IRPrinter(ir_out_afterSSAConstruction).visit(irRoot);
+            optimizer.ConstantAndCopyPropagation();
+            optimizer.simplifyCFG();
             optimizer.DeadCodeElimination();
+            optimizer.simplifyCFG();
+            optimizer.ConstantAndCopyPropagation();
+            optimizer.simplifyCFG();
+            optimizer.DeadCodeElimination();
+            optimizer.simplifyCFG();
+            new IRPrinter(ir_out_afterOptimization).visit(irRoot);
             optimizer.SSADestruction();
             optimizer.simplifyCFG();
-            //new IRPrinter(ir_out_afterOptimization).visit(irRoot);
             //Codegen
-            new TwoAddressInstructionResolver(irRoot).run();
+            //new X86ConstraintResolver(irRoot).run();
+            new RegisterAllocator(irRoot).run();
             new IRPrinter(ir_codegen).visit(irRoot);
         } catch (Exception e) {
             e.printStackTrace();

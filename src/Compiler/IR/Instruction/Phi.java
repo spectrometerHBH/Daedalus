@@ -54,7 +54,6 @@ public class Phi extends IRInstruction {
     public void updateUseRegisters() {
         useRegisters.clear();
         for (Map.Entry<BasicBlock, Operand> entry : paths.entrySet()) {
-            BasicBlock basicBlock = entry.getKey();
             Operand operand = entry.getValue();
             if (operand instanceof Register) useRegisters.add((Register) operand);
         }
@@ -83,5 +82,15 @@ public class Phi extends IRInstruction {
     @Override
     public void renameUseRegisters() {
 
+    }
+
+    @Override
+    public void replaceOperand(Operand oldOperand, Operand newOperand) {
+        for (Map.Entry<BasicBlock, Operand> entry : paths.entrySet()) {
+            BasicBlock basicBlock = entry.getKey();
+            Operand operand = entry.getValue();
+            if (operand == oldOperand) paths.put(basicBlock, newOperand);
+        }
+        updateUseRegisters();
     }
 }

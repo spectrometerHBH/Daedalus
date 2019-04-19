@@ -1,5 +1,6 @@
 package Compiler.Backend;
 
+import Compiler.IR.Function;
 import Compiler.IR.IRRoot;
 import Compiler.IR.Instruction.Binary;
 import Compiler.IR.Instruction.IRInstruction;
@@ -7,15 +8,25 @@ import Compiler.IR.Instruction.Move;
 import Compiler.IR.Operand.I64Value;
 import Compiler.IR.Operand.Operand;
 
-public class TwoAddressInstructionResolver {
+//Convert IR to X86 form
+//TODO : calling convention resolve
+//TODO : div/mod, shl/shr
+
+public class X86ConstraintResolver {
     private IRRoot irRoot;
 
-    public TwoAddressInstructionResolver(IRRoot irRoot) {
+    public X86ConstraintResolver(IRRoot irRoot) {
         this.irRoot = irRoot;
     }
 
     public void run() {
-        irRoot.getFunctionMap().values().forEach(function -> function.getReversePostOrderDFSBBList().forEach(basicBlock -> {
+        irRoot.getFunctionMap().values().forEach(this::twoAddressInstructionResolve);
+        irRoot.getFunctionMap().values().forEach(this::processCallingConvention);
+        irRoot.getFunctionMap().values().forEach(this::processDivAndShift);
+    }
+
+    private void twoAddressInstructionResolve(Function function) {
+        function.getReversePostOrderDFSBBList().forEach(basicBlock -> {
             IRInstruction nowIRInstruction = basicBlock.head, nextIRInstruction;
             for (; nowIRInstruction != null; nowIRInstruction = nextIRInstruction) {
                 nextIRInstruction = nowIRInstruction.getNextInstruction();
@@ -52,6 +63,14 @@ public class TwoAddressInstructionResolver {
                     }
                 }
             }
-        }));
+        });
+    }
+
+    private void processCallingConvention(Function function) {
+
+    }
+
+    private void processDivAndShift(Function function) {
+
     }
 }

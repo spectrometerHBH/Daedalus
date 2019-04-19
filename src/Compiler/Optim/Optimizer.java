@@ -3,25 +3,25 @@ package Compiler.Optim;
 import Compiler.IR.IRRoot;
 
 public class Optimizer {
-    private IRRoot irRoot;
     private SSAConstructor ssaConstructor;
     private SSADestructor ssaDestructor;
     private CFGSimplifier cfgSimplifier;
-    private DeadCodeEliminator deadCodeEliminater;
+    private DeadCodeEliminator deadCodeEliminator;
+    private ConstantAndCopyPropagator constantAndCopyPropagator;
 
     public Optimizer(IRRoot irRoot) {
-        this.irRoot = irRoot;
         ssaConstructor = new SSAConstructor(irRoot);
         ssaDestructor = new SSADestructor(irRoot);
         cfgSimplifier = new CFGSimplifier(irRoot);
-        deadCodeEliminater = new DeadCodeEliminator(irRoot);
+        deadCodeEliminator = new DeadCodeEliminator(irRoot);
+        constantAndCopyPropagator = new ConstantAndCopyPropagator(irRoot);
     }
 
     public void simplifyCFG() {
         cfgSimplifier.run();
     }
 
-    public void SSAConstruction() throws Exception {
+    public void SSAConstruction() {
         ssaConstructor.run();
     }
 
@@ -30,6 +30,10 @@ public class Optimizer {
     }
 
     public void DeadCodeElimination() {
-        deadCodeEliminater.run();
+        deadCodeEliminator.run();
+    }
+
+    public void ConstantAndCopyPropagation() {
+        constantAndCopyPropagator.run();
     }
 }

@@ -100,18 +100,18 @@ expression
     |   <assoc=right> op=('++' | '--') expression                   #UnaryExpr
     |   <assoc=right> op=('+' | '-') expression                     #UnaryExpr
     |   <assoc=right> op=('!' | '~') expression                     #UnaryExpr  
-    |   lhs = expression op=('*' | '/' | '%') rhs = expression      #BinaryExpr
-    |   lhs = expression op=('+' | '-') rhs = expression            #BinaryExpr
-    |   lhs = expression op=('<<' | '>>') rhs = expression          #BinaryExpr
-    |   lhs = expression op=('<' | '>') rhs = expression            #BinaryExpr
-    |   lhs = expression op=('<=' | '>=') rhs = expression          #BinaryExpr
-    |   lhs = expression op=('==' | '!=') rhs = expression          #BinaryExpr   
-    |   lhs = expression op='&' rhs = expression                    #BinaryExpr
-    |   lhs = expression op='^' rhs = expression                    #BinaryExpr
-    |   lhs = expression op='|' rhs = expression                    #BinaryExpr
-    |   lhs = expression op='&&' rhs = expression                   #BinaryExpr
-    |   lhs = expression op='||' rhs = expression                   #BinaryExpr
-    |   <assoc=right> lhs = expression op='=' rhs = expression      #BinaryExpr
+    |   src1 = expression op=('*' | '/' | '%') src2 = expression      #BinaryExpr
+    |   src1 = expression op=('+' | '-') src2 = expression            #BinaryExpr
+    |   src1 = expression op=('<<' | '>>') src2 = expression          #BinaryExpr
+    |   src1 = expression op=('<' | '>') src2 = expression            #BinaryExpr
+    |   src1 = expression op=('<=' | '>=') src2 = expression          #BinaryExpr
+    |   src1 = expression op=('==' | '!=') src2 = expression          #BinaryExpr
+    |   src1 = expression op='&' src2 = expression                    #BinaryExpr
+    |   src1 = expression op='^' src2 = expression                    #BinaryExpr
+    |   src1 = expression op='|' src2 = expression                    #BinaryExpr
+    |   src1 = expression op='&&' src2 = expression                   #BinaryExpr
+    |   src1 = expression op='||' src2 = expression                   #BinaryExpr
+    |   <assoc=right> src1 = expression op='=' src2 = expression      #BinaryExpr
     |   Identifier                                                  #Identifier
     |   This                                                        #ThisExpr
     |   constant                                                    #Literal

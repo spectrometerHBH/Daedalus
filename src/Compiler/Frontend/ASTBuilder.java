@@ -335,7 +335,7 @@ public class ASTBuilder extends MxstarBaseVisitor<ASTNode> {
             for (ParserRuleContext parameter : ctx.parameterList().expression())
                 parameterList.add((ExprNode) visit(parameter));
         }
-        return new FuncallExprNode((ExprNode) visit(ctx.expression()),
+        return new FuncCallExprNode((ExprNode) visit(ctx.expression()),
                 parameterList,
                 new Position(ctx.getStart()));
     }

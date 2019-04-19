@@ -103,4 +103,14 @@ public class Call extends IRInstruction {
             objectPointer = ((VirtualRegister) objectPointer).getSSARenameRegister(((VirtualRegister) objectPointer).info.stack.peek());
         updateUseRegisters();
     }
+
+    @Override
+    public void replaceOperand(Operand oldOperand, Operand newOperand) {
+        for (int i = 0; i < parameterList.size(); i++) {
+            Operand parameter = parameterList.get(i);
+            if (parameter == oldOperand) parameterList.set(i, newOperand);
+        }
+        if (objectPointer == oldOperand) objectPointer = newOperand;
+        updateUseRegisters();
+    }
 }

@@ -67,4 +67,10 @@ public class Alloc extends IRInstruction {
             size = ((VirtualRegister) size).getSSARenameRegister(((VirtualRegister) size).info.stack.peek());
         updateUseRegisters();
     }
+
+    @Override
+    public void replaceOperand(Operand oldOperand, Operand newOperand) {
+        if (size == oldOperand) size = newOperand;
+        updateUseRegisters();
+    }
 }

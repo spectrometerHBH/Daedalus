@@ -162,9 +162,9 @@ public class IRPrinter implements IRVisitor {
         }
         inst.getDst().accept(this);
         out.print(" = " + op + " ");
-        inst.getLhs().accept(this);
+        inst.getSrc1().accept(this);
         out.print(" ");
-        inst.getRhs().accept(this);
+        inst.getSrc2().accept(this);
         out.println();
     }
 
@@ -225,8 +225,7 @@ public class IRPrinter implements IRVisitor {
                 op = "pos";
                 break;
             case NOTL:
-                op = "notl";
-                break;
+                throw new RuntimeException();
         }
         inst.getDst().accept(this);
         out.print(" = " + op + " ");

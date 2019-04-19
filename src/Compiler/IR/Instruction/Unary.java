@@ -74,6 +74,12 @@ public class Unary extends IRInstruction {
         updateUseRegisters();
     }
 
+    @Override
+    public void replaceOperand(Operand oldOperand, Operand newOperand) {
+        if (src == oldOperand) src = newOperand;
+        updateUseRegisters();
+    }
+
     public enum Op {
         NOT, NEG, INC, DEC, POS, NOTL
     }

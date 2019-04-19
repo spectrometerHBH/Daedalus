@@ -11,15 +11,15 @@ import java.util.Map;
 
 public class Cmp extends IRInstruction {
     private Op op;
-    private Operand lhs;
-    private Operand rhs;
+    private Operand src1;
+    private Operand src2;
     private Operand dst;
 
-    public Cmp(BasicBlock currentBB, Op op, Operand lhs, Operand rhs, Operand dst) {
+    public Cmp(BasicBlock currentBB, Op op, Operand src1, Operand src2, Operand dst) {
         super(currentBB);
         this.op = op;
-        this.lhs = lhs;
-        this.rhs = rhs;
+        this.src1 = src1;
+        this.src2 = src2;
         this.dst = dst;
         updateUseRegisters();
     }
@@ -28,12 +28,12 @@ public class Cmp extends IRInstruction {
         return op;
     }
 
-    public Operand getLhs() {
-        return lhs;
+    public Operand getSrc1() {
+        return src1;
     }
 
-    public Operand getRhs() {
-        return rhs;
+    public Operand getSrc2() {
+        return src2;
     }
 
     public Operand getDst() {
@@ -48,8 +48,8 @@ public class Cmp extends IRInstruction {
     @Override
     public void updateUseRegisters() {
         useRegisters.clear();
-        if (lhs instanceof Register) useRegisters.add((Register) lhs);
-        if (rhs instanceof Register) useRegisters.add((Register) rhs);
+        if (src1 instanceof Register) useRegisters.add((Register) src1);
+        if (src2 instanceof Register) useRegisters.add((Register) src2);
     }
 
     @Override
@@ -64,8 +64,8 @@ public class Cmp extends IRInstruction {
 
     @Override
     public void setUseRegisters(Map<Register, Register> renameMap) {
-        if (lhs instanceof Register) lhs = renameMap.get(lhs);
-        if (rhs instanceof Register) rhs = renameMap.get(rhs);
+        if (src1 instanceof Register) src1 = renameMap.get(src1);
+        if (src2 instanceof Register) src2 = renameMap.get(src2);
         updateUseRegisters();
     }
 
@@ -77,10 +77,17 @@ public class Cmp extends IRInstruction {
 
     @Override
     public void renameUseRegisters() {
-        if (lhs instanceof VirtualRegister && !(lhs instanceof GlobalVariable))
-            lhs = ((VirtualRegister) lhs).getSSARenameRegister(((VirtualRegister) lhs).info.stack.peek());
-        if (rhs instanceof VirtualRegister && !(rhs instanceof GlobalVariable))
-            rhs = ((VirtualRegister) rhs).getSSARenameRegister(((VirtualRegister) rhs).info.stack.peek());
+        if (src1 instanceof VirtualRegister && !(src1 instanceof GlobalVariable))
+            src1 = ((VirtualRegister) src1).getSSARenameRegister(((VirtualRegister) src1).info.stack.peek());
+        if (src2 instanceof VirtualRegister && !(src2 instanceof GlobalVariable))
+            src2 = ((VirtualRegister) src2).getSSARenameRegister(((VirtualRegister) src2).info.stack.peek());
+        updateUseRegisters();
+    }
+
+    @Override
+    public void replaceOperand(Operand oldOperand, Operand newOperand) {
+        if (src1 == oldOperand) src1 = newOperand;
+        if (src2 == oldOperand) src2 = newOperand;
         updateUseRegisters();
     }
 

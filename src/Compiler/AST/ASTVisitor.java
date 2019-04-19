@@ -45,7 +45,7 @@ public interface ASTVisitor {
 
     void visit(ClassMemberNode node);
 
-    void visit(FuncallExprNode node);
+    void visit(FuncCallExprNode node);
 
     void visit(IDExprNode node);
 

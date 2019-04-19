@@ -60,4 +60,10 @@ public class Return extends IRInstruction {
             returnValue = ((VirtualRegister) returnValue).getSSARenameRegister(((VirtualRegister) returnValue).info.stack.peek());
         updateUseRegisters();
     }
+
+    @Override
+    public void replaceOperand(Operand oldOperand, Operand newOperand) {
+        if (returnValue == oldOperand) returnValue = newOperand;
+        updateUseRegisters();
+    }
 }

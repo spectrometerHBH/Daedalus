@@ -94,6 +94,13 @@ public class Binary extends IRInstruction {
         updateUseRegisters();
     }
 
+    @Override
+    public void replaceOperand(Operand oldOperand, Operand newOperand) {
+        if (src1 == oldOperand) src1 = newOperand;
+        if (src2 == oldOperand) src2 = newOperand;
+        updateUseRegisters();
+    }
+
     public boolean isCommutative() {
         return op == Op.ADD || op == Op.MUL || op == Op.AND || op == Op.OR || op == Op.XOR;
     }

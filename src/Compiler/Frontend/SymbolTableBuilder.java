@@ -12,7 +12,7 @@ public class SymbolTableBuilder implements ASTVisitor {
     private Scope currentScope;
     private ClassSymbol currentClassSymbol;
     private FunctionSymbol currentFunctionSymbol;
-    private Stack<Loop> stackOfLoops = new Stack<Loop>();
+    private Stack<Loop> stackOfLoops = new Stack<>();
 
     public SymbolTableBuilder(GlobalScope globalScope) {
         this.globalScope = globalScope;
@@ -182,7 +182,7 @@ public class SymbolTableBuilder implements ASTVisitor {
     }
 
     @Override
-    public void visit(FuncallExprNode node) {
+    public void visit(FuncCallExprNode node) {
         node.getFunction().accept(this);
         node.getParameterList().forEach(x -> x.accept(this));
     }

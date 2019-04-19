@@ -124,7 +124,7 @@ public class ClassDeclarationScanner implements ASTVisitor {
     }
 
     @Override
-    public void visit(FuncallExprNode node) {
+    public void visit(FuncCallExprNode node) {
 
     }
 

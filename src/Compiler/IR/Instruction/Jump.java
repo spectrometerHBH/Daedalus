@@ -2,6 +2,7 @@ package Compiler.IR.Instruction;
 
 import Compiler.IR.BasicBlock;
 import Compiler.IR.IRVisitor;
+import Compiler.IR.Operand.Operand;
 import Compiler.IR.Operand.Register;
 
 import java.util.Map;
@@ -51,6 +52,11 @@ public class Jump extends IRInstruction {
 
     @Override
     public void renameUseRegisters() {
+
+    }
+
+    @Override
+    public void replaceOperand(Operand oldOperand, Operand newOperand) {
 
     }
 }

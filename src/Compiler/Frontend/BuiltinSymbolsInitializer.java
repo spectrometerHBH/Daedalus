@@ -65,7 +65,7 @@ public class BuiltinSymbolsInitializer {
                     stmtNodeList.add(new ExprStmtNode(new BinaryExprNode(new IDExprNode(((VarDeclNode) x).getIdentifier(), x.getPosition()), ((VarDeclNode) x).getExpr(), BinaryExprNode.Op.ASSIGN, x.getPosition()), x.getPosition()));
             }
         });
-        stmtNodeList.add(new ReturnNode(new FuncallExprNode(new IDExprNode("main", null), new ArrayList<>(), null), null));
+        stmtNodeList.add(new ReturnNode(new FuncCallExprNode(new IDExprNode("main", null), new ArrayList<>(), null), null));
         BlockStmtNode blockStmtNode = new BlockStmtNode(stmtNodeList, null);
         FuncDeclNode initFunction = new FuncDeclNode(new IntTypeNode(null), "__init", new ArrayList<>(), blockStmtNode, null);
         ast.getDeclNodeList().add(initFunction);

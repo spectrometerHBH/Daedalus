@@ -76,4 +76,10 @@ public class Branch extends IRInstruction {
             cond = ((VirtualRegister) cond).getSSARenameRegister(((VirtualRegister) cond).info.stack.peek());
         updateUseRegisters();
     }
+
+    @Override
+    public void replaceOperand(Operand oldOperand, Operand newOperand) {
+        if (cond == oldOperand) cond = newOperand;
+        updateUseRegisters();
+    }
 }

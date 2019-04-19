@@ -49,7 +49,6 @@ public class IRBuilder implements ASTVisitor {
     @Override
     public void visit(VarDeclNode node) {
         VariableSymbol variableSymbol = node.getVariableSymbol();
-        Type type = node.getTypeAfterResolve();
         if (node.isGlobalVariable()) {
             VirtualRegister globalVariable = new GlobalI64Value(node.getIdentifier());
             irRoot.addGlobalVariable((GlobalVariable) globalVariable);
@@ -88,8 +87,8 @@ public class IRBuilder implements ASTVisitor {
             returnList.forEach(ret -> {
                 ret.getCurrentBB().removeInst();
                 if (ret.getReturnValue() != null)
-                    ret.getCurrentBB().appendInst(new Move(currentBB, ret.getReturnValue(), returnOperand));
-                ret.getCurrentBB().terminate(new Jump(currentBB, exitBB));
+                    ret.getCurrentBB().appendInst(new Move(ret.getCurrentBB(), ret.getReturnValue(), returnOperand));
+                ret.getCurrentBB().terminate(new Jump(ret.getCurrentBB(), exitBB));
             });
             exitBB.terminate(new Return(exitBB, returnOperand));
         } else currentFunction.setExitBlock(currentFunction.getReturnInstList().get(0).getCurrentBB());
@@ -332,10 +331,8 @@ public class IRBuilder implements ASTVisitor {
                 callFunction = irRoot.builtinStringEQ;
                 break;
             case ANDL:
-                break;
-            case ORL:
-                break;
             case ASSIGN:
+            case ORL:
                 break;
         }
 
@@ -499,7 +496,7 @@ public class IRBuilder implements ASTVisitor {
     }
 
     @Override
-    public void visit(FuncallExprNode node) {
+    public void visit(FuncCallExprNode node) {
         //if (stringLengthOrArraySize(node)) return;
         if (isArraySizeCall(node)) return;
         node.getFunction().accept(this);
@@ -582,14 +579,10 @@ public class IRBuilder implements ASTVisitor {
         Unary.Op op = Unary.Op.NOT;
         switch (node.getOp()) {
             case PRE_INC:
-                op = Unary.Op.INC;
-                break;
-            case PRE_DEC:
-                op = Unary.Op.DEC;
-                break;
             case SUF_INC:
                 op = Unary.Op.INC;
                 break;
+            case PRE_DEC:
             case SUF_DEC:
                 op = Unary.Op.DEC;
                 break;
@@ -601,8 +594,6 @@ public class IRBuilder implements ASTVisitor {
                 break;
             case NOT:
                 op = Unary.Op.NOT;
-                break;
-            case NOTL:
                 break;
             default:
                 break;
@@ -825,7 +816,7 @@ public class IRBuilder implements ASTVisitor {
         ((FunctionSymbol) globalScope.resolveSymbol("toString", null)).setFunction(irRoot.builtinToString);
     }
 
-    private boolean isArraySizeCall(FuncallExprNode node) {
+    private boolean isArraySizeCall(FuncCallExprNode node) {
         FunctionSymbol functionSymbol = node.getFunction().getFunctionSymbol();
         String functionName = functionSymbol.getSymbolName();
         if (functionSymbol.isMemberFunction() && functionName.equals("array.size")) {
@@ -838,7 +829,7 @@ public class IRBuilder implements ASTVisitor {
     }
 
     /*
-    private boolean stringLengthOrArraySize(FuncallExprNode node) {
+    private boolean stringLengthOrArraySize(FuncCallExprNode node) {
         FunctionSymbol functionSymbol = node.getFunction().getFunctionSymbol();
         String functionName = functionSymbol.getSymbolName();
         if (functionSymbol.isMemberFunction()) {
