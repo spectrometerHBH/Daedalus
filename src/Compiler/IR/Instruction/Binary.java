@@ -2,10 +2,7 @@ package Compiler.IR.Instruction;
 
 import Compiler.IR.BasicBlock;
 import Compiler.IR.IRVisitor;
-import Compiler.IR.Operand.GlobalVariable;
-import Compiler.IR.Operand.Operand;
-import Compiler.IR.Operand.Register;
-import Compiler.IR.Operand.VirtualRegister;
+import Compiler.IR.Operand.*;
 
 import java.util.Map;
 
@@ -99,6 +96,157 @@ public class Binary extends IRInstruction {
         if (src1 == oldOperand) src1 = newOperand;
         if (src2 == oldOperand) src2 = newOperand;
         updateUseRegisters();
+    }
+
+    private Lea transformBinary2Lea(Binary inst) {
+        switch (inst.getOp()) {
+            case ADD: {
+                if (inst.src1 instanceof Immediate)
+                    return new Lea(inst.getCurrentBB(), new DynamicData((VirtualRegister) inst.src2, null, new Immediate(0), (Immediate) inst.src1), inst.getDst());
+                else if (inst.src2 instanceof Immediate)
+                    return new Lea(inst.getCurrentBB(), new DynamicData((VirtualRegister) inst.src1, null, new Immediate(0), (Immediate) inst.src2), inst.getDst());
+                else
+                    return new Lea(inst.getCurrentBB(), new DynamicData((VirtualRegister) inst.src1, (VirtualRegister) inst.src2, new Immediate(1), new Immediate(0)), inst.getDst());
+            }
+            case SUB: {
+                if (inst.src2 instanceof Immediate)
+                    return new Lea(inst.getCurrentBB(), new DynamicData((VirtualRegister) inst.src1, null, new Immediate(0), new Immediate(-((Immediate) inst.src2).getImmediate())), inst.getDst());
+                else
+                    return null;
+            }
+            case MUL: {
+                if (inst.src1 instanceof Immediate) {
+                    int scale = ((Immediate) inst.src1).getImmediate();
+                    if (scale == 1 || scale == 2 || scale == 4 || scale == 8)
+                        return new Lea(inst.getCurrentBB(), new DynamicData(null, (VirtualRegister) inst.src2, (Immediate) inst.src1, new Immediate(0)), inst.getDst());
+                    else if (scale == 3 || scale == 5 || scale == 9)
+                        return new Lea(inst.getCurrentBB(), new DynamicData((VirtualRegister) inst.src2, (VirtualRegister) inst.src2, new Immediate(scale - 1), new Immediate(0)), inst.getDst());
+                } else if (inst.src2 instanceof Immediate) {
+                    int scale = ((Immediate) inst.src2).getImmediate();
+                    if (scale == 1 || scale == 2 || scale == 4 || scale == 8)
+                        return new Lea(inst.getCurrentBB(), new DynamicData(null, (VirtualRegister) inst.src1, (Immediate) inst.src2, new Immediate(0)), inst.getDst());
+                    else if (scale == 3 || scale == 5 || scale == 9)
+                        return new Lea(inst.getCurrentBB(), new DynamicData((VirtualRegister) inst.src1, (VirtualRegister) inst.src1, new Immediate(scale - 1), new Immediate(0)), inst.getDst());
+
+                } else
+                    return null;
+            }
+            default:
+                return null;
+        }
+    }
+
+    private Lea constructLea(Register base1, Register index1, int scale1, Register index2, int scale2, int offset, Register dst) {
+        if (base1 != null) {
+            if (index1 != null) {
+                if (index2 != null) {
+                    //base1 + index1 * scale1 + index2 * scale2 + offset
+                    if (base1 == index1 && index1 == index2) {
+                        int scale = scale1 + scale2 + 1;
+                        if (scale == 1 || scale == 2 || scale == 4 || scale == 8)
+                            return new Lea(currentBB, new DynamicData(null, base1, new Immediate(scale), new Immediate(offset)), dst);
+                        else if (scale == 3 || scale == 5 || scale == 9)
+                            return new Lea(currentBB, new DynamicData(base1, base1, new Immediate(scale - 1), new Immediate(offset)), dst);
+                        else
+                            return null;
+                    } else if (base1 == index1) {
+                        if (scale1 == 1 && scale2 == 1) {
+                            return new Lea(currentBB, new DynamicData(index2, base1, new Immediate(2), new Immediate(offset)), dst);
+                        } else
+                            return null;
+                    } else if (base1 == index2) {
+                        if (scale1 == 1 && scale2 == 1)
+                            return new Lea(currentBB, new DynamicData(index1, base1, new Immediate(2), new Immediate(offset)), dst);
+                        else
+                            return null;
+                    } else if (index1 == index2) {
+                        int scale = scale1 + scale2;
+                        if (scale == 1 || scale == 2 || scale == 4 || scale == 8)
+                            return new Lea(currentBB, new DynamicData(base1, index1, new Immediate(scale), new Immediate(offset)), dst);
+                        else
+                            return null;
+                    } else
+                        return null;
+                } else {
+                    //base1 + index1 * scale1 + offset
+                    if (base1 == index1 && scale1 == 1)
+                        return new Lea(currentBB, new DynamicData(null, base1, new Immediate(2), new Immediate(offset)), dst);
+                    else
+                        return new Lea(currentBB, new DynamicData(base1, index1, new Immediate(scale1), new Immediate(offset)), dst);
+                }
+            } else {
+                if (index2 != null) {
+                    //base1 + index2 * scale2 + offset
+                    if (base1 == index2 && scale2 == 1)
+                        return new Lea(currentBB, new DynamicData(null, base1, new Immediate(2), new Immediate(offset)), dst);
+                    else
+                        return new Lea(currentBB, new DynamicData(base1, index2, new Immediate(scale2), new Immediate(offset)), dst);
+                } else {
+                    //base1 + offset
+                    return new Lea(currentBB, new DynamicData(base1, null, new Immediate(0), new Immediate(offset)), dst);
+                }
+            }
+        } else {
+            if (index1 != null) {
+                if (index2 != null) {
+                    //index1 * scale1 + index2 * scale2 + offset
+                    if (index1 == index2) {
+                        int scale = scale1 + scale2;
+                        if (scale == 2 || scale == 4 || scale == 8)
+                            return new Lea(currentBB, new DynamicData(null, index1, new Immediate(scale), new Immediate(offset)), dst);
+                        else if (scale == 3 || scale == 5 || scale == 9)
+                            return new Lea(currentBB, new DynamicData(index1, index1, new Immediate(scale - 1), new Immediate(offset)), dst);
+                        else
+                            return null;
+                    } else {
+                        if (scale1 == 1) {
+                            return new Lea(currentBB, new DynamicData(index1, index2, new Immediate(scale2), new Immediate(offset)), dst);
+                        } else if (scale2 == 1) {
+                            return new Lea(currentBB, new DynamicData(index2, index1, new Immediate(scale1), new Immediate(offset)), dst);
+                        } else
+                            return null;
+                    }
+                } else {
+                    //index1 * scale1 + offset
+                    if (scale1 == 1)
+                        return new Lea(currentBB, new DynamicData(index1, null, new Immediate(0), new Immediate(offset)), dst);
+                    else
+                        return new Lea(currentBB, new DynamicData(null, index1, new Immediate(scale1), new Immediate(offset)), dst);
+                }
+            } else {
+                if (index2 != null) {
+                    //index2 * scale2 + offset
+                    if (scale2 == 1)
+                        return new Lea(currentBB, new DynamicData(index2, null, new Immediate(0), new Immediate(offset)), dst);
+                    else
+                        return new Lea(currentBB, new DynamicData(null, index2, new Immediate(scale2), new Immediate(offset)), dst);
+                } else {
+                    //offset
+                    return new Lea(currentBB, new DynamicData(null, null, new Immediate(0), new Immediate(offset)), dst);
+                }
+            }
+        }
+    }
+
+    private Lea combineLea(Lea lea2, Lea lea1) {
+        Register base1 = lea1.getSrc().getBase(), index1 = lea1.getSrc().getIndex();
+        int scale1 = lea1.getSrc().getScale().getImmediate(), offset1 = lea1.getSrc().getOffset().getImmediate();
+        Register base2 = lea2.getSrc().getBase(), index2 = lea2.getSrc().getIndex();
+        int scale2 = lea2.getSrc().getScale().getImmediate(), offset2 = lea2.getSrc().getOffset().getImmediate();
+        if (lea1.getDst() == base2)
+            return constructLea(base1, index1, scale1, index2, scale2, offset1 + offset2, (Register) lea2.getDst());
+        else if (lea1.getDst() == index2)
+            return constructLea(base2, base1, scale2, index1, scale1 * scale2, offset1 * scale2 + offset2, (Register) lea2.getDst());
+        else
+            return null;
+    }
+
+    public IRInstruction combine(IRInstruction last) {
+        Lea thisLea = transformBinary2Lea(this), lastLea;
+        if (last instanceof Binary) lastLea = transformBinary2Lea((Binary) last);
+        else lastLea = (Lea) last;
+        if (thisLea != null && lastLea != null) return combineLea(thisLea, lastLea);
+        else return null;
     }
 
     public boolean isCommutative() {

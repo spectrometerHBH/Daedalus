@@ -21,7 +21,7 @@ public class IRInterpreter {
     ));
     // instructions that have destination
     static private final Set<String> opnames2 = new HashSet<>(Arrays.asList(
-            "load", "move", "alloc", "phi",
+            "load", "move", "alloc", "phi", "lea",
             "add", "sub", "mul", "div", "mod", "shl", "shr", "and", "or", "xor", "neg", "not",
             "slt", "sgt", "sle", "sge", "seq", "sne", "call"
     ));
@@ -158,21 +158,25 @@ public class IRInterpreter {
 
         // save operands to variables
         switch (inst.operator) {
+            case "lea":
+                inst.dest = split[0].trim();
+                inst.op1 = words.get(1).equals("null") ? null : words.get(1);
+                inst.op2 = words.get(2).equals("null") ? null : words.get(2);
+                inst.scale = Integer.valueOf(words.get(3));
+                inst.offset = Integer.valueOf(words.get(4));
+                return;
             case "store":
                 inst.op1 = words.get(2);
                 inst.op2 = words.get(1);
-                //inst.size = Integer.valueOf(words.get(1));
+                //inst.scale = Integer.valueOf(words.get(1));
                 //inst.offset = Integer.valueOf(words.get(4));
                 return;
             case "load":
-                inst.dest = split[0].trim();
-                inst.op1 = words.get(1);
-                //inst.size = Integer.valueOf(words.get(1));
-                //inst.offset = Integer.valueOf(words.get(3));
-                return;
             case "alloc":
                 inst.dest = split[0].trim();
                 inst.op1 = words.get(1);
+                //inst.scale = Integer.valueOf(words.get(1));
+                //inst.offset = Integer.valueOf(words.get(3));
                 return;
             case "call":
                 if (split.length == 2) inst.dest = split[0].trim();
@@ -192,7 +196,6 @@ public class IRInterpreter {
                 for (int i = 1; i < words.size(); i += 2) {
                     String label = words.get(i);
                     String reg = words.get(i + 1);
-                    //if (!label.endsWith(":")) throw new SemanticError("label should end with `:`");
                     if (!reg.startsWith("%") && !reg.startsWith("@") && !reg.equals("undef"))
                         throw new SemanticError("source of a phi node should be a register or `undef`");
                     phi.paths.put(label, reg);
@@ -338,19 +341,25 @@ public class IRInterpreter {
         // }
         if (++cntInst >= instLimit) throw new RuntimeError("instruction limit exceeded");
         switch (curInst.operator) {
+            case "lea":
+                long base_ = curInst.op1 == null ? 0 : readSrc(curInst.op1);
+                long index_ = curInst.op2 == null ? 0 : readSrc(curInst.op2);
+                registerWrite(curInst.dest, base_ + index_ * curInst.scale + curInst.offset);
+                return;
+
             case "load":
                 long addr = readSrc(curInst.op1); //+ curInst.offset;
-                curInst.size = 8;
+                curInst.scale = 8;
                 long res = 0;
-                for (int i = 0; i < curInst.size; ++i) res = (res << 8) | memoryRead(addr + i);
+                for (int i = 0; i < curInst.scale; ++i) res = (res << 8) | memoryRead(addr + i);
                 registerWrite(curInst.dest, res);
                 return;
 
             case "store":
                 long address = readSrc(curInst.op1); // + curInst.offset;
                 long data = readSrc(curInst.op2);
-                curInst.size = 8;
-                for (long i = curInst.size - 1; i >= 0; --i) {
+                curInst.scale = 8;
+                for (long i = curInst.scale - 1; i >= 0; --i) {
                     memoryWrite(address + i, (byte) (data & 0xFF));
                     data >>= 8;
                 }
@@ -492,7 +501,7 @@ public class IRInterpreter {
                 if (curInst.dest != null && !func.hasReturnValue)
                     throw new RuntimeError("function `" + func.name + "` has not return value");
                 Map<String, Register> regs = new HashMap<>();
-                if (curInst.args.size() != func.args.size()) throw new RuntimeError("argument size cannot match");
+                if (curInst.args.size() != func.args.size()) throw new RuntimeError("argument scale cannot match");
                 //This loop passes reg values in this function to correspondent function values & build new register table
                 for (int i = 0; i < curInst.args.size(); ++i) {
                     String name = func.args.get(i);
@@ -675,7 +684,7 @@ public class IRInterpreter {
         String dest;        // used as `cond` for `br`
         String op1;
         String op2;
-        long size;           // for `load` / `store`
+        long scale;           // for `load` / `store`
         long offset;         // for `load` / `store`
         List<String> args;  // for `call` / `phi`
 
@@ -691,7 +700,7 @@ public class IRInterpreter {
             this.dest = inst.dest;
             this.op1 = inst.op1;
             this.op2 = inst.op2;
-            this.size = inst.size;
+            this.scale = inst.scale;
             this.offset = inst.offset;
             this.args = inst.args;
             this.lineno = inst.lineno;

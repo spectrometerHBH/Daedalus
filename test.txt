@@ -37,27 +37,3 @@ int main() {
 
 
 
-/*!! metadata:
-=== comment ===
-code_elimination_recursion-515030910639-yingsihao.txt
-=== is_public ===
-True
-=== assert ===
-output
-=== timeout ===
-2.0
-=== input ===
-
-=== phase ===
-optim extended
-=== output ===
-3100
-3100
-7053
-1035
-7035
-=== exitcode ===
-
-
-!!*/
-

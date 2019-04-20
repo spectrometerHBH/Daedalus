@@ -74,7 +74,7 @@ Jump Instruction:
 Memory Access Instruction:
     store %src %dest        // M[%dest] <- %src
     %dest = load %addr      // %dest <- M[%addr] (I believe simplicity favours regularity)
-    %dest = alloc %size     // Allocate %size byte memory in heap space and return top pointer
+    %dest = alloc %size     // Allocate %size byte memory in heap space and return top base
 
 Function Call Instruction:
     call funcname %op1 %op2 %op3 ...

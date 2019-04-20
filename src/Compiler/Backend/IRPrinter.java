@@ -24,7 +24,7 @@ public class IRPrinter implements IRVisitor {
     @Override
     public void visit(IRRoot irRoot) {
         irRoot.getGlobalVariableList().forEach(globalVariable -> out.println("@" + getName((Storage) globalVariable)));
-        irRoot.getStaticStringList().forEach(staticString -> out.println("@" + getName(staticString.getPointer()) + " = " + staticString.getVal()));
+        irRoot.getStaticStringList().forEach(staticString -> out.println("@" + getName(staticString.getBase()) + " = " + staticString.getVal()));
         if (!irRoot.getGlobalVariableList().isEmpty() || !irRoot.getStaticStringList().isEmpty()) out.println();
         for (Map.Entry<String, Function> entry : irRoot.getFunctionMap().entrySet()) entry.getValue().accept(this);
     }
@@ -250,9 +250,35 @@ public class IRPrinter implements IRVisitor {
     }
 
     @Override
+    public void visit(Lea inst) {
+        inst.getDst().accept(this);
+        out.print(" = lea ");
+        inst.getSrc().accept(this);
+        out.println();
+    }
+
+    @Override
     public void visit(Storage storage) {
-        if (storage instanceof GlobalVariable) out.print("@" + getName(storage));
-        else out.print("%" + getName(storage));
+        if (storage instanceof Register) {
+            if (storage instanceof GlobalVariable) out.print("@" + getName(storage));
+            else out.print("%" + getName(storage));
+        } else if (storage instanceof Memory) {
+            //out.print("[");
+            if (((Memory) storage).getBase() != null)
+                visit(((Memory) storage).getBase());
+            else
+                out.print("null");
+            out.print(" ");
+            if (((Memory) storage).getIndex() != null) {
+                visit(((Memory) storage).getIndex());
+                out.print(" ");
+                visit(((Memory) storage).getScale());
+            } else {
+                out.print("null 0");
+            }
+            out.print(" ");
+            visit(((Memory) storage).getOffset());
+        }
     }
 
     @Override

@@ -8,6 +8,7 @@ public class Optimizer {
     private CFGSimplifier cfgSimplifier;
     private DeadCodeEliminator deadCodeEliminator;
     private ConstantAndCopyPropagator constantAndCopyPropagator;
+    private InstructionCombiner instructionCombiner;
 
     public Optimizer(IRRoot irRoot) {
         ssaConstructor = new SSAConstructor(irRoot);
@@ -15,6 +16,7 @@ public class Optimizer {
         cfgSimplifier = new CFGSimplifier(irRoot);
         deadCodeEliminator = new DeadCodeEliminator(irRoot);
         constantAndCopyPropagator = new ConstantAndCopyPropagator(irRoot);
+        instructionCombiner = new InstructionCombiner(irRoot);
     }
 
     public void simplifyCFG() {
@@ -35,5 +37,9 @@ public class Optimizer {
 
     public void ConstantAndCopyPropagation() {
         constantAndCopyPropagator.run();
+    }
+
+    public void InstructionCombination() {
+        instructionCombiner.run();
     }
 }

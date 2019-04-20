@@ -36,9 +36,11 @@ public interface IRVisitor {
 
     void visit(Unary inst);
 
+    void visit(Phi inst);
+
+    void visit(Lea inst);
+
     void visit(Storage storage);
 
     void visit(Immediate immediate);
-
-    void visit(Phi inst);
 }

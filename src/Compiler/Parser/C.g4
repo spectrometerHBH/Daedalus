@@ -236,7 +236,7 @@ typeSpecifier
     |   enumSpecifier
     |   typedefName
     |   '__typeof__' '(' constantExpression ')' // GCC extension
-    |   typeSpecifier pointer
+    |   typeSpecifier base
     ;
 
 structOrUnionSpecifier
@@ -320,7 +320,7 @@ alignmentSpecifier
     ;
 
 declarator
-    :   pointer? directDeclarator gccDeclaratorExtension*
+    :   base? directDeclarator gccDeclaratorExtension*
     ;
 
 directDeclarator
@@ -333,7 +333,7 @@ directDeclarator
     |   directDeclarator '(' parameterTypeList ')'
     |   directDeclarator '(' identifierList? ')'
     |   Identifier ':' DigitSequence  // bit field
-    |   '(' typeSpecifier? pointer directDeclarator ')' // function pointer like: (__cdecl *f)
+    |   '(' typeSpecifier? base directDeclarator ')' // function base like: (__cdecl *f)
     ;
 
 gccDeclaratorExtension
@@ -362,11 +362,11 @@ nestedParenthesesBlock
         )*
     ;
 
-pointer
+base
     :   '*' typeQualifierList?
-    |   '*' typeQualifierList? pointer
+    |   '*' typeQualifierList? base
     |   '^' typeQualifierList? // Blocks language extension
-    |   '^' typeQualifierList? pointer // Blocks language extension
+    |   '^' typeQualifierList? base // Blocks language extension
     ;
 
 typeQualifierList
@@ -399,8 +399,8 @@ typeName
     ;
 
 abstractDeclarator
-    :   pointer
-    |   pointer? directAbstractDeclarator gccDeclaratorExtension*
+    :   base
+    |   base? directAbstractDeclarator gccDeclaratorExtension*
     ;
 
 directAbstractDeclarator
