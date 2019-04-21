@@ -11,7 +11,15 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Set;
 
-// TODO : Sparse Condition Constant Propagation
+//Simple constant propagation
+//        This pass implements constant propagation and merging. It looks for instructions involving only constant operands and replaces them with a constant value instead of an instruction. For example:
+//        add i32 1, 2
+//        becomes
+//        i32 3
+//        NOTE: this pass has a habit of making definitions be dead. It is a good idea to run a Dead Instruction Elimination pass sometime after running this pass.
+//LLVM Pass
+
+// TODO : SCCP
 
 class ConstantAndCopyPropagator extends Pass {
     ConstantAndCopyPropagator(IRRoot irRoot) {

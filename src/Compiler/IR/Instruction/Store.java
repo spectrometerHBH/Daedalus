@@ -88,7 +88,7 @@ public class Store extends IRInstruction {
     @Override
     public void replaceOperand(Operand oldOperand, Operand newOperand) {
         if (src == oldOperand) src = newOperand;
-        if (dst == newOperand) dst = oldOperand;
+        if (dst == oldOperand) dst = newOperand;
         updateUseRegisters();
     }
 }

@@ -32,12 +32,12 @@ public class Main {
         InputStream in = new FileInputStream("test.txt");
 
         //for text-ir output
-        //PrintStream ir_out_raw = new PrintStream("ir_raw.ll");
-        //PrintStream ir_out_afterSSAConstruction = new PrintStream("ir_out_ssa_construct.ll");
-        //PrintStream ir_out_afterOptimization = new PrintStream("ir_out_after_optim.ll");
-        //PrintStream ir_out_combine = new PrintStream("ir_out_combine.ll");
-        PrintStream ir_codegen = new PrintStream(System.out);
+        PrintStream ir_out_raw = new PrintStream("ir_raw.ll");
+        PrintStream ir_out_afterSSAConstruction = new PrintStream("ir_out_ssa_construct.ll");
+        PrintStream ir_out_afterOptimization = new PrintStream("ir_out_after_optim.ll");
         //PrintStream ir_codegen = new PrintStream("ir_out_after_codegen.ll");
+        PrintStream ir_codegen = new PrintStream(System.out);
+
         //for IR interpreter test use
         //FileInputStream ir_test_in = new FileInputStream("ir_out_after_codegen.ll");
         //DataInputStream ir_data_in = new DataInputStream(System.in);
@@ -58,29 +58,29 @@ public class Main {
             irBuilder.visit(ast);
             IRRoot irRoot = irBuilder.getIrRoot();
             new GlobalVariableResolver(irRoot).run();
-            //new IRPrinter(ir_out_raw).visit(irRoot);
+            new IRPrinter(ir_out_raw).visit(irRoot);
             //Optimization
             Optimizer optimizer = new Optimizer(irRoot);
             optimizer.simplifyCFG();
             optimizer.SSAConstruction();
-            //new IRPrinter(ir_out_afterSSAConstruction).visit(irRoot);
-            optimizer.ConstantAndCopyPropagation();
-            optimizer.simplifyCFG();
-            optimizer.DeadCodeElimination();
-            optimizer.simplifyCFG();
-            optimizer.ConstantAndCopyPropagation();
-            optimizer.simplifyCFG();
-            optimizer.DeadCodeElimination();
-            optimizer.simplifyCFG();
-            //new IRPrinter(ir_out_afterOptimization).visit(irRoot);
+            new IRPrinter(ir_out_afterSSAConstruction).visit(irRoot);
+            for (int rounds = 0; rounds < 8; rounds++) {
+                optimizer.CommonSubexpressionElimination();
+                optimizer.ConstantAndCopyPropagation();
+                optimizer.simplifyCFG();
+                optimizer.DeadCodeElimination();
+                optimizer.simplifyCFG();
+            }
             optimizer.InstructionCombination();
-            //new IRPrinter(ir_out_combine).visit(irRoot);
+            new IRPrinter(ir_out_afterOptimization).visit(irRoot);
             optimizer.SSADestruction();
             optimizer.simplifyCFG();
             //Codegen
             new X86ConstraintResolver(irRoot).run();
             new RegisterAllocator(irRoot).run();
             new IRPrinter(ir_codegen).visit(irRoot);
+
+            //new IRInterpreter(ir_test_in, false, ir_data_in, ir_data_out).run();
         } catch (Exception e) {
             e.printStackTrace();
             System.err.println(e.getMessage());

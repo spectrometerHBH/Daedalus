@@ -9,6 +9,8 @@ import java.util.Map;
 public class Binary extends IRInstruction {
     private Op op;
     private Operand src1, src2, dst;
+    //for CSE use
+    public Operand previousResult = null;
 
     public Binary(BasicBlock currentBB, Op op, Operand src1, Operand src2, Operand dst) {
         super(currentBB);

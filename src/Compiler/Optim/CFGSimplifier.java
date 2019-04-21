@@ -17,7 +17,7 @@ import java.util.List;
 //        Removes basic blocks with no predecessors.(ok)
 //        Merges a basic block into its predecessor if there is only one and the predecessor only has one successor.(ok)
 //        Eliminates PHI nodes for basic blocks with a single predecessor.(ok)
-//        Eliminates a basic block that only contains an unconditional branch.
+//        TODO : Eliminates a basic block that only contains an unconditional branch.
 //LLVM Pass
 
 class CFGSimplifier extends Pass {
