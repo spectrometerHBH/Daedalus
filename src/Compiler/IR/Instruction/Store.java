@@ -2,10 +2,7 @@ package Compiler.IR.Instruction;
 
 import Compiler.IR.BasicBlock;
 import Compiler.IR.IRVisitor;
-import Compiler.IR.Operand.GlobalVariable;
-import Compiler.IR.Operand.Operand;
-import Compiler.IR.Operand.Register;
-import Compiler.IR.Operand.VirtualRegister;
+import Compiler.IR.Operand.*;
 
 import java.util.Map;
 
@@ -52,6 +49,7 @@ public class Store extends IRInstruction {
         useRegisters.clear();
         if (src instanceof Register) useRegisters.add((Register) src);
         if (dst instanceof Register) useRegisters.add((Register) dst);
+        else if (dst instanceof Memory) useRegisters.addAll(((Memory) dst).useRegisters());
     }
 
     @Override
@@ -88,7 +86,9 @@ public class Store extends IRInstruction {
     @Override
     public void replaceOperand(Operand oldOperand, Operand newOperand) {
         if (src == oldOperand) src = newOperand;
-        if (dst == oldOperand) dst = newOperand;
+        if (dst instanceof Register) {
+            if (dst == oldOperand) dst = newOperand;
+        } else if (dst instanceof Memory) ((Memory) dst).replaceOperand(oldOperand, newOperand);
         updateUseRegisters();
     }
 }

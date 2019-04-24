@@ -159,25 +159,27 @@ public class IRInterpreter {
         // save operands to variables
         switch (inst.operator) {
             case "lea":
+            case "load":
                 inst.dest = split[0].trim();
                 inst.op1 = words.get(1).equals("null") ? null : words.get(1);
                 inst.op2 = words.get(2).equals("null") ? null : words.get(2);
                 inst.scale = Integer.valueOf(words.get(3));
                 inst.offset = Integer.valueOf(words.get(4));
                 return;
+
             case "store":
-                inst.op1 = words.get(2);
-                inst.op2 = words.get(1);
-                //inst.scale = Integer.valueOf(words.get(1));
-                //inst.offset = Integer.valueOf(words.get(4));
+                inst.dest = words.get(1);
+                inst.op1 = words.get(2).equals("null") ? null : words.get(2);
+                inst.op2 = words.get(3).equals("null") ? null : words.get(3);
+                inst.scale = Integer.valueOf(words.get(4));
+                inst.offset = Integer.valueOf(words.get(5));
                 return;
-            case "load":
+
             case "alloc":
                 inst.dest = split[0].trim();
                 inst.op1 = words.get(1);
-                //inst.scale = Integer.valueOf(words.get(1));
-                //inst.offset = Integer.valueOf(words.get(3));
                 return;
+
             case "call":
                 if (split.length == 2) inst.dest = split[0].trim();
                 inst.op1 = words.get(1);
@@ -342,25 +344,27 @@ public class IRInterpreter {
         if (++cntInst >= instLimit) throw new RuntimeError("instruction limit exceeded");
         switch (curInst.operator) {
             case "lea":
-                long base_ = curInst.op1 == null ? 0 : readSrc(curInst.op1);
-                long index_ = curInst.op2 == null ? 0 : readSrc(curInst.op2);
-                registerWrite(curInst.dest, base_ + index_ * curInst.scale + curInst.offset);
+                long base_lea = curInst.op1 == null ? 0 : readSrc(curInst.op1);
+                long index_lea = curInst.op2 == null ? 0 : readSrc(curInst.op2);
+                registerWrite(curInst.dest, base_lea + index_lea * curInst.scale + curInst.offset);
                 return;
 
             case "load":
-                long addr = readSrc(curInst.op1); //+ curInst.offset;
-                curInst.scale = 8;
+                long base_load = curInst.op1 == null ? 0 : readSrc(curInst.op1);
+                long index_load = curInst.op2 == null ? 0 : readSrc(curInst.op2);
+                long addr_load = base_load + index_load * curInst.scale + curInst.offset;
                 long res = 0;
-                for (int i = 0; i < curInst.scale; ++i) res = (res << 8) | memoryRead(addr + i);
+                for (int i = 0; i < 8; ++i) res = (res << 8) | memoryRead(addr_load + i);
                 registerWrite(curInst.dest, res);
                 return;
 
             case "store":
-                long address = readSrc(curInst.op1); // + curInst.offset;
-                long data = readSrc(curInst.op2);
-                curInst.scale = 8;
-                for (long i = curInst.scale - 1; i >= 0; --i) {
-                    memoryWrite(address + i, (byte) (data & 0xFF));
+                long base_store = curInst.op1 == null ? 0 : readSrc(curInst.op1);
+                long index_store = curInst.op2 == null ? 0 : readSrc(curInst.op2);
+                long addr_store = base_store + index_store * curInst.scale + curInst.offset;
+                long data = readSrc(curInst.dest);
+                for (long i = 8 - 1; i >= 0; --i) {
+                    memoryWrite(addr_store + i, (byte) (data & 0xFF));
                     data >>= 8;
                 }
                 return;

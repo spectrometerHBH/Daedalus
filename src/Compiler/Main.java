@@ -13,9 +13,7 @@ import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTree;
 
-import java.io.FileInputStream;
-import java.io.InputStream;
-import java.io.PrintStream;
+import java.io.*;
 
 public class Main {
     private static ProgramNode buildAST(InputStream in) throws Exception {
@@ -30,18 +28,18 @@ public class Main {
     public static void main(String... args) throws Exception {
         //for program to be compiled
         InputStream in = new FileInputStream("test.txt");
+        boolean test = true;
 
         //for text-ir output
         PrintStream ir_out_raw = new PrintStream("ir_raw.ll");
         PrintStream ir_out_afterSSAConstruction = new PrintStream("ir_out_ssa_construct.ll");
         PrintStream ir_out_afterOptimization = new PrintStream("ir_out_after_optim.ll");
-        //PrintStream ir_codegen = new PrintStream("ir_out_after_codegen.ll");
-        PrintStream ir_codegen = new PrintStream(System.out);
+        PrintStream ir_codegen = test ? new PrintStream(System.out) : new PrintStream("ir_out_after_codegen.ll");
 
         //for IR interpreter test use
-        //FileInputStream ir_test_in = new FileInputStream("ir_out_after_codegen.ll");
-        //DataInputStream ir_data_in = new DataInputStream(System.in);
-        //PrintStream ir_data_out = new PrintStream(new FileOutputStream("ir_test_out.txt"));
+        FileInputStream ir_test_in = new FileInputStream("ir_out_after_codegen.ll");
+        DataInputStream ir_data_in = new DataInputStream(System.in);
+        PrintStream ir_data_out = new PrintStream(new FileOutputStream("ir_test_out.txt"));
 
         try {
             //Syntax Analysis
@@ -64,7 +62,7 @@ public class Main {
             optimizer.simplifyCFG();
             optimizer.SSAConstruction();
             new IRPrinter(ir_out_afterSSAConstruction).visit(irRoot);
-            for (int rounds = 0; rounds < 8; rounds++) {
+            for (int rounds = 0; rounds < 5; rounds++) {
                 optimizer.CommonSubexpressionElimination();
                 optimizer.ConstantAndCopyPropagation();
                 optimizer.simplifyCFG();

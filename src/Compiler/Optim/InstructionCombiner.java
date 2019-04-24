@@ -2,11 +2,8 @@ package Compiler.Optim;
 
 import Compiler.IR.Function;
 import Compiler.IR.IRRoot;
-import Compiler.IR.Instruction.Binary;
-import Compiler.IR.Instruction.IRInstruction;
-import Compiler.IR.Instruction.Lea;
-import Compiler.IR.Operand.Operand;
-import Compiler.IR.Operand.Register;
+import Compiler.IR.Instruction.*;
+import Compiler.IR.Operand.*;
 
 //Combine expression patterns
 //        Combine expression patterns to form expressions with fewer, simple instructions. This pass does not modify the CFG.
@@ -25,7 +22,10 @@ class InstructionCombiner extends Pass {
     void run() {
         irRoot.getFunctionMap().values().forEach(function -> {
             calcDefUseChain(function);
+            //generate Lea for single-used temporary if possible
             generateLea(function);
+            //merge address calculation for single-used temporary into Load/Store
+            mergeAddrCalcWithLoadAndStore(function);
         });
     }
 
@@ -79,6 +79,58 @@ class InstructionCombiner extends Pass {
                     }
                 }
             }
+        });
+    }
+
+    private void mergeAddrCalcWithLoadAndStore(Function function) {
+        function.getReversePostOrderDFSBBList().forEach(basicBlock -> {
+            for (IRInstruction irInstruction = basicBlock.head; irInstruction != null; irInstruction = irInstruction.getNextInstruction())
+                if (irInstruction instanceof Load) {
+                    if (((Load) irInstruction).getSrc() instanceof VirtualRegister) {
+                        VirtualRegister addr = (VirtualRegister) ((Load) irInstruction).getSrc();
+                        if (use.get(addr).size() == 1) {
+                            IRInstruction defOfAddr_tmp = def.get(addr);
+                            Lea defOfAddr = null;
+                            if (defOfAddr_tmp instanceof Lea) defOfAddr = (Lea) defOfAddr_tmp;
+                            else if (defOfAddr_tmp instanceof Binary)
+                                defOfAddr = ((Binary) defOfAddr_tmp).transformBinary2Lea((Binary) defOfAddr_tmp);
+                            if (defOfAddr != null) {
+                                defOfAddr_tmp.removeSelf();
+                                for (Register useRegister : defOfAddr_tmp.getUseRegisters()) {
+                                    use.get(useRegister).remove(defOfAddr_tmp);
+                                    use.get(useRegister).add(irInstruction);
+                                }
+                                def.remove(addr);
+                                irInstruction.replaceOperand(addr, defOfAddr.getSrc());
+                            }
+                        }
+                    }
+                    if (((Load) irInstruction).getSrc() instanceof VirtualRegister)
+                        irInstruction.replaceOperand(((Load) irInstruction).getSrc(), new DynamicData(((Register) ((Load) irInstruction).getSrc()), null, new Immediate(0), new Immediate(0)));
+                } else if (irInstruction instanceof Store) {
+                    if (((Store) irInstruction).getDst() instanceof VirtualRegister) {
+                        VirtualRegister addr = (VirtualRegister) ((Store) irInstruction).getDst();
+                        if (use.get(addr).size() == 1) {
+                            IRInstruction defOfAddr_tmp = def.get(addr);
+                            Lea defOfAddr = null;
+                            if (defOfAddr_tmp instanceof Lea) defOfAddr = (Lea) defOfAddr_tmp;
+                            else if (defOfAddr_tmp instanceof Binary)
+                                defOfAddr = ((Binary) defOfAddr_tmp).transformBinary2Lea((Binary) defOfAddr_tmp);
+                            if (defOfAddr != null) {
+                                defOfAddr_tmp.removeSelf();
+                                for (Register useRegister : defOfAddr_tmp.getUseRegisters()) {
+                                    use.get(useRegister).remove(defOfAddr_tmp);
+                                    use.get(useRegister).add(irInstruction);
+                                }
+                                def.remove(addr);
+                                irInstruction.replaceOperand(addr, defOfAddr.getSrc());
+                            }
+                        }
+                    }
+                    if (((Store) irInstruction).getDst() instanceof VirtualRegister) {
+                        irInstruction.replaceOperand(((Store) irInstruction).getDst(), new DynamicData((Register) (((Store) irInstruction).getDst()), null, new Immediate(0), new Immediate(0)));
+                    }
+                }
         });
     }
 }

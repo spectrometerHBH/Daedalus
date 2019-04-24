@@ -23,6 +23,7 @@ public class X86ConstraintResolver {
         irRoot.getFunctionMap().values().forEach(this::twoAddressInstructionResolve);
         irRoot.getFunctionMap().values().forEach(this::processCallingConvention);
         irRoot.getFunctionMap().values().forEach(this::processDivAndShift);
+        irRoot.getFunctionMap().values().forEach(this::processHeapAllocation);
     }
 
     private void twoAddressInstructionResolve(Function function) {
@@ -71,6 +72,10 @@ public class X86ConstraintResolver {
     }
 
     private void processDivAndShift(Function function) {
+
+    }
+
+    private void processHeapAllocation(Function function) {
 
     }
 }

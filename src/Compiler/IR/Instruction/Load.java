@@ -2,10 +2,7 @@ package Compiler.IR.Instruction;
 
 import Compiler.IR.BasicBlock;
 import Compiler.IR.IRVisitor;
-import Compiler.IR.Operand.GlobalVariable;
-import Compiler.IR.Operand.Operand;
-import Compiler.IR.Operand.Register;
-import Compiler.IR.Operand.VirtualRegister;
+import Compiler.IR.Operand.*;
 
 import java.util.Map;
 
@@ -51,6 +48,7 @@ public class Load extends IRInstruction {
     public void updateUseRegisters() {
         useRegisters.clear();
         if (src instanceof Register) useRegisters.add((Register) src);
+        else if (src instanceof Memory) useRegisters.addAll(((Memory) src).useRegisters());
     }
 
     @Override
@@ -63,12 +61,14 @@ public class Load extends IRInstruction {
         dst = newRegister;
     }
 
+    //used in GlobalVariableResolver
     @Override
     public void setUseRegisters(Map<Register, Register> renameMap) {
         if (src instanceof Register) src = renameMap.get(src);
         updateUseRegisters();
     }
 
+    //used in SSA construction
     @Override
     public void renameDefRegister() {
         if (dst instanceof VirtualRegister && !(dst instanceof GlobalVariable))
@@ -84,7 +84,9 @@ public class Load extends IRInstruction {
 
     @Override
     public void replaceOperand(Operand oldOperand, Operand newOperand) {
-        if (src == oldOperand) src = newOperand;
+        if (src instanceof Register) {
+            if (src == oldOperand) src = newOperand;
+        } else if (src instanceof Memory) ((Memory) src).replaceOperand(oldOperand, newOperand);
         updateUseRegisters();
     }
 }

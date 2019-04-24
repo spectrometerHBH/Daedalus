@@ -100,7 +100,7 @@ public class Binary extends IRInstruction {
         updateUseRegisters();
     }
 
-    private Lea transformBinary2Lea(Binary inst) {
+    public Lea transformBinary2Lea(Binary inst) {
         switch (inst.getOp()) {
             case ADD: {
                 if (inst.src1 instanceof Immediate)
