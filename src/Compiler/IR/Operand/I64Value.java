@@ -10,6 +10,11 @@ public class I64Value extends Value {
         super(name);
     }
 
+    public I64Value(String name, PhysicalRegister color) {
+        super(name);
+        this.color = color;
+    }
+
     @Override
     public void accept(IRVisitor irVisitor) {
         irVisitor.visit(this);

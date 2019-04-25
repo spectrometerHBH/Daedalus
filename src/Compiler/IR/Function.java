@@ -13,6 +13,7 @@ public class Function {
     public Set<Function> calleeSet = new HashSet<>();
     public Set<Function> recursiveCalleeSet = new HashSet<>();
     public FunctionInfo functionInfo;
+    public LinkedList<Call> callerInstructionList = new LinkedList<>();
 
     private BasicBlock entryBlock = new BasicBlock(this, "entry");
     private BasicBlock exitBlock = new BasicBlock(this, "exit");

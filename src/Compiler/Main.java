@@ -28,7 +28,7 @@ public class Main {
     public static void main(String... args) throws Exception {
         //for program to be compiled
         InputStream in = new FileInputStream("test.txt");
-        boolean test = true;
+        boolean test = false;
 
         //for text-ir output
         PrintStream ir_out_raw = new PrintStream("ir_raw.ll");
@@ -77,8 +77,6 @@ public class Main {
             new X86ConstraintResolver(irRoot).run();
             new RegisterAllocator(irRoot).run();
             new IRPrinter(ir_codegen).visit(irRoot);
-
-            //new IRInterpreter(ir_test_in, false, ir_data_in, ir_data_out).run();
         } catch (Exception e) {
             e.printStackTrace();
             System.err.println(e.getMessage());

@@ -3,6 +3,7 @@ package Compiler.Optim;
 import Compiler.IR.BasicBlock;
 import Compiler.IR.Function;
 import Compiler.IR.IRRoot;
+import Compiler.IR.Instruction.Call;
 import Compiler.IR.Instruction.IRInstruction;
 import Compiler.IR.Instruction.Phi;
 import Compiler.IR.Operand.Register;
@@ -11,6 +12,8 @@ import Compiler.IR.Operand.VirtualRegister;
 import java.util.*;
 
 class SSAConstructor extends Pass {
+    Set<Integer> clearIndex = new HashSet<>();
+
     SSAConstructor(IRRoot irRoot) {
         super(irRoot);
     }
@@ -158,11 +161,26 @@ class SSAConstructor extends Pass {
 
     private void renameVariables(Function function) {
         VirtualRegister _this = (VirtualRegister) function.getReferenceForClassMethod();
-        if (_this != null) function.setReferenceForClassMethod(_this.getSSARenameRegister(_this.getNewId()));
+
+        if (_this != null) {
+            if (_this.info == null) {
+                //if _this is not used, eliminate its argument passing
+                for (Call call : function.callerInstructionList) call.setObjectPointer(null);
+                function.setReferenceForClassMethod(null);
+            } else function.setReferenceForClassMethod(_this.getSSARenameRegister(_this.getNewId()));
+        }
+
         for (int i = 0; i < function.getParameterList().size(); i++) {
             VirtualRegister parameter = (VirtualRegister) function.getParameterList().get(i);
-            function.getParameterList().set(i, parameter.getSSARenameRegister(parameter.getNewId()));
+            if (parameter.info == null) {
+                //if parameter is not used/def, eliminate its argument passing
+                for (Call call : function.callerInstructionList) call.getParameterList().set(i, null);
+                function.getParameterList().set(i, null);
+            } else function.getParameterList().set(i, parameter.getSSARenameRegister(parameter.getNewId()));
         }
+        function.getParameterList().removeAll(Collections.singleton(null));
+        for (Call call : function.callerInstructionList) call.getParameterList().removeAll(Collections.singleton(null));
+
         rename(function.getEntryBlock());
         if (_this != null) _this.getOrigin().info.stack.pop();
         function.getParameterList().forEach(parameter -> ((VirtualRegister) parameter).getOrigin().info.stack.pop());

@@ -11,6 +11,8 @@ public abstract class VirtualRegister extends Register {
     private VirtualRegister origin = null;
     private int SSAID = -1;
 
+    public PhysicalRegister color = null;
+
     public VirtualRegister() {
     }
 
@@ -51,10 +53,6 @@ public abstract class VirtualRegister extends Register {
         int newId = info.counter++;
         info.stack.push(newId);
         return newId;
-    }
-
-    public void initRegisterInformation() {
-        info = new RegisterInformation();
     }
 
     public static class RegisterInformation {

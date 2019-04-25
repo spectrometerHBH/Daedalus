@@ -4,9 +4,14 @@ import Compiler.IR.Function;
 import Compiler.IR.IRRoot;
 import Compiler.IR.Instruction.Binary;
 import Compiler.IR.Instruction.IRInstruction;
+import Compiler.IR.Instruction.Load;
 import Compiler.IR.Instruction.Move;
-import Compiler.IR.Operand.I64Value;
-import Compiler.IR.Operand.Operand;
+import Compiler.IR.Operand.*;
+
+import java.util.LinkedList;
+
+import static Compiler.IR.Operand.PhysicalRegister.argumentPassVRegisters;
+import static Compiler.IR.Operand.PhysicalRegister.vrbp;
 
 //Convert IR to X86 form
 //TODO : calling convention resolve
@@ -14,6 +19,7 @@ import Compiler.IR.Operand.Operand;
 
 public class X86ConstraintResolver {
     private IRRoot irRoot;
+    private LinkedList<Register> parameterList = new LinkedList<>();
 
     public X86ConstraintResolver(IRRoot irRoot) {
         this.irRoot = irRoot;
@@ -68,7 +74,14 @@ public class X86ConstraintResolver {
     }
 
     private void processCallingConvention(Function function) {
-
+        if (function.getReferenceForClassMethod() != null)
+            parameterList.add(function.getReferenceForClassMethod());
+        parameterList.addAll(function.getParameterList());
+        for (int i = 0; i < parameterList.size(); i++)
+            if (i < 6)
+                function.getEntryBlock().head.prependInstruction(new Move(function.getEntryBlock(), argumentPassVRegisters.get(i), parameterList.get(i)));
+            else
+                function.getEntryBlock().head.prependInstruction(new Load(function.getEntryBlock(), new StackData(vrbp, null, new Immediate(0), new Immediate(16 + i * 8)), parameterList.get(i)));
     }
 
     private void processDivAndShift(Function function) {

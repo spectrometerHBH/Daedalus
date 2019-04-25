@@ -504,6 +504,7 @@ public class IRBuilder implements ASTVisitor {
         if (node.getType().getTypeName().equals("void")) node.setResultOperand(null);
         else node.setResultOperand(new I64Value());
         Call call = new Call(currentBB, functionSymbol.getFunction(), node.getResultOperand());
+        functionSymbol.getFunction().callerInstructionList.add(call);
         node.getParameterList().forEach(x -> {
             x.accept(this);
             call.appendParameterList(getOperandForValueUse(currentBB, x.getResultOperand()));
@@ -559,6 +560,7 @@ public class IRBuilder implements ASTVisitor {
             if (classSymbol.getConstructor() != null) {
                 //call default constructor
                 Call call = new Call(currentBB, classSymbol.getConstructor().getFunction(), null);
+                classSymbol.getConstructor().getFunction().callerInstructionList.add(call);
                 call.setObjectPointer(node.getResultOperand());
                 currentBB.appendInst(call);
             }
