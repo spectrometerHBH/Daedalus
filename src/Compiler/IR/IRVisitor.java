@@ -40,6 +40,10 @@ public interface IRVisitor {
 
     void visit(Lea inst);
 
+    void visit(Push inst);
+
+    void visit(Pop inst);
+
     void visit(Storage storage);
 
     void visit(Immediate immediate);

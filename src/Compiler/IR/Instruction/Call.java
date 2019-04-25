@@ -8,12 +8,11 @@ import Compiler.IR.Operand.Operand;
 import Compiler.IR.Operand.Register;
 import Compiler.IR.Operand.VirtualRegister;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.LinkedList;
 import java.util.Map;
 
 public class Call extends IRInstruction {
-    private List<Operand> parameterList = new ArrayList<>();
+    private LinkedList<Operand> parameterList = new LinkedList<>();
     private Function callee;
     private Operand objectPointer;
     private Operand result;
@@ -30,7 +29,7 @@ public class Call extends IRInstruction {
         updateUseRegisters();
     }
 
-    public List<Operand> getParameterList() {
+    public LinkedList<Operand> getParameterList() {
         return parameterList;
     }
 
@@ -49,6 +48,11 @@ public class Call extends IRInstruction {
 
     public Operand getResult() {
         return result;
+    }
+
+    public void setResult(Operand result) {
+        this.result = result;
+        updateUseRegisters();
     }
 
     @Override

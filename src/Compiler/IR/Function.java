@@ -14,6 +14,7 @@ public class Function {
     public Set<Function> recursiveCalleeSet = new HashSet<>();
     public FunctionInfo functionInfo;
     public LinkedList<Call> callerInstructionList = new LinkedList<>();
+    public int argumentLimit;
 
     private BasicBlock entryBlock = new BasicBlock(this, "entry");
     private BasicBlock exitBlock = new BasicBlock(this, "exit");

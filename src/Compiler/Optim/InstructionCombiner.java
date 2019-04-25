@@ -26,6 +26,8 @@ class InstructionCombiner extends Pass {
             generateLea(function);
             //merge address calculation for single-used temporary into Load/Store
             mergeAddrCalcWithLoadAndStore(function);
+            //merge cmp with branch for code generation
+            mergeCmpWithBranch(function);
         });
     }
 
@@ -131,6 +133,20 @@ class InstructionCombiner extends Pass {
                         irInstruction.replaceOperand(((Store) irInstruction).getDst(), new DynamicData((Register) (((Store) irInstruction).getDst()), null, new Immediate(0), new Immediate(0)));
                     }
                 }
+        });
+    }
+
+    private void mergeCmpWithBranch(Function function) {
+        function.getReversePostOrderDFSBBList().forEach(basicBlock -> {
+            if (basicBlock.tail instanceof Branch) {
+                if (((Branch) basicBlock.tail).getCond() instanceof VirtualRegister) {
+                    VirtualRegister cond = (VirtualRegister) ((Branch) basicBlock.tail).getCond();
+                    Cmp defOfCond = (Cmp) def.get(cond);
+                    defOfCond.setDefRegister(null);
+                    ((Branch) basicBlock.tail).defOfCond = defOfCond;
+                    ((Branch) basicBlock.tail).setCond(null);
+                }
+            }
         });
     }
 }

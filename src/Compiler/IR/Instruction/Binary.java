@@ -31,6 +31,7 @@ public class Binary extends IRInstruction {
 
     public void setSrc1(Operand src1) {
         this.src1 = src1;
+        updateUseRegisters();
     }
 
     public Operand getSrc2() {
@@ -39,6 +40,7 @@ public class Binary extends IRInstruction {
 
     public void setSrc2(Operand src2) {
         this.src2 = src2;
+        updateUseRegisters();
     }
 
     public Operand getDst() {

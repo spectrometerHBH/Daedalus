@@ -64,7 +64,7 @@ public class IRPrinter implements IRVisitor {
     @Override
     public void visit(Alloc inst) {
         inst.getPointer().accept(this);
-        out.print(" = alloc ");
+        out.print(" = extern_alloc ");
         inst.getSize().accept(this);
         out.println();
     }
@@ -114,9 +114,35 @@ public class IRPrinter implements IRVisitor {
 
     @Override
     public void visit(Branch inst) {
-        out.print("br ");
-        inst.getCond().accept(this);
-        out.println(" " + getLabel(inst.getThenBB()) + " " + getLabel(inst.getElseBB()));
+        if (inst.defOfCond != null) {
+            String op = null;
+            switch (inst.defOfCond.getOp()) {
+                case LT:
+                    op = "slt";
+                    break;
+                case LEQ:
+                    op = "sle";
+                    break;
+                case EQ:
+                    op = "seq";
+                    break;
+                case GEQ:
+                    op = "sge";
+                    break;
+                case GT:
+                    op = "sgt";
+                    break;
+                case NEQ:
+                    op = "sne";
+                    break;
+            }
+            out.print("br " + op);
+            out.println(" " + getLabel(inst.getThenBB()) + " " + getLabel(inst.getElseBB()));
+        } else {
+            out.print("br ");
+            inst.getCond().accept(this);
+            out.println(" " + getLabel(inst.getThenBB()) + " " + getLabel(inst.getElseBB()));
+        }
     }
 
     @Override
@@ -139,33 +165,41 @@ public class IRPrinter implements IRVisitor {
 
     @Override
     public void visit(Cmp inst) {
-        String op = null;
-        switch (inst.getOp()) {
-            case LT:
-                op = "slt";
-                break;
-            case LEQ:
-                op = "sle";
-                break;
-            case EQ:
-                op = "seq";
-                break;
-            case GEQ:
-                op = "sge";
-                break;
-            case GT:
-                op = "sgt";
-                break;
-            case NEQ:
-                op = "sne";
-                break;
+        if (inst.getDst() == null) {
+            out.print("cmp ");
+            inst.getSrc1().accept(this);
+            out.print(" ");
+            inst.getSrc2().accept(this);
+            out.println();
+        } else {
+            String op = null;
+            switch (inst.getOp()) {
+                case LT:
+                    op = "slt";
+                    break;
+                case LEQ:
+                    op = "sle";
+                    break;
+                case EQ:
+                    op = "seq";
+                    break;
+                case GEQ:
+                    op = "sge";
+                    break;
+                case GT:
+                    op = "sgt";
+                    break;
+                case NEQ:
+                    op = "sne";
+                    break;
+            }
+            inst.getDst().accept(this);
+            out.print(" = " + op + ' ');
+            inst.getSrc1().accept(this);
+            out.print(" ");
+            inst.getSrc2().accept(this);
+            out.println();
         }
-        inst.getDst().accept(this);
-        out.print(" = " + op + " ");
-        inst.getSrc1().accept(this);
-        out.print(" ");
-        inst.getSrc2().accept(this);
-        out.println();
     }
 
     @Override
@@ -254,6 +288,20 @@ public class IRPrinter implements IRVisitor {
         inst.getDst().accept(this);
         out.print(" = lea ");
         inst.getSrc().accept(this);
+        out.println();
+    }
+
+    @Override
+    public void visit(Push inst) {
+        out.print("push ");
+        inst.getSrc().accept(this);
+        out.println();
+    }
+
+    @Override
+    public void visit(Pop inst) {
+        out.print("pop ");
+        inst.getDst().accept(this);
         out.println();
     }
 

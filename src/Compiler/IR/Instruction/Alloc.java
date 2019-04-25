@@ -28,6 +28,16 @@ public class Alloc extends IRInstruction {
         return pointer;
     }
 
+    public void setSize(Operand size) {
+        this.size = size;
+        updateUseRegisters();
+    }
+
+    public void setPointer(Operand pointer) {
+        this.pointer = pointer;
+        updateUseRegisters();
+    }
+
     @Override
     public void accept(IRVisitor irVisitor) {
         irVisitor.visit(this);

@@ -12,6 +12,7 @@ public abstract class VirtualRegister extends Register {
     private int SSAID = -1;
 
     public PhysicalRegister color = null;
+    public StackData spillAddr = null;
 
     public VirtualRegister() {
     }

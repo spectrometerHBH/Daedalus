@@ -1,11 +1,9 @@
-void exchange(int x,int y)
-{
+int f(int a, int b, int c, int d, int e, int f, int g, int h){
+    return a + b + c + d + e + f + g + h;
 }
 
-int main() {
-
+int main(){
+    int n = 1;
+    n = f(n, n, n, n, n, n, n, n * 2);
     return 0;
 }
-
-
-

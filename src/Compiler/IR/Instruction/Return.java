@@ -18,6 +18,11 @@ public class Return extends IRInstruction {
         updateUseRegisters();
     }
 
+    public void setReturnValue(Operand returnValue) {
+        this.returnValue = returnValue;
+        updateUseRegisters();
+    }
+
     public Operand getReturnValue() {
         return returnValue;
     }

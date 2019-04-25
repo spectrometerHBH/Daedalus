@@ -14,6 +14,8 @@ public class Branch extends IRInstruction {
     private BasicBlock thenBB;
     private BasicBlock elseBB;
 
+    public Cmp defOfCond = null;
+
     public Branch(BasicBlock currentBB, Operand cond, BasicBlock thenBB, BasicBlock elseBB) {
         super(currentBB);
         this.cond = cond;
@@ -37,6 +39,10 @@ public class Branch extends IRInstruction {
 
     public Operand getCond() {
         return cond;
+    }
+
+    public void setCond(Operand cond) {
+        this.cond = cond;
     }
 
     @Override
