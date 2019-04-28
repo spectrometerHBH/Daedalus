@@ -136,8 +136,8 @@ class SSAConstructor extends Pass {
 
         for (IRInstruction irInstruction = basicBlock.head; irInstruction != null; irInstruction = irInstruction.getNextInstruction())
             if (!(irInstruction instanceof Phi)) {
-                irInstruction.renameUseRegisters();
-                irInstruction.renameDefRegister();
+                irInstruction.renameUseRegistersForSSA();
+                irInstruction.renameDefRegisterForSSA();
             }
 
         for (BasicBlock successor : basicBlock.getSuccessors()) {

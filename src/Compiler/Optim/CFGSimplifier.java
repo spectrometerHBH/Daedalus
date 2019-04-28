@@ -29,7 +29,16 @@ class CFGSimplifier extends Pass {
     void run() {
         irRoot.getFunctionMap().forEach((name, function) -> {
             convertClearBranch(function);
-            RemoveUnreachableBB(function);
+            removeUnreachableBB(function);
+            mergeBB(function);
+        });
+    }
+
+    void runMore() {
+        irRoot.getFunctionMap().forEach((name, function) -> {
+            convertClearBranch(function);
+            eliminateSingleBranchBB(function);
+            removeUnreachableBB(function);
             mergeBB(function);
         });
     }
@@ -55,7 +64,7 @@ class CFGSimplifier extends Pass {
         function.recalcReversePostOrderDFSBBList();
     }
 
-    private void RemoveUnreachableBB(Function function) {
+    private void removeUnreachableBB(Function function) {
         //RPO remove orphan
         List<BasicBlock> removeList = new LinkedList<>();
         function.getReversePostOrderDFSBBList().forEach(basicBlock -> basicBlock.getPredecessors().forEach(predecessor -> {
@@ -77,5 +86,24 @@ class CFGSimplifier extends Pass {
             }
         }
         function.recalcReversePostOrderDFSBBList();
+    }
+
+    private void eliminateSingleBranchBB(Function function) {
+        function.getReversePostOrderDFSBBList().forEach(basicBlock -> {
+            if (basicBlock.head == basicBlock.tail && basicBlock.head instanceof Jump) {
+                BasicBlock targetBB = ((Jump) basicBlock.head).getTargetBB();
+                targetBB.getPredecessors().remove(basicBlock);
+                for (BasicBlock predecessor : basicBlock.getPredecessors()) {
+                    predecessor.getSuccessors().remove(basicBlock);
+                    predecessor.getSuccessors().add(targetBB);
+                    targetBB.getPredecessors().add(predecessor);
+                    if (predecessor.tail instanceof Jump) {
+                        ((Jump) predecessor.tail).setTargetBB(targetBB);
+                    } else if (predecessor.tail instanceof Branch) {
+                        ((Branch) predecessor.tail).replaceTarget(basicBlock, targetBB);
+                    }
+                }
+            }
+        });
     }
 }

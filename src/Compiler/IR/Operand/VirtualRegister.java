@@ -2,6 +2,7 @@ package Compiler.IR.Operand;
 
 import Compiler.IR.BasicBlock;
 import Compiler.IR.IRVisitor;
+import Compiler.IR.Instruction.Move;
 
 import java.util.*;
 
@@ -11,8 +12,14 @@ public abstract class VirtualRegister extends Register {
     private VirtualRegister origin = null;
     private int SSAID = -1;
 
+    //for Register Allocation use
     public PhysicalRegister color = null;
     public StackData spillAddr = null;
+    public Set<VirtualRegister> adjList = new HashSet<>();
+    public int degree;
+    public Set<Move> moveList = new HashSet<>();
+    public VirtualRegister alias;
+    public boolean addForSpill = false;
 
     public VirtualRegister() {
     }
@@ -54,6 +61,13 @@ public abstract class VirtualRegister extends Register {
         int newId = info.counter++;
         info.stack.push(newId);
         return newId;
+    }
+
+    public void clearAllocationInfo() {
+        spillAddr = null;
+        adjList.clear();
+        moveList.clear();
+        alias = null;
     }
 
     public static class RegisterInformation {

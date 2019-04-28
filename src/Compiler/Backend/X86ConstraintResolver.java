@@ -5,14 +5,14 @@ import Compiler.IR.IRRoot;
 import Compiler.IR.Instruction.*;
 import Compiler.IR.Operand.*;
 
-import java.util.LinkedList;
+import java.util.*;
 
 import static Compiler.IR.Operand.PhysicalRegister.*;
 
 public class X86ConstraintResolver {
     private IRRoot irRoot;
     private LinkedList<Register> parameterList = new LinkedList<>();
-
+    private Map<VirtualRegister, VirtualRegister> calleeSaveVRTemporaryMap = new HashMap<>();
     public X86ConstraintResolver(IRRoot irRoot) {
         this.irRoot = irRoot;
     }
@@ -41,7 +41,7 @@ public class X86ConstraintResolver {
                             ((Binary) nowIRInstruction).setSrc1(((Binary) nowIRInstruction).getDst());
                         } else {
                             //z = y op z
-                            //-->
+                            //-->u
                             //z' = z
                             //z = y
                             //z = z op z'
@@ -64,7 +64,7 @@ public class X86ConstraintResolver {
     }
 
     private void physicalRegisterConstraintResolve(Function function) {
-        //load arguments
+        //load function arguments
         parameterList.clear();
         if (function.getReferenceForClassMethod() != null)
             parameterList.add(function.getReferenceForClassMethod());
@@ -75,11 +75,12 @@ public class X86ConstraintResolver {
             else {
                 function.getEntryBlock().head.prependInstruction(new Load(function.getEntryBlock(), new StackData(vrbp, null, new Immediate(0), new Immediate(16 + (i - 6) * 8)), parameterList.get(i)));
             }
+
         //modify return
         Return returnInst = (Return) function.getExitBlock().tail;
         if (returnInst.getReturnValue() != null) {
             returnInst.prependInstruction(new Move(function.getExitBlock(), returnInst.getReturnValue(), vrax));
-            returnInst.setReturnValue(null);
+            returnInst.setReturnValue(vrax);
         }
 
         function.getReversePostOrderDFSBBList().forEach(basicBlock -> {
@@ -87,8 +88,7 @@ public class X86ConstraintResolver {
                 if (irInstruction instanceof Call) {
                     Call inst = (Call) irInstruction;
                     function.argumentLimit = Math.max(function.argumentLimit, inst.getObjectPointer() == null ? inst.getParameterList().size() : inst.getParameterList().size() + 1);
-
-                    //set arguments
+                    //pass arguments
                     int registerLimit = inst.getObjectPointer() == null ? 6 : 5;
                     while (inst.getParameterList().size() > registerLimit)
                         irInstruction.prependInstruction(new Store(basicBlock, inst.getParameterList().removeLast(),
@@ -102,10 +102,10 @@ public class X86ConstraintResolver {
                     for (int i = 0; i < ((Call) irInstruction).getParameterList().size(); i++) {
                         Operand operand = ((Call) irInstruction).getParameterList().get(i);
                         ((Call) irInstruction).getParameterList().set(i, argumentPassVRegisters.get(cnt));
-                        irInstruction.updateUseRegisters();
                         irInstruction.prependInstruction(new Move(basicBlock, operand, argumentPassVRegisters.get(cnt++)));
                     }
                     //get function call result
+                    irInstruction.updateUseRegisters();
                     if (((Call) irInstruction).getResult() != null) {
                         irInstruction.postpendInstruction(new Move(basicBlock, vrax, ((Call) irInstruction).getResult()));
                         ((Call) irInstruction).setResult(vrax);
@@ -115,20 +115,27 @@ public class X86ConstraintResolver {
                         //shl & shr
                         case SHL:
                         case SHR: {
-                            irInstruction.prependInstruction(new Move(basicBlock, ((Binary) irInstruction).getSrc2(), vrcx));
-                            irInstruction.replaceOperand(((Binary) irInstruction).getSrc2(), vrcx);
+                            if (((Binary) irInstruction).getSrc2() instanceof VirtualRegister) {
+                                irInstruction.prependInstruction(new Move(basicBlock, ((Binary) irInstruction).getSrc2(), vrcx));
+                                irInstruction.replaceUseRegister(((Binary) irInstruction).getSrc2(), vrcx);
+                            }
                             break;
                         }
                         //mod & div
                         case MOD:
                         case DIV: {
                             irInstruction.prependInstruction(new Move(basicBlock, ((Binary) irInstruction).getSrc1(), vrax));
-                            irInstruction.prependInstruction(new CDQ(basicBlock));
-                            irInstruction.replaceOperand(((Binary) irInstruction).getSrc1(), vrax);
+                            irInstruction.prependInstruction(new Move(basicBlock, rdx, vrdx));
+                            irInstruction.prependInstruction(new Move(basicBlock, ((Binary) irInstruction).getSrc2(), vrcx));
+                            irInstruction.replaceUseRegister(((Binary) irInstruction).getSrc1(), vrax);
+                            irInstruction.replaceUseRegister(((Binary) irInstruction).getSrc2(), vrcx);
                             if (((Binary) irInstruction).getOp() == Binary.Op.DIV)
                                 irInstruction.postpendInstruction(new Move(basicBlock, vrax, ((Binary) irInstruction).getDst()));
                             else
                                 irInstruction.postpendInstruction(new Move(basicBlock, vrdx, ((Binary) irInstruction).getDst()));
+                            irInstruction.postpendInstruction(new Move(basicBlock, rdx, vrdx));
+                            irInstruction.postpendInstruction(new Move(basicBlock, rax, vrax));
+                            ((Binary) irInstruction).setDst(vrax);
                             break;
                         }
                         default: {
@@ -142,5 +149,23 @@ public class X86ConstraintResolver {
                     ((Alloc) irInstruction).setPointer(vrax);
                 }
         });
+
+        //make temporaries for calleeSaveVRs
+
+        List<VirtualRegister> calleeList = new ArrayList<>(calleeSaveVRegisters);
+        for (int i = 0; i < calleeSaveVRegisters.size(); i++) {
+            VirtualRegister virtualRegister = calleeList.get(i);
+            if (virtualRegister != vrbp && virtualRegister != vrsp) {
+                I64Value temporary = new I64Value("temp_" + virtualRegister.getName());
+                calleeSaveVRTemporaryMap.put(virtualRegister, temporary);
+                function.getEntryBlock().head.prependInstruction(new Move(function.getEntryBlock(), virtualRegister, temporary));
+            }
+        }
+        for (int i = calleeList.size() - 1; i >= 0; i--) {
+            VirtualRegister virtualRegister = calleeList.get(i);
+            if (virtualRegister != vrbp && virtualRegister != vrsp) {
+                function.getExitBlock().tail.prependInstruction(new Move(function.getExitBlock(), calleeSaveVRTemporaryMap.get(virtualRegister), virtualRegister));
+            }
+        }
     }
 }

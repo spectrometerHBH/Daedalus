@@ -62,22 +62,40 @@ public class Unary extends IRInstruction {
     }
 
     @Override
-    public void renameDefRegister() {
+    public void renameDefRegisterForSSA() {
         if (dst instanceof VirtualRegister && !(dst instanceof GlobalVariable))
             dst = ((VirtualRegister) dst).getSSARenameRegister(((VirtualRegister) dst).getNewId());
     }
 
     @Override
-    public void renameUseRegisters() {
+    public void renameUseRegistersForSSA() {
         if (src instanceof VirtualRegister && !(src instanceof GlobalVariable))
             src = ((VirtualRegister) src).getSSARenameRegister(((VirtualRegister) src).info.stack.peek());
         updateUseRegisters();
     }
 
     @Override
-    public void replaceOperand(Operand oldOperand, Operand newOperand) {
+    public void replaceUseRegister(Operand oldOperand, Operand newOperand) {
         if (src == oldOperand) src = newOperand;
         updateUseRegisters();
+    }
+
+    @Override
+    public void calcUseAndDef() {
+        use.clear();
+        def.clear();
+        if (src instanceof VirtualRegister && !(src instanceof GlobalVariable)) use.add((VirtualRegister) src);
+        if (dst instanceof VirtualRegister && !(dst instanceof GlobalVariable)) def.add((VirtualRegister) dst);
+    }
+
+    @Override
+    public void replaceUse(VirtualRegister oldVR, VirtualRegister newVR) {
+        if (src == oldVR) src = newVR;
+    }
+
+    @Override
+    public void replaceDef(VirtualRegister oldVR, VirtualRegister newVR) {
+        if (dst == oldVR) dst = newVR;
     }
 
     public enum Op {

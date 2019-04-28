@@ -25,6 +25,10 @@ public class Optimizer {
         cfgSimplifier.run();
     }
 
+    public void simplifyCFG(boolean eliminateOK) {
+        cfgSimplifier.runMore();
+    }
+
     public void SSAConstruction() {
         ssaConstructor.run();
     }

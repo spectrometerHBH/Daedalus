@@ -70,23 +70,46 @@ public class Load extends IRInstruction {
 
     //used in SSA construction
     @Override
-    public void renameDefRegister() {
+    public void renameDefRegisterForSSA() {
         if (dst instanceof VirtualRegister && !(dst instanceof GlobalVariable))
             dst = ((VirtualRegister) dst).getSSARenameRegister(((VirtualRegister) dst).getNewId());
     }
 
     @Override
-    public void renameUseRegisters() {
+    public void renameUseRegistersForSSA() {
         if (src instanceof VirtualRegister && !(src instanceof GlobalVariable))
             src = ((VirtualRegister) src).getSSARenameRegister(((VirtualRegister) src).info.stack.peek());
         updateUseRegisters();
     }
 
     @Override
-    public void replaceOperand(Operand oldOperand, Operand newOperand) {
+    public void replaceUseRegister(Operand oldOperand, Operand newOperand) {
         if (src instanceof Register) {
             if (src == oldOperand) src = newOperand;
         } else if (src instanceof Memory) ((Memory) src).replaceOperand(oldOperand, newOperand);
         updateUseRegisters();
+    }
+
+    @Override
+    public void calcUseAndDef() {
+        use.clear();
+        def.clear();
+        if (src instanceof VirtualRegister && !(src instanceof GlobalVariable)) use.add((VirtualRegister) src);
+        else if (src instanceof Memory) use.addAll(((Memory) src).useRegisters());
+        if (dst instanceof VirtualRegister && !(dst instanceof GlobalVariable)) def.add((VirtualRegister) dst);
+    }
+
+    @Override
+    public void replaceUse(VirtualRegister oldVR, VirtualRegister newVR) {
+        if (src instanceof VirtualRegister) {
+            if (src == oldVR) src = newVR;
+        } else if (src instanceof Memory) ((Memory) src).replaceOperand(oldVR, newVR);
+    }
+
+    @Override
+    public void replaceDef(VirtualRegister oldVR, VirtualRegister newVR) {
+        if (dst instanceof VirtualRegister) {
+            if (dst == oldVR) dst = newVR;
+        }
     }
 }

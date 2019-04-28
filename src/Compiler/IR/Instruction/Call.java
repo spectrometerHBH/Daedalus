@@ -11,6 +11,9 @@ import Compiler.IR.Operand.VirtualRegister;
 import java.util.LinkedList;
 import java.util.Map;
 
+import static Compiler.IR.Operand.PhysicalRegister.callerSaveVRegisters;
+import static Compiler.IR.Operand.PhysicalRegister.vrsp;
+
 public class Call extends IRInstruction {
     private LinkedList<Operand> parameterList = new LinkedList<>();
     private Function callee;
@@ -91,13 +94,13 @@ public class Call extends IRInstruction {
     }
 
     @Override
-    public void renameDefRegister() {
+    public void renameDefRegisterForSSA() {
         if (result != null && result instanceof VirtualRegister && !(result instanceof GlobalVariable))
             result = ((VirtualRegister) result).getSSARenameRegister(((VirtualRegister) result).getNewId());
     }
 
     @Override
-    public void renameUseRegisters() {
+    public void renameUseRegistersForSSA() {
         for (int i = 0; i < parameterList.size(); i++) {
             Operand parameter = parameterList.get(i);
             if (parameter instanceof VirtualRegister && !(parameter instanceof GlobalVariable))
@@ -109,12 +112,41 @@ public class Call extends IRInstruction {
     }
 
     @Override
-    public void replaceOperand(Operand oldOperand, Operand newOperand) {
+    public void replaceUseRegister(Operand oldOperand, Operand newOperand) {
         for (int i = 0; i < parameterList.size(); i++) {
             Operand parameter = parameterList.get(i);
             if (parameter == oldOperand) parameterList.set(i, newOperand);
         }
         if (objectPointer == oldOperand) objectPointer = newOperand;
         updateUseRegisters();
+    }
+
+    @Override
+    public void calcUseAndDef() {
+        use.clear();
+        def.clear();
+        parameterList.forEach(parameter -> {
+            if (parameter instanceof VirtualRegister && !(parameter instanceof GlobalVariable))
+                use.add((VirtualRegister) parameter);
+        });
+        if (objectPointer instanceof VirtualRegister && !(objectPointer instanceof GlobalVariable))
+            use.add((VirtualRegister) objectPointer);
+        if (result instanceof VirtualRegister && !(result instanceof GlobalVariable)) def.add((VirtualRegister) result);
+        def.addAll(callerSaveVRegisters);
+        def.remove(vrsp);
+    }
+
+    @Override
+    public void replaceUse(VirtualRegister oldVR, VirtualRegister newVR) {
+        for (int i = 0; i < parameterList.size(); i++) {
+            Operand parameter = parameterList.get(i);
+            if (parameter == oldVR) parameterList.set(i, newVR);
+        }
+        if (objectPointer == oldVR) objectPointer = newVR;
+    }
+
+    @Override
+    public void replaceDef(VirtualRegister oldVR, VirtualRegister newVR) {
+
     }
 }

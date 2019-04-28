@@ -1,6 +1,7 @@
 package Compiler.IR;
 
 import Compiler.IR.Instruction.*;
+import Compiler.IR.Operand.VirtualRegister;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -151,5 +152,35 @@ public class BasicBlock {
             irInstruction.setCurrentBB(newBasicBlock);
             if (!irInstruction.hasNextInstruction()) break;
         }
+    }
+
+    //for Liveness Analysis in Register Allocation
+    private Set<VirtualRegister> use = new HashSet<>();
+    private Set<VirtualRegister> def = new HashSet<>();
+    private Set<VirtualRegister> liveIn = new HashSet<>();
+    private Set<VirtualRegister> liveOut = new HashSet<>();
+
+    public Set<VirtualRegister> getUse() {
+        return use;
+    }
+
+    public Set<VirtualRegister> getDef() {
+        return def;
+    }
+
+    public Set<VirtualRegister> getLiveIn() {
+        return liveIn;
+    }
+
+    public void setLiveIn(Set<VirtualRegister> liveIn) {
+        this.liveIn = liveIn;
+    }
+
+    public Set<VirtualRegister> getLiveOut() {
+        return liveOut;
+    }
+
+    public void setLiveOut(Set<VirtualRegister> liveOut) {
+        this.liveOut = liveOut;
     }
 }

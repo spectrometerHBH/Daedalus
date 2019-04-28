@@ -4,6 +4,7 @@ import Compiler.IR.BasicBlock;
 import Compiler.IR.IRVisitor;
 import Compiler.IR.Operand.Operand;
 import Compiler.IR.Operand.Register;
+import Compiler.IR.Operand.VirtualRegister;
 
 import java.util.Map;
 
@@ -42,7 +43,7 @@ public class Push extends IRInstruction {
     }
 
     @Override
-    public void renameDefRegister() {
+    public void renameDefRegisterForSSA() {
 
     }
 
@@ -52,13 +53,29 @@ public class Push extends IRInstruction {
     }
 
     @Override
-    public void renameUseRegisters() {
+    public void renameUseRegistersForSSA() {
 
     }
 
     @Override
-    public void replaceOperand(Operand oldOperand, Operand newOperand) {
+    public void replaceUseRegister(Operand oldOperand, Operand newOperand) {
         if (src == oldOperand) src = newOperand;
         updateUseRegisters();
+    }
+
+    @Override
+    public void calcUseAndDef() {
+        use.clear();
+        def.clear();
+    }
+
+    @Override
+    public void replaceUse(VirtualRegister oldVR, VirtualRegister newVR) {
+
+    }
+
+    @Override
+    public void replaceDef(VirtualRegister oldVR, VirtualRegister newVR) {
+
     }
 }

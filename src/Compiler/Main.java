@@ -34,7 +34,9 @@ public class Main {
         PrintStream ir_out_raw = new PrintStream("ir_raw.ll");
         PrintStream ir_out_afterSSAConstruction = new PrintStream("ir_out_ssa_construct.ll");
         PrintStream ir_out_afterOptimization = new PrintStream("ir_out_after_optim.ll");
+        PrintStream ir_out_afterX86Transformation = new PrintStream("ir_out_after_X86.ll");
         PrintStream ir_codegen = test ? new PrintStream(System.out) : new PrintStream("ir_out_after_codegen.ll");
+        PrintStream ir_codegen_without_color = new PrintStream("ir_out_after_codegen_no_color.ll");
 
         //for IR interpreter test use
         FileInputStream ir_test_in = new FileInputStream("ir_out_after_codegen.ll");
@@ -59,7 +61,7 @@ public class Main {
             new IRPrinter(ir_out_raw).visit(irRoot);
             //Optimization
             Optimizer optimizer = new Optimizer(irRoot);
-            optimizer.simplifyCFG();
+            optimizer.simplifyCFG(true);
             optimizer.SSAConstruction();
             new IRPrinter(ir_out_afterSSAConstruction).visit(irRoot);
             for (int rounds = 0; rounds < 5; rounds++) {
@@ -72,11 +74,14 @@ public class Main {
             optimizer.InstructionCombination();
             new IRPrinter(ir_out_afterOptimization).visit(irRoot);
             optimizer.SSADestruction();
-            optimizer.simplifyCFG();
+            optimizer.simplifyCFG(true);
             //Codegen
             new X86ConstraintResolver(irRoot).run();
+            new IRPrinter(ir_out_afterX86Transformation, false, false).visit(irRoot);
             new RegisterAllocator(irRoot).run();
-            new IRPrinter(ir_codegen).visit(irRoot);
+            optimizer.simplifyCFG(true);
+            new IRPrinter(ir_codegen_without_color).visit(irRoot);
+            new IRPrinter(ir_codegen, true).visit(irRoot);
         } catch (Exception e) {
             e.printStackTrace();
             System.err.println(e.getMessage());

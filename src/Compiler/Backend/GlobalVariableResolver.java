@@ -90,7 +90,7 @@ public class GlobalVariableResolver {
     private VirtualRegister getTemporal(GlobalVariable useRegister, Map<GlobalVariable, VirtualRegister> globalTemporal) {
         VirtualRegister temporal = globalTemporal.get(useRegister);
         if (temporal == null) {
-            temporal = new I64Value();
+            temporal = new I64Value(((GlobalI64Value) useRegister).getName());
             globalTemporal.put(useRegister, temporal);
         }
         return temporal;

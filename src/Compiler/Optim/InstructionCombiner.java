@@ -103,12 +103,12 @@ class InstructionCombiner extends Pass {
                                     use.get(useRegister).add(irInstruction);
                                 }
                                 def.remove(addr);
-                                irInstruction.replaceOperand(addr, defOfAddr.getSrc());
+                                irInstruction.replaceUseRegister(addr, defOfAddr.getSrc());
                             }
                         }
                     }
                     if (((Load) irInstruction).getSrc() instanceof VirtualRegister)
-                        irInstruction.replaceOperand(((Load) irInstruction).getSrc(), new DynamicData(((Register) ((Load) irInstruction).getSrc()), null, new Immediate(0), new Immediate(0)));
+                        irInstruction.replaceUseRegister(((Load) irInstruction).getSrc(), new DynamicData(((Register) ((Load) irInstruction).getSrc()), null, new Immediate(0), new Immediate(0)));
                 } else if (irInstruction instanceof Store) {
                     if (((Store) irInstruction).getDst() instanceof VirtualRegister) {
                         VirtualRegister addr = (VirtualRegister) ((Store) irInstruction).getDst();
@@ -125,12 +125,12 @@ class InstructionCombiner extends Pass {
                                     use.get(useRegister).add(irInstruction);
                                 }
                                 def.remove(addr);
-                                irInstruction.replaceOperand(addr, defOfAddr.getSrc());
+                                irInstruction.replaceUseRegister(addr, defOfAddr.getSrc());
                             }
                         }
                     }
                     if (((Store) irInstruction).getDst() instanceof VirtualRegister) {
-                        irInstruction.replaceOperand(((Store) irInstruction).getDst(), new DynamicData((Register) (((Store) irInstruction).getDst()), null, new Immediate(0), new Immediate(0)));
+                        irInstruction.replaceUseRegister(((Store) irInstruction).getDst(), new DynamicData((Register) (((Store) irInstruction).getDst()), null, new Immediate(0), new Immediate(0)));
                     }
                 }
         });
@@ -141,10 +141,18 @@ class InstructionCombiner extends Pass {
             if (basicBlock.tail instanceof Branch) {
                 if (((Branch) basicBlock.tail).getCond() instanceof VirtualRegister) {
                     VirtualRegister cond = (VirtualRegister) ((Branch) basicBlock.tail).getCond();
-                    Cmp defOfCond = (Cmp) def.get(cond);
-                    defOfCond.setDefRegister(null);
-                    ((Branch) basicBlock.tail).defOfCond = defOfCond;
-                    ((Branch) basicBlock.tail).setCond(null);
+                    if (def.get(cond) instanceof Cmp) {
+                        Cmp defOfCond = (Cmp) def.get(cond);
+                        defOfCond.setDefRegister(null);
+                        ((Branch) basicBlock.tail).defOfCond = defOfCond;
+                        ((Branch) basicBlock.tail).setCond(null);
+                    } else {
+                        IRInstruction defOfCond = def.get(cond);
+                        Cmp newCmp = new Cmp(basicBlock, Cmp.Op.EQ, cond, new Immediate(1), null);
+                        basicBlock.tail.prependInstruction(newCmp);
+                        ((Branch) basicBlock.tail).defOfCond = newCmp;
+                        ((Branch) basicBlock.tail).setCond(null);
+                    }
                 }
             }
         });

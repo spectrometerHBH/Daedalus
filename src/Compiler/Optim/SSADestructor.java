@@ -57,7 +57,6 @@ class SSADestructor extends Pass {
                 for (Map.Entry<BasicBlock, Operand> entry : ((Phi) irInstruction).getPaths().entrySet()) {
                     BasicBlock comingBasicBlock = entry.getKey();
                     Operand comingRegister = entry.getValue();
-                    //PCmap.get(comingBasicBlock).add(new ParallelCopy((VirtualRegister) ((Phi) irInstruction).getDst(), comingRegister));
                     PCmap.get(comingBasicBlock).add(new ParallelCopy((VirtualRegister) ((Phi) irInstruction).getDst(), comingRegister == null ? new Immediate(0) : comingRegister));
                 }
             }

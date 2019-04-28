@@ -81,13 +81,13 @@ public class Binary extends IRInstruction {
     }
 
     @Override
-    public void renameDefRegister() {
+    public void renameDefRegisterForSSA() {
         if (!(dst instanceof GlobalVariable))
             dst = ((VirtualRegister) dst).getSSARenameRegister(((VirtualRegister) dst).getNewId());
     }
 
     @Override
-    public void renameUseRegisters() {
+    public void renameUseRegistersForSSA() {
         if (src1 instanceof VirtualRegister && !(src1 instanceof GlobalVariable))
             src1 = ((VirtualRegister) src1).getSSARenameRegister(((VirtualRegister) src1).info.stack.peek());
         if (src2 instanceof VirtualRegister && !(src2 instanceof GlobalVariable))
@@ -96,10 +96,30 @@ public class Binary extends IRInstruction {
     }
 
     @Override
-    public void replaceOperand(Operand oldOperand, Operand newOperand) {
+    public void replaceUseRegister(Operand oldOperand, Operand newOperand) {
         if (src1 == oldOperand) src1 = newOperand;
         if (src2 == oldOperand) src2 = newOperand;
         updateUseRegisters();
+    }
+
+    @Override
+    public void calcUseAndDef() {
+        use.clear();
+        def.clear();
+        if (src1 instanceof VirtualRegister && !(src1 instanceof GlobalVariable)) use.add((VirtualRegister) src1);
+        if (src2 instanceof VirtualRegister && !(src2 instanceof GlobalVariable)) use.add((VirtualRegister) src2);
+        if (dst instanceof VirtualRegister && !(dst instanceof GlobalVariable)) def.add((VirtualRegister) dst);
+    }
+
+    @Override
+    public void replaceUse(VirtualRegister oldVR, VirtualRegister newVR) {
+        if (src1 == oldVR) src1 = newVR;
+        if (src2 == oldVR) src2 = newVR;
+    }
+
+    @Override
+    public void replaceDef(VirtualRegister oldVR, VirtualRegister newVR) {
+        if (dst == oldVR) dst = newVR;
     }
 
     public Lea transformBinary2Lea(Binary inst) {

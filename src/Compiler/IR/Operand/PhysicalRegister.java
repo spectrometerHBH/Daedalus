@@ -29,22 +29,22 @@ public class PhysicalRegister extends Register {
     public static final LinkedList<PhysicalRegister> argumentPassRegisters = new LinkedList<>();
     public static final LinkedList<PhysicalRegister> allRegisters = new LinkedList<>();
 
-    public static final VirtualRegister vrax = new I64Value("rax", rax);
-    public static final VirtualRegister vrcx = new I64Value("rcx", rcx);
-    public static final VirtualRegister vrdx = new I64Value("rdx", rdx);
-    public static final VirtualRegister vrbx = new I64Value("rbx", rbx);
-    public static final VirtualRegister vrsi = new I64Value("rsi", rsi);
-    public static final VirtualRegister vrdi = new I64Value("rdi", rdi);
-    public static final VirtualRegister vrsp = new I64Value("rsp", rsp);
-    public static final VirtualRegister vrbp = new I64Value("rbp", rbp);
-    public static final VirtualRegister vr8 = new I64Value("r8", r8);
-    public static final VirtualRegister vr9 = new I64Value("r9", r9);
-    public static final VirtualRegister vr10 = new I64Value("r10", r10);
-    public static final VirtualRegister vr11 = new I64Value("r11", r11);
-    public static final VirtualRegister vr12 = new I64Value("r12", r12);
-    public static final VirtualRegister vr13 = new I64Value("r13", r13);
-    public static final VirtualRegister vr14 = new I64Value("r14", r14);
-    public static final VirtualRegister vr15 = new I64Value("r15", r15);
+    public static final VirtualRegister vrax = new I64Value("vrax", rax);
+    public static final VirtualRegister vrcx = new I64Value("vrcx", rcx);
+    public static final VirtualRegister vrdx = new I64Value("vrdx", rdx);
+    public static final VirtualRegister vrbx = new I64Value("vrbx", rbx);
+    public static final VirtualRegister vrsi = new I64Value("vrsi", rsi);
+    public static final VirtualRegister vrdi = new I64Value("vrdi", rdi);
+    public static final VirtualRegister vrsp = new I64Value("vrsp", rsp);
+    public static final VirtualRegister vrbp = new I64Value("vrbp", rbp);
+    public static final VirtualRegister vr8 = new I64Value("vr8", r8);
+    public static final VirtualRegister vr9 = new I64Value("vr9", r9);
+    public static final VirtualRegister vr10 = new I64Value("vr10", r10);
+    public static final VirtualRegister vr11 = new I64Value("vr11", r11);
+    public static final VirtualRegister vr12 = new I64Value("vr12", r12);
+    public static final VirtualRegister vr13 = new I64Value("vr13", r13);
+    public static final VirtualRegister vr14 = new I64Value("vr14", r14);
+    public static final VirtualRegister vr15 = new I64Value("vr15", r15);
 
     public static final Set<VirtualRegister> callerSaveVRegisters = new HashSet<>();
     public static final Set<VirtualRegister> calleeSaveVRegisters = new HashSet<>();
@@ -76,8 +76,8 @@ public class PhysicalRegister extends Register {
         allVRegisters.add(vr13);
         allVRegisters.add(vr14);
         allVRegisters.add(vr15);
-        for (VirtualRegister virtualRegister : argumentPassVRegisters) {
-            argumentPassRegisters.add(virtualRegister.color);
+        for (VirtualRegister virtualRegister : allVRegisters) {
+            allRegisters.add(virtualRegister.color);
             if (virtualRegister.color.isCallerSave) {
                 callerSaveVRegisters.add(virtualRegister);
                 callerSaveRegisters.add(virtualRegister.color);
@@ -103,10 +103,10 @@ public class PhysicalRegister extends Register {
     }
 
     public boolean isCalleeSave() {
-        return calleeSaveRegisters.contains(this);
+        return isCalleeSave;
     }
 
     public boolean isCallerSave() {
-        return callerSaveRegisters.contains(this);
+        return isCallerSave;
     }
 }

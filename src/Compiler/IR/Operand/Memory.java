@@ -8,7 +8,7 @@ public abstract class Memory extends Storage {
     private Register index = null;
     private Immediate scale = new Immediate(0);
     private Immediate offset = new Immediate(0);
-    private List<Register> useRegisters = new ArrayList<>();
+    private List<VirtualRegister> useRegisters = new ArrayList<>();
 
     public Memory(VirtualRegister base) {
         super(base.getName());
@@ -58,15 +58,15 @@ public abstract class Memory extends Storage {
         this.offset = offset;
     }
 
-    public List<Register> useRegisters() {
+    public List<VirtualRegister> useRegisters() {
         useRegisters.clear();
-        if (base != null) useRegisters.add(base);
-        if (index != null) useRegisters.add(index);
+        if (base != null && !(base instanceof GlobalVariable)) useRegisters.add((VirtualRegister) base);
+        if (index != null && !(index instanceof GlobalVariable)) useRegisters.add((VirtualRegister) index);
         return useRegisters;
     }
 
     public void replaceOperand(Operand oldOperand, Operand newOperand) {
-        if (base == oldOperand) base = (Register) newOperand;
-        if (index == oldOperand) index = (Register) newOperand;
+        if (base == oldOperand) base = (VirtualRegister) newOperand;
+        if (index == oldOperand) index = (VirtualRegister) newOperand;
     }
 }

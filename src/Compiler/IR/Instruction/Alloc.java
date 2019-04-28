@@ -9,6 +9,8 @@ import Compiler.IR.Operand.VirtualRegister;
 
 import java.util.Map;
 
+import static Compiler.IR.Operand.PhysicalRegister.*;
+
 public class Alloc extends IRInstruction {
     private Operand size;
     private Operand pointer;
@@ -35,7 +37,6 @@ public class Alloc extends IRInstruction {
 
     public void setPointer(Operand pointer) {
         this.pointer = pointer;
-        updateUseRegisters();
     }
 
     @Override
@@ -66,21 +67,43 @@ public class Alloc extends IRInstruction {
     }
 
     @Override
-    public void renameDefRegister() {
+    public void renameDefRegisterForSSA() {
         if (pointer instanceof VirtualRegister && !(pointer instanceof GlobalVariable))
             pointer = ((VirtualRegister) pointer).getSSARenameRegister(((VirtualRegister) pointer).getNewId());
     }
 
     @Override
-    public void renameUseRegisters() {
+    public void renameUseRegistersForSSA() {
         if (size instanceof VirtualRegister && !(size instanceof GlobalVariable))
             size = ((VirtualRegister) size).getSSARenameRegister(((VirtualRegister) size).info.stack.peek());
         updateUseRegisters();
     }
 
     @Override
-    public void replaceOperand(Operand oldOperand, Operand newOperand) {
+    public void replaceUseRegister(Operand oldOperand, Operand newOperand) {
         if (size == oldOperand) size = newOperand;
         updateUseRegisters();
+    }
+
+    @Override
+    public void calcUseAndDef() {
+        use.clear();
+        def.clear();
+        if (size instanceof VirtualRegister && !(size instanceof GlobalVariable)) use.add((VirtualRegister) size);
+        if (pointer instanceof VirtualRegister && !(pointer instanceof GlobalVariable))
+            def.add((VirtualRegister) pointer);
+        def.addAll(callerSaveVRegisters);
+        def.remove(vrsp);
+        def.remove(vrbp);
+    }
+
+    @Override
+    public void replaceUse(VirtualRegister oldVR, VirtualRegister newVR) {
+        if (size == oldVR) size = newVR;
+    }
+
+    @Override
+    public void replaceDef(VirtualRegister oldVR, VirtualRegister newVR) {
+        if (pointer == oldVR) pointer = newVR;
     }
 }

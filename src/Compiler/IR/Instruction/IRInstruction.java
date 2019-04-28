@@ -4,10 +4,9 @@ import Compiler.IR.BasicBlock;
 import Compiler.IR.IRVisitor;
 import Compiler.IR.Operand.Operand;
 import Compiler.IR.Operand.Register;
+import Compiler.IR.Operand.VirtualRegister;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public abstract class IRInstruction {
     protected BasicBlock currentBB;
@@ -93,8 +92,6 @@ public abstract class IRInstruction {
 
     public abstract void setDefRegister(Register newRegister);
 
-    public abstract void renameDefRegister();
-
     public List<Register> getUseRegisters() {
         updateUseRegisters();
         return useRegisters;
@@ -102,7 +99,37 @@ public abstract class IRInstruction {
 
     public abstract void setUseRegisters(Map<Register, Register> renameMap);
 
-    public abstract void renameUseRegisters();
+    //for Liveness Analysis during Register Allocation
+    protected Set<VirtualRegister> use = new HashSet<>();
+    protected Set<VirtualRegister> def = new HashSet<>();
+    protected Set<VirtualRegister> liveIn = new HashSet<>();
+    protected Set<VirtualRegister> liveOut = new HashSet<>();
 
-    public abstract void replaceOperand(Operand oldOperand, Operand newOperand);
+    public abstract void renameDefRegisterForSSA();
+
+    public abstract void renameUseRegistersForSSA();
+
+    public abstract void replaceUseRegister(Operand oldOperand, Operand newOperand);
+
+    public abstract void calcUseAndDef();
+
+    public abstract void replaceUse(VirtualRegister oldVR, VirtualRegister newVR);
+
+    public abstract void replaceDef(VirtualRegister oldVR, VirtualRegister newVR);
+
+    public Set<VirtualRegister> getUse() {
+        return use;
+    }
+
+    public Set<VirtualRegister> getDef() {
+        return def;
+    }
+
+    public Set<VirtualRegister> getLiveIn() {
+        return liveIn;
+    }
+
+    public Set<VirtualRegister> getLiveOut() {
+        return liveOut;
+    }
 }

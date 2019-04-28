@@ -2,9 +2,7 @@ package Compiler.IR.Instruction;
 
 import Compiler.IR.BasicBlock;
 import Compiler.IR.IRVisitor;
-import Compiler.IR.Operand.Memory;
-import Compiler.IR.Operand.Operand;
-import Compiler.IR.Operand.Register;
+import Compiler.IR.Operand.*;
 
 import java.util.Map;
 
@@ -49,7 +47,12 @@ public class Lea extends IRInstruction {
     }
 
     @Override
-    public void renameDefRegister() {
+    public void renameDefRegisterForSSA() {
+
+    }
+
+    @Override
+    public void renameUseRegistersForSSA() {
 
     }
 
@@ -59,13 +62,26 @@ public class Lea extends IRInstruction {
     }
 
     @Override
-    public void renameUseRegisters() {
-
+    public void replaceUseRegister(Operand oldOperand, Operand newOperand) {
+        src.replaceOperand(oldOperand, newOperand);
+        updateUseRegisters();
     }
 
     @Override
-    public void replaceOperand(Operand oldOperand, Operand newOperand) {
-        src.replaceOperand(oldOperand, newOperand);
-        updateUseRegisters();
+    public void calcUseAndDef() {
+        use.clear();
+        def.clear();
+        use.addAll(src.useRegisters());
+        if (dst instanceof VirtualRegister && !(dst instanceof GlobalVariable)) def.add((VirtualRegister) dst);
+    }
+
+    @Override
+    public void replaceUse(VirtualRegister oldVR, VirtualRegister newVR) {
+        src.replaceOperand(oldVR, newVR);
+    }
+
+    @Override
+    public void replaceDef(VirtualRegister oldVR, VirtualRegister newVR) {
+        if (dst == oldVR) dst = newVR;
     }
 }

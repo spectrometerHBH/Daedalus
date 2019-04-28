@@ -43,6 +43,7 @@ public class Branch extends IRInstruction {
 
     public void setCond(Operand cond) {
         this.cond = cond;
+        updateUseRegisters();
     }
 
     @Override
@@ -72,20 +73,36 @@ public class Branch extends IRInstruction {
     }
 
     @Override
-    public void renameDefRegister() {
+    public void renameDefRegisterForSSA() {
 
     }
 
     @Override
-    public void renameUseRegisters() {
+    public void renameUseRegistersForSSA() {
         if (cond instanceof VirtualRegister && !(cond instanceof GlobalVariable))
             cond = ((VirtualRegister) cond).getSSARenameRegister(((VirtualRegister) cond).info.stack.peek());
         updateUseRegisters();
     }
 
     @Override
-    public void replaceOperand(Operand oldOperand, Operand newOperand) {
+    public void replaceUseRegister(Operand oldOperand, Operand newOperand) {
         if (cond == oldOperand) cond = newOperand;
         updateUseRegisters();
+    }
+
+    @Override
+    public void calcUseAndDef() {
+        use.clear();
+        def.clear();
+    }
+
+    @Override
+    public void replaceUse(VirtualRegister oldVR, VirtualRegister newVR) {
+
+    }
+
+    @Override
+    public void replaceDef(VirtualRegister oldVR, VirtualRegister newVR) {
+
     }
 }

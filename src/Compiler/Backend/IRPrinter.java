@@ -17,8 +17,22 @@ public class IRPrinter implements IRVisitor {
     private Map<BasicBlock, String> basicBlockStringMap = new HashMap<>();
     private Map<String, Integer> nameCountMap = new HashMap<>();
 
+    private boolean printColor = false;
+    private boolean printDefUse = false;
+
     public IRPrinter(PrintStream out) {
         this.out = out;
+    }
+
+    public IRPrinter(PrintStream out, boolean printColor) {
+        this.out = out;
+        this.printColor = printColor;
+    }
+
+    public IRPrinter(PrintStream out, boolean printColor, boolean printDefUse) {
+        this.out = out;
+        this.printColor = printColor;
+        this.printDefUse = printDefUse;
     }
 
     @Override
@@ -35,10 +49,10 @@ public class IRPrinter implements IRVisitor {
         out.print("define " + (isVoid ? "void " : "i64 ") + "@" + function.getName() + " ");
         if (function.getReferenceForClassMethod() != null) function.getReferenceForClassMethod().accept(this);
         out.print(" ");
-        function.getParameterList().forEach(x -> {
-            x.accept(this);
-            out.print(" ");
-        });
+        //function.getParameterList().forEach(x -> {
+        //    x.accept(this);
+        //    out.print(" ");
+        //});
         out.println("{");
         function.getReversePostOrderDFSBBList().forEach(this::visit);
         out.println("}");
@@ -57,6 +71,17 @@ public class IRPrinter implements IRVisitor {
         for (IRInstruction irInstruction = basicBlock.head; irInstruction != null; irInstruction = irInstruction.getNextInstruction()) {
             out.print("    ");
             irInstruction.accept(this);
+            if (printDefUse) {
+                out.print("        //<def>");
+                irInstruction.calcUseAndDef();
+                for (VirtualRegister def : irInstruction.getDef())
+                    out.print(" " + getName(def));
+                out.println();
+                out.print("        //<use>");
+                for (VirtualRegister use : irInstruction.getUse())
+                    out.print(" " + getName(use));
+                out.println();
+            }
         }
         out.println();
     }
@@ -64,7 +89,7 @@ public class IRPrinter implements IRVisitor {
     @Override
     public void visit(Alloc inst) {
         inst.getPointer().accept(this);
-        out.print(" = extern_alloc ");
+        out.print(" = alloc ");
         inst.getSize().accept(this);
         out.println();
     }
@@ -342,11 +367,25 @@ public class IRPrinter implements IRVisitor {
         return newName;
     }
 
-    private String getName(Storage storage) {
-        VirtualRegister origin = ((VirtualRegister) storage).getOrigin();
-        String name = storageStringMap.get(origin);
-        name = name != null ? name : createName(origin, origin.getName() == null ? "t" : origin.getName());
-        return name + "." + ((VirtualRegister) storage).getSSAID();
+    public String getName(Storage storage) {
+        if (storage instanceof VirtualRegister) {
+            if (printColor && !(storage instanceof GlobalVariable)) {
+                return ((VirtualRegister) storage).color.getName();
+            } else {
+                /*
+                VirtualRegister origin = ((VirtualRegister) storage).getOrigin();
+                String name = storageStringMap.get(origin);
+                name = name != null ? name : createName(origin, origin.getName() == null ? "t" : origin.getName());
+                return name + "." + ((VirtualRegister) storage).getSSAID();
+                */
+                String name = storageStringMap.get(storage);
+                name = name != null ? name : createName(storage, storage.getName() == null ? "t" : storage.getName());
+                return name;
+                //return origin.toString() + "." + ((VirtualRegister) storage).getSSAID();
+            }
+        } else if (storage instanceof PhysicalRegister) {
+            return storage.getName();
+        } else return "fuck_you";
     }
 
     private String createLabel(BasicBlock basicBlock, String name) {
@@ -362,4 +401,5 @@ public class IRPrinter implements IRVisitor {
         String name = basicBlockStringMap.get(basicBlock);
         return name != null ? name : createLabel(basicBlock, basicBlock.getName());
     }
+
 }

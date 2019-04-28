@@ -161,7 +161,7 @@ class ConstantAndCopyPropagator extends Pass {
             Set<IRInstruction> oldUses = use.get(oldOperand);
             for (IRInstruction user : oldUses)
                 if (user != irInstruction) {
-                    user.replaceOperand(oldOperand, newOperand);
+                    user.replaceUseRegister(oldOperand, newOperand);
                     if (!inQueue.contains(user)) {
                         workList.add(user);
                         inQueue.add(user);
@@ -174,7 +174,7 @@ class ConstantAndCopyPropagator extends Pass {
             Set<IRInstruction> newUses = use.get(newOperand);
             for (IRInstruction user : oldUses)
                 if (user != irInstruction) {
-                    user.replaceOperand(oldOperand, newOperand);
+                    user.replaceUseRegister(oldOperand, newOperand);
                     newUses.add(user);
                     if (!inQueue.contains(user)) {
                         workList.add(user);

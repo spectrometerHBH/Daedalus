@@ -15,12 +15,14 @@ public class Function {
     public FunctionInfo functionInfo;
     public LinkedList<Call> callerInstructionList = new LinkedList<>();
     public int argumentLimit;
+    public int temporaryCnt = 0;
 
     private BasicBlock entryBlock = new BasicBlock(this, "entry");
     private BasicBlock exitBlock = new BasicBlock(this, "exit");
     private List<Return> returnInstList = new ArrayList<>();
     private Register referenceForClassMethod = null;
     private List<Register> parameterList = new ArrayList<>();
+    private List<BasicBlock> postOrderDFSBBList = null;
     private List<BasicBlock> reversePostOrderDFSBBList = null;
     private Set<BasicBlock> visit = null;
     private Set<VirtualRegister> globals = new HashSet<>();
@@ -100,6 +102,15 @@ public class Function {
             reversePostOrderDFSBBList.get(i).postOrderNumber = i;
         }
         Collections.reverse(reversePostOrderDFSBBList);
+    }
+
+    public List<BasicBlock> getPostOrderDFSBBList() {
+        if (postOrderDFSBBList == null) {
+            postOrderDFSBBList = new ArrayList<>();
+            postOrderDFSBBList.addAll(reversePostOrderDFSBBList);
+            Collections.reverse(postOrderDFSBBList);
+        }
+        return postOrderDFSBBList;
     }
 
     private void postOrderDFS(BasicBlock nowBB) {

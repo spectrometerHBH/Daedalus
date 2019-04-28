@@ -55,20 +55,38 @@ public class Return extends IRInstruction {
     }
 
     @Override
-    public void renameDefRegister() {
+    public void renameDefRegisterForSSA() {
 
     }
 
     @Override
-    public void renameUseRegisters() {
+    public void renameUseRegistersForSSA() {
         if (returnValue instanceof VirtualRegister && !(returnValue instanceof GlobalVariable))
             returnValue = ((VirtualRegister) returnValue).getSSARenameRegister(((VirtualRegister) returnValue).info.stack.peek());
         updateUseRegisters();
     }
 
     @Override
-    public void replaceOperand(Operand oldOperand, Operand newOperand) {
+    public void replaceUseRegister(Operand oldOperand, Operand newOperand) {
         if (returnValue == oldOperand) returnValue = newOperand;
         updateUseRegisters();
+    }
+
+    @Override
+    public void calcUseAndDef() {
+        use.clear();
+        def.clear();
+        if (returnValue instanceof VirtualRegister && !(returnValue instanceof GlobalVariable))
+            use.add((VirtualRegister) returnValue);
+    }
+
+    @Override
+    public void replaceUse(VirtualRegister oldVR, VirtualRegister newVR) {
+        if (returnValue == oldVR) returnValue = newVR;
+    }
+
+    @Override
+    public void replaceDef(VirtualRegister oldVR, VirtualRegister newVR) {
+
     }
 }
