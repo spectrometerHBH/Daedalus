@@ -82,6 +82,8 @@ class CFGSimplifier extends Pass {
                 BasicBlock successor = basicBlock.getSuccessors().iterator().next();
                 if (successor != function.getEntryBlock() && successor.getPredecessors().size() == 1) {
                     successor.mergeBB(basicBlock);
+                    if (successor == function.getExitBlock())
+                        function.setExitBlock(basicBlock);
                 }
             }
         }
@@ -90,20 +92,23 @@ class CFGSimplifier extends Pass {
 
     private void eliminateSingleBranchBB(Function function) {
         function.getReversePostOrderDFSBBList().forEach(basicBlock -> {
-            if (basicBlock.head == basicBlock.tail && basicBlock.head instanceof Jump) {
-                BasicBlock targetBB = ((Jump) basicBlock.head).getTargetBB();
-                targetBB.getPredecessors().remove(basicBlock);
-                for (BasicBlock predecessor : basicBlock.getPredecessors()) {
-                    predecessor.getSuccessors().remove(basicBlock);
-                    predecessor.getSuccessors().add(targetBB);
-                    targetBB.getPredecessors().add(predecessor);
-                    if (predecessor.tail instanceof Jump) {
-                        ((Jump) predecessor.tail).setTargetBB(targetBB);
-                    } else if (predecessor.tail instanceof Branch) {
-                        ((Branch) predecessor.tail).replaceTarget(basicBlock, targetBB);
+            if (basicBlock != function.getEntryBlock()) {
+                if (basicBlock.head == basicBlock.tail && basicBlock.head instanceof Jump) {
+                    BasicBlock targetBB = ((Jump) basicBlock.head).getTargetBB();
+                    targetBB.getPredecessors().remove(basicBlock);
+                    for (BasicBlock predecessor : basicBlock.getPredecessors()) {
+                        predecessor.getSuccessors().remove(basicBlock);
+                        predecessor.getSuccessors().add(targetBB);
+                        targetBB.getPredecessors().add(predecessor);
+                        if (predecessor.tail instanceof Jump) {
+                            ((Jump) predecessor.tail).setTargetBB(targetBB);
+                        } else if (predecessor.tail instanceof Branch) {
+                            ((Branch) predecessor.tail).replaceTarget(basicBlock, targetBB);
+                        }
                     }
                 }
             }
         });
+        function.recalcReversePostOrderDFSBBList();
     }
 }

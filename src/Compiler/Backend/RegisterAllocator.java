@@ -51,8 +51,6 @@ public class RegisterAllocator {
     public RegisterAllocator(IRRoot irRoot) {
         this.irRoot = irRoot;
         precolored.addAll(allVRegisters);
-        precolored.remove(vrbp);
-        precolored.remove(vrsp);
 
         colors.addAll(allRegisters);
         colors.remove(rsp);
@@ -85,8 +83,9 @@ public class RegisterAllocator {
                 debug_out.print("AdjList : ");
                 u.adjList.forEach(v -> debug_out.print(" " + irPrinter.getName(v)));
                 debug_out.println();
-
                 debug_out.print("degree : " + u.degree);
+                debug_out.println();
+                debug_out.print("Alias ：" + irPrinter.getName(u.alias));
                 debug_out.println();
                 debug_out.println("------");
             });
@@ -137,26 +136,24 @@ public class RegisterAllocator {
     }
 
     private void cleanMove() {
-        irRoot.getFunctionMap().values().forEach(function -> {
-            function.getReversePostOrderDFSBBList().forEach(basicBlock -> {
-                for (IRInstruction irInstruction = basicBlock.head; irInstruction != null; irInstruction = irInstruction.getNextInstruction())
-                    if (irInstruction instanceof Move && ((Move) irInstruction).getSrc() instanceof Register && ((Move) irInstruction).getDst() instanceof Register) {
-                        PhysicalRegister color1 = null, color2 = null;
-                        if (((Move) irInstruction).getSrc() instanceof VirtualRegister)
-                            color1 = ((VirtualRegister) ((Move) irInstruction).getSrc()).color;
-                        else if (((Move) irInstruction).getSrc() instanceof PhysicalRegister)
-                            color1 = (PhysicalRegister) ((Move) irInstruction).getSrc();
-                        if (((Move) irInstruction).getDst() instanceof VirtualRegister)
-                            color2 = ((VirtualRegister) ((Move) irInstruction).getDst()).color;
-                        else if (((Move) irInstruction).getDst() instanceof PhysicalRegister)
-                            color2 = (PhysicalRegister) ((Move) irInstruction).getDst();
-                        assert color1 != null;
-                        assert color2 != null;
-                        if (color1 == color2)
-                            irInstruction.removeSelf();
-                    }
-            });
-        });
+        irRoot.getFunctionMap().values().forEach(function -> function.getReversePostOrderDFSBBList().forEach(basicBlock -> {
+            for (IRInstruction irInstruction = basicBlock.head; irInstruction != null; irInstruction = irInstruction.getNextInstruction())
+                if (irInstruction instanceof Move && ((Move) irInstruction).getSrc() instanceof Register && ((Move) irInstruction).getDst() instanceof Register) {
+                    PhysicalRegister color1 = null, color2 = null;
+                    if (((Move) irInstruction).getSrc() instanceof VirtualRegister)
+                        color1 = ((VirtualRegister) ((Move) irInstruction).getSrc()).color;
+                    else if (((Move) irInstruction).getSrc() instanceof PhysicalRegister)
+                        color1 = (PhysicalRegister) ((Move) irInstruction).getSrc();
+                    if (((Move) irInstruction).getDst() instanceof VirtualRegister)
+                        color2 = ((VirtualRegister) ((Move) irInstruction).getDst()).color;
+                    else if (((Move) irInstruction).getDst() instanceof PhysicalRegister)
+                        color2 = (PhysicalRegister) ((Move) irInstruction).getDst();
+                    assert color1 != null;
+                    assert color2 != null;
+                    if (color1 == color2)
+                        irInstruction.removeSelf();
+                }
+        }));
     }
 
     private void init() {
@@ -524,6 +521,7 @@ public class RegisterAllocator {
                             irInstruction.prependInstruction(new Load(basicBlock, use.spillAddr, tmp));
                             irInstruction.postpendInstruction(new Store(basicBlock, tmp, use.spillAddr));
                             irInstruction.replaceUse(use, tmp);
+                            irInstruction.replaceDef(use, tmp);
                         } else {
                             //TODO : peephole optimization for Move, Binary(add, sub, mul, and, or, xor)
                             if (irInstruction instanceof Move && ((Move) irInstruction).getSrc() == use && ((VirtualRegister) ((Move) irInstruction).getDst()).spillAddr == null)
@@ -550,19 +548,19 @@ public class RegisterAllocator {
                         }
                     }
                 }
-                for (VirtualRegister use : irInstruction.getUse()) {
-                    if (coalescedNodes.contains(use)) {
-                        irInstruction.replaceUse(use, getAlias(use));
-                    }
-                }
-                for (VirtualRegister def : irInstruction.getDef()) {
-                    if (coalescedNodes.contains(def)) {
-                        irInstruction.replaceDef(def, getAlias(def));
-                    }
-                }
+                //for (VirtualRegister use : irInstruction.getUse()) {
+                //    if (coalescedNodes.contains(use)) {
+                //        irInstruction.replaceUse(use, getAlias(use));
+                //    }
+                //}
+                //for (VirtualRegister def : irInstruction.getDef()) {
+                //    if (coalescedNodes.contains(def)) {
+                //        irInstruction.replaceDef(def, getAlias(def));
+                //    }
+                //}
                 irInstruction.calcUseAndDef();
-                if (irInstruction instanceof Move && ((Move) irInstruction).getSrc() == ((Move) irInstruction).getDst())
-                    irInstruction.removeSelf();
+                //if (irInstruction instanceof Move && ((Move) irInstruction).getSrc() == ((Move) irInstruction).getDst())
+                //    irInstruction.removeSelf();
             }
         });
     }

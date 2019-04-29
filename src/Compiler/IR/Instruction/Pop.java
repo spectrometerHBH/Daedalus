@@ -19,7 +19,7 @@ public class Pop extends IRInstruction {
 
     @Override
     public void accept(IRVisitor irVisitor) {
-
+        irVisitor.visit(this);
     }
 
     @Override

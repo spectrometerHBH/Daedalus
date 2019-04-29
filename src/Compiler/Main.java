@@ -28,7 +28,7 @@ public class Main {
     public static void main(String... args) throws Exception {
         //for program to be compiled
         InputStream in = new FileInputStream("test.txt");
-        boolean test = false;
+        boolean test = true;
 
         //for text-ir output
         PrintStream ir_out_raw = new PrintStream("ir_raw.ll");
@@ -80,8 +80,11 @@ public class Main {
             new IRPrinter(ir_out_afterX86Transformation, false, false).visit(irRoot);
             new RegisterAllocator(irRoot).run();
             optimizer.simplifyCFG(true);
+            new X86CodeEmitter(irRoot).run();
             new IRPrinter(ir_codegen_without_color).visit(irRoot);
             new IRPrinter(ir_codegen, true).visit(irRoot);
+
+            //new IRInterpreter_codegen(ir_test_in, false, ir_data_in, ir_data_out).run();
         } catch (Exception e) {
             e.printStackTrace();
             System.err.println(e.getMessage());
