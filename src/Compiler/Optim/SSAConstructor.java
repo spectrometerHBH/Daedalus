@@ -161,12 +161,13 @@ class SSAConstructor extends Pass {
 
     private void renameVariables(Function function) {
         VirtualRegister _this = (VirtualRegister) function.getReferenceForClassMethod();
-
+        boolean eliminateThis = false;
         if (_this != null) {
             if (_this.info == null) {
                 //if _this is not used, eliminate its argument passing
                 for (Call call : function.callerInstructionList) call.setObjectPointer(null);
                 function.setReferenceForClassMethod(null);
+                eliminateThis = true;
             } else function.setReferenceForClassMethod(_this.getSSARenameRegister(_this.getNewId()));
         }
 
@@ -182,7 +183,8 @@ class SSAConstructor extends Pass {
         for (Call call : function.callerInstructionList) call.getParameterList().removeAll(Collections.singleton(null));
 
         rename(function.getEntryBlock());
-        if (_this != null) _this.getOrigin().info.stack.pop();
+
+        if (_this != null && !eliminateThis) _this.getOrigin().info.stack.pop();
         function.getParameterList().forEach(parameter -> ((VirtualRegister) parameter).getOrigin().info.stack.pop());
     }
 }

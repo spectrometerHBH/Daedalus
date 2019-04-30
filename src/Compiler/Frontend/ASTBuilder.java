@@ -13,15 +13,17 @@ import java.util.List;
 public class ASTBuilder extends MxstarBaseVisitor<ASTNode> {
     @Override
     public ASTNode visitProgram(MxstarParser.ProgramContext ctx) {
+        boolean hasClassDeclNode = false;
         List<DeclNode> decls = new ArrayList<>();
         if (ctx.programSection() != null) {
             for (ParserRuleContext programSection : ctx.programSection()) {
                 ASTNode decl = visit(programSection);
                 if (decl instanceof VarDeclListNode) decls.addAll(((VarDeclListNode) decl).getList());
                 else decls.add((DeclNode) decl);
+                if (decl instanceof ClassDeclNode) hasClassDeclNode = true;
             }
         }
-        return new ProgramNode(decls, new Position(ctx.getStart()));
+        return new ProgramNode(decls, new Position(ctx.getStart()), hasClassDeclNode);
     }
 
     @Override

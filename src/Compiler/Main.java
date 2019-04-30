@@ -46,6 +46,7 @@ public class Main {
         try {
             //Syntax Analysis
             ProgramNode ast = buildAST(in);
+
             //Semantic Analysis
             GlobalScope globalScope = (new BuiltinSymbolsInitializer(ast)).getGlobalScope();
             new ClassDeclarationScanner(globalScope).visit(ast);
@@ -53,18 +54,24 @@ public class Main {
             new ClassMemberScanner(globalScope).visit(ast);
             new SymbolTableBuilder(globalScope).visit(ast);
             new SemanticChecker(globalScope).visit(ast);
-            //IR Construction (Explicit CFG with Quad & Explicit Variables without SSA form)
+
+            //HIR optimization
+            new SideEffectSolver(globalScope).visit(ast);
+            new OutputIrrelevantCodeEliminator(globalScope).visit(ast);
+
+            //LIR Construction (Explicit CFG with Quad & Explicit Variables without SSA form)
             IRBuilder irBuilder = new IRBuilder(globalScope);
             irBuilder.visit(ast);
             IRRoot irRoot = irBuilder.getIrRoot();
             new GlobalVariableResolver(irRoot).run();
             new IRPrinter(ir_out_raw).visit(irRoot);
-            //Optimization
+
+            //LIR Optimization based on SSA
             Optimizer optimizer = new Optimizer(irRoot);
             optimizer.simplifyCFG(true);
             optimizer.SSAConstruction();
             new IRPrinter(ir_out_afterSSAConstruction).visit(irRoot);
-            for (int rounds = 0; rounds < 5; rounds++) {
+            for (int rounds = 0; rounds < 8; rounds++) {
                 optimizer.CommonSubexpressionElimination();
                 optimizer.ConstantAndCopyPropagation();
                 optimizer.simplifyCFG();
@@ -75,6 +82,7 @@ public class Main {
             new IRPrinter(ir_out_afterOptimization).visit(irRoot);
             optimizer.SSADestruction();
             optimizer.simplifyCFG(true);
+
             //Codegen
             new X86ConstraintResolver(irRoot).run();
             new IRPrinter(ir_out_afterX86Transformation, false, false).visit(irRoot);

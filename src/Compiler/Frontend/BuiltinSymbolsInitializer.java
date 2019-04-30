@@ -37,14 +37,14 @@ public class BuiltinSymbolsInitializer {
         globalScope.setString(string);
 
         //BuiltinFunctions
-        globalScope.defineFunction(new FunctionSymbol("print", VoidTypeSymbol, null, globalScope) {{
+        globalScope.defineFunction(new FunctionSymbol("print", VoidTypeSymbol, null, globalScope, true) {{
             defineVariable(new VariableSymbol("str", string, null));
         }});
-        globalScope.defineFunction(new FunctionSymbol("println", VoidTypeSymbol, null, globalScope) {{
+        globalScope.defineFunction(new FunctionSymbol("println", VoidTypeSymbol, null, globalScope, true) {{
             defineVariable(new VariableSymbol("str", string, null));
         }});
-        globalScope.defineFunction(new FunctionSymbol("getString", string, null, globalScope));
-        globalScope.defineFunction(new FunctionSymbol("getInt", IntTypeSymbol, null, globalScope));
+        globalScope.defineFunction(new FunctionSymbol("getString", string, null, globalScope, true));
+        globalScope.defineFunction(new FunctionSymbol("getInt", IntTypeSymbol, null, globalScope, true));
         globalScope.defineFunction(new FunctionSymbol("toString", string, null, globalScope) {{
             defineVariable(new VariableSymbol("i", IntTypeSymbol, null));
         }});

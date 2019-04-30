@@ -18,6 +18,7 @@ import java.util.Stack;
 
 import static Compiler.IR.Operand.PhysicalRegister.*;
 
+//Graph Coloring
 //Build -> Simplify -> Coalesce -> Freeze -> Spill -> Select
 public class RegisterAllocator {
     private IRRoot irRoot;
@@ -473,14 +474,6 @@ public class RegisterAllocator {
         Iterator<VirtualRegister> iterator = spillWorklist.iterator();
         VirtualRegister m = iterator.next(), now;
         for (; m.addForSpill && iterator.hasNext(); m = iterator.next()) ;
-        /*int maxDegree = m.degree;
-        if (iterator.hasNext()) {
-            for (now = iterator.next(); iterator.hasNext(); now = iterator.next())
-                if (!now.addForSpill && now.degree > maxDegree && !precolored.contains(now)) {
-                    m = now;
-                    maxDegree = now.degree;
-                }
-        }*/
         spillWorklist.remove(m);
         simplifyWorklist.add(m);
         freezeMoves(m);
@@ -548,19 +541,7 @@ public class RegisterAllocator {
                         }
                     }
                 }
-                //for (VirtualRegister use : irInstruction.getUse()) {
-                //    if (coalescedNodes.contains(use)) {
-                //        irInstruction.replaceUse(use, getAlias(use));
-                //    }
-                //}
-                //for (VirtualRegister def : irInstruction.getDef()) {
-                //    if (coalescedNodes.contains(def)) {
-                //        irInstruction.replaceDef(def, getAlias(def));
-                //    }
-                //}
                 irInstruction.calcUseAndDef();
-                //if (irInstruction instanceof Move && ((Move) irInstruction).getSrc() == ((Move) irInstruction).getDst())
-                //    irInstruction.removeSelf();
             }
         });
     }

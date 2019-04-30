@@ -13,12 +13,21 @@ public class FunctionSymbol extends Symbol implements Scope {
     private Function function;
     private Map<String, VariableSymbol> arguments = new LinkedHashMap<>();
 
+    //for HIR optimization
+    public boolean hasSideEffect = false;
+
     //for IR
     private boolean isMemberFunction = false;
 
     public FunctionSymbol(String name, Type type, FuncDeclNode funcDeclNode, Scope enclosingScope) {
         super(name, type, funcDeclNode);
         this.enclosingScope = enclosingScope;
+    }
+
+    public FunctionSymbol(String name, Type type, FuncDeclNode funcDeclNode, Scope enclosingScope, boolean hasSideEffect) {
+        super(name, type, funcDeclNode);
+        this.enclosingScope = enclosingScope;
+        this.hasSideEffect = hasSideEffect;
     }
 
     public Map<String, VariableSymbol> getArguments() {

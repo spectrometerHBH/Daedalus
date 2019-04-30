@@ -20,6 +20,7 @@ import java.util.Set;
 //LLVM Pass
 
 // TODO : SCCP
+// TODO : string constant propagation
 
 class ConstantAndCopyPropagator extends Pass {
     ConstantAndCopyPropagator(IRRoot irRoot) {
@@ -31,6 +32,7 @@ class ConstantAndCopyPropagator extends Pass {
         irRoot.getFunctionMap().values().forEach(function -> {
             calcDefUseChain(function);
             constantAndCopyPropagation(function);
+            stringConstantPropagation(function);
         });
     }
 
@@ -154,6 +156,10 @@ class ConstantAndCopyPropagator extends Pass {
                 }
             }
         }
+    }
+
+    private void stringConstantPropagation(Function function) {
+
     }
 
     private void substituteOperand(LinkedList<IRInstruction> workList, Set<IRInstruction> inQueue, IRInstruction irInstruction, Operand oldOperand, Operand newOperand) {

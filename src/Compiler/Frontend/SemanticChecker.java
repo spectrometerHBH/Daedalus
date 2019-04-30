@@ -276,7 +276,10 @@ public class SemanticChecker implements ASTVisitor {
                 for (Map.Entry<String, VariableSymbol> entry : functionSymbol.getArguments().entrySet()) {
                     String identifier = entry.getKey();
                     VariableSymbol variableSymbol = entry.getValue();
-                    variableSymbol.getType().compatible(iterator.next().getType(), node.getPosition());
+                    ExprNode exprNode = iterator.next();
+                    if (!exprNode.isValue())
+                        throw new SemanticError("Function call expression error, parameter not a valid value", node.getPosition());
+                    variableSymbol.getType().compatible(exprNode.getType(), node.getPosition());
                 }
                 node.setCategory(ExprNode.Category.RVALUE);
                 node.setType(function.getFunctionSymbol().getType());

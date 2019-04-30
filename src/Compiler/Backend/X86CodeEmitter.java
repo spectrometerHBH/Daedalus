@@ -21,6 +21,8 @@ public class X86CodeEmitter {
 
     public void run() {
         irRoot.getFunctionMap().values().forEach(this::constructStackFrame);
+        translateGlobalVariables();
+        irRoot.getFunctionMap().values().forEach(this::translateInstructions);
     }
 
     private void constructStackFrame(Function function) {
@@ -36,5 +38,13 @@ public class X86CodeEmitter {
         if (stackFrameSize != 0)
             exitBB.tail.prependInstruction(new Binary(exitBB, Binary.Op.ADD, rsp, new Immediate(stackFrameSize), rsp));
         exitBB.tail.prependInstruction(new Pop(exitBB, rbp));
+    }
+
+    private void translateGlobalVariables() {
+
+    }
+
+    private void translateInstructions(Function function) {
+
     }
 }
