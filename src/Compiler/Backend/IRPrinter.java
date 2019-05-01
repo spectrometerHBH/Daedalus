@@ -38,7 +38,7 @@ public class IRPrinter implements IRVisitor {
     @Override
     public void visit(IRRoot irRoot) {
         irRoot.getGlobalVariableList().forEach(globalVariable -> out.println("@" + getName((Storage) globalVariable)));
-        irRoot.getStaticStringList().forEach(staticString -> out.println("@" + getName(staticString.getBase()) + " = " + staticString.getVal()));
+        irRoot.getStaticStringList().forEach(staticString -> out.println("@" + getName(staticString.getBase()) + " = \"" + staticString.getVal() + "\""));
         if (!irRoot.getGlobalVariableList().isEmpty() || !irRoot.getStaticStringList().isEmpty()) out.println();
         for (Map.Entry<String, Function> entry : irRoot.getFunctionMap().entrySet()) entry.getValue().accept(this);
     }

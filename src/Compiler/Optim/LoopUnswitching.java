@@ -22,7 +22,8 @@ public class LoopUnswitching extends Pass {
     }
 
     @Override
-    void run() {
-
+    boolean run() {
+        changed = false;
+        return changed;
     }
 }

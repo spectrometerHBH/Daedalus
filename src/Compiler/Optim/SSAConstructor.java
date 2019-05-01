@@ -19,7 +19,7 @@ class SSAConstructor extends Pass {
     }
 
     @Override
-    void run() {
+    boolean run() {
         irRoot.getFunctionMap().forEach((name, function) -> {
             computeDominateTree(function);
             computeDominanceFrontier(function);
@@ -27,6 +27,7 @@ class SSAConstructor extends Pass {
             insertPhiFunction(function);
             renameVariables(function);
         });
+        return true;
     }
 
     private void computeDominateTree(Function function) {

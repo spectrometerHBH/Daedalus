@@ -17,7 +17,7 @@ import java.util.List;
 //        Removes basic blocks with no predecessors.(ok)
 //        Merges a basic block into its predecessor if there is only one and the predecessor only has one successor.(ok)
 //        Eliminates PHI nodes for basic blocks with a single predecessor.(ok)
-//        TODO : Eliminates a basic block that only contains an unconditional branch.
+//        Eliminates a basic block that only contains an unconditional branch.
 //LLVM Pass
 
 class CFGSimplifier extends Pass {
@@ -26,21 +26,25 @@ class CFGSimplifier extends Pass {
     }
 
     @Override
-    void run() {
+    boolean run() {
+        changed = false;
         irRoot.getFunctionMap().forEach((name, function) -> {
             convertClearBranch(function);
             removeUnreachableBB(function);
             mergeBB(function);
         });
+        return changed;
     }
 
-    void runMore() {
+    boolean runMore() {
+        changed = false;
         irRoot.getFunctionMap().forEach((name, function) -> {
             convertClearBranch(function);
             eliminateSingleBranchBB(function);
             removeUnreachableBB(function);
             mergeBB(function);
         });
+        return changed;
     }
 
     private void convertClearBranch(Function function) {
@@ -48,8 +52,10 @@ class CFGSimplifier extends Pass {
             if (basicBlock.tail instanceof Branch) {
                 Branch branch = (Branch) basicBlock.tail;
                 if (branch.getThenBB() == branch.getElseBB()) {
+                    changed = true;
                     branch.replaceInstruction(new Jump(basicBlock, branch.getThenBB()));
                 } else if (branch.getCond() instanceof Immediate) {
+                    changed = true;
                     int cond = ((Immediate) branch.getCond()).getImmediate();
                     BasicBlock target = cond == 1 ? branch.getThenBB() : branch.getElseBB();
                     BasicBlock cut = cond == 1 ? branch.getElseBB() : branch.getThenBB();
@@ -68,7 +74,10 @@ class CFGSimplifier extends Pass {
         //RPO remove orphan
         List<BasicBlock> removeList = new LinkedList<>();
         function.getReversePostOrderDFSBBList().forEach(basicBlock -> basicBlock.getPredecessors().forEach(predecessor -> {
-            if (!function.reachable(predecessor)) removeList.add(predecessor);
+            if (!function.reachable(predecessor)) {
+                changed = true;
+                removeList.add(predecessor);
+            }
         }));
         removeList.forEach(BasicBlock::removeSelf);
         function.recalcReversePostOrderDFSBBList();
@@ -81,6 +90,7 @@ class CFGSimplifier extends Pass {
             if (basicBlock.getSuccessors().size() == 1) {
                 BasicBlock successor = basicBlock.getSuccessors().iterator().next();
                 if (successor != function.getEntryBlock() && successor.getPredecessors().size() == 1) {
+                    changed = true;
                     successor.mergeBB(basicBlock);
                     if (successor == function.getExitBlock())
                         function.setExitBlock(basicBlock);
@@ -94,6 +104,7 @@ class CFGSimplifier extends Pass {
         function.getReversePostOrderDFSBBList().forEach(basicBlock -> {
             if (basicBlock != function.getEntryBlock()) {
                 if (basicBlock.head == basicBlock.tail && basicBlock.head instanceof Jump) {
+                    changed = true;
                     BasicBlock targetBB = ((Jump) basicBlock.head).getTargetBB();
                     targetBB.getPredecessors().remove(basicBlock);
                     for (BasicBlock predecessor : basicBlock.getPredecessors()) {

@@ -14,7 +14,8 @@ public class LoopInvariantCodeMotion extends Pass {
     }
 
     @Override
-    void run() {
-
+    boolean run() {
+        changed = false;
+        return changed;
     }
 }

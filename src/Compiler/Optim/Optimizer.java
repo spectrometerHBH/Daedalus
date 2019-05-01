@@ -21,35 +21,35 @@ public class Optimizer {
         commonSubexpressionEliminator = new CommonSubexpressionEliminator(irRoot);
     }
 
-    public void simplifyCFG() {
-        cfgSimplifier.run();
+    public boolean simplifyCFG() {
+        return cfgSimplifier.run();
     }
 
-    public void simplifyCFG(boolean eliminateOK) {
-        cfgSimplifier.runMore();
+    public boolean simplifyCFG(boolean eliminateOK) {
+        return cfgSimplifier.runMore();
     }
 
-    public void SSAConstruction() {
-        ssaConstructor.run();
+    public boolean SSAConstruction() {
+        return ssaConstructor.run();
     }
 
-    public void SSADestruction() {
-        ssaDestructor.run();
+    public boolean SSADestruction() {
+        return ssaDestructor.run();
     }
 
-    public void DeadCodeElimination() {
-        deadCodeEliminator.run();
+    public boolean DeadCodeElimination() {
+        return deadCodeEliminator.run();
     }
 
-    public void ConstantAndCopyPropagation() {
-        constantAndCopyPropagator.run();
+    public boolean ConstantAndCopyPropagation() {
+        return constantAndCopyPropagator.run();
     }
 
-    public void InstructionCombination() {
-        instructionCombiner.run();
+    public boolean InstructionCombination() {
+        return instructionCombiner.run();
     }
 
-    public void CommonSubexpressionElimination() {
-        commonSubexpressionEliminator.run();
+    public boolean CommonSubexpressionElimination() {
+        return commonSubexpressionEliminator.run();
     }
 }

@@ -17,6 +17,11 @@ main_while_cond_1:
     cmp %i_1 %t_1
     br sle main_while_body_1 main_while_merge_1
 
+main_while_body_1:
+    %i_2 = add %i_1 1
+    store 1 %t_4 %i_1 8 8
+    jump main_while_cond_1
+
 main_while_merge_1:
     %t_5 = add %t_1 5
     %t_6 = lea null %t_5 8 8
@@ -28,11 +33,17 @@ main_while_merge_1:
     jump main_for_body_1
 
 main_for_body_1:
-    %M_3 = phi main_while_merge_1 %M_2 main_for_merge_1 %M_4 
-    %tmp_1 = phi main_while_merge_1 undef main_for_merge_1 %tmp_2 
     %i_3 = phi main_while_merge_1 2 main_for_merge_1 %i_4 
+    %tmp_1 = phi main_while_merge_1 undef main_for_merge_1 %tmp_2 
+    %M_3 = phi main_while_merge_1 %M_2 main_for_merge_1 %M_4 
     cmp %i_3 %t_1
     br sgt main_for_merge_2 main_if_merge_1
+
+main_for_merge_2:
+    store %M_3 @M_1 null 0 0
+    store %t_1 @N_1 null 0 0
+    store %t_4 @check_1 null 0 0
+    ret 0
 
 main_if_merge_1:
     %t_9 = lea null %i_3 8 8
@@ -52,8 +63,8 @@ main_if_merge_2:
     jump main_for_cond_1
 
 main_for_cond_1:
-    %i_5 = phi main_if_merge_2 1 main_for_step_1 %i_6 
     %tmp_3 = phi main_if_merge_2 %tmp_1 main_for_step_1 %t_12 
+    %i_5 = phi main_if_merge_2 1 main_for_step_1 %i_6 
     cmp %i_5 %M_4
     br sle main_lhs_then_1 main_for_merge_1
 
@@ -78,26 +89,22 @@ main_if_merge_3:
     cmp %t_19 0
     br seq main_if_then_2 main_if_else_1
 
-main_if_then_2:
-    %t_20 = load %t_7 %i_3 8 8
-    %t_21 = load %t_13 null 0 0
-    %t_22 = mul %t_20 %t_21
-    store %t_22 %t_7 %t_17 1 0
-    jump main_for_merge_1
-
 main_if_else_1:
-    %t_23 = load %t_13 null 0 0
-    %t_24 = mul %i_3 %t_23
-    %t_25 = load %t_13 null 0 0
-    %t_26 = sub %t_25 1
-    %t_27 = load %t_7 %i_3 8 8
-    %t_28 = mul %t_27 %t_26
-    store %t_28 %t_7 %t_24 8 8
+    %t_20 = load %t_13 null 0 0
+    %t_21 = mul %i_3 %t_20
+    %t_22 = load %t_13 null 0 0
+    %t_23 = sub %t_22 1
+    %t_24 = load %t_7 %i_3 8 8
+    %t_25 = mul %t_24 %t_23
+    store %t_25 %t_7 %t_21 8 8
     jump main_for_step_1
 
-main_for_step_1:
-    %i_6 = add %i_5 1
-    jump main_for_cond_1
+main_if_then_2:
+    %t_26 = load %t_7 %i_3 8 8
+    %t_27 = load %t_13 null 0 0
+    %t_28 = mul %t_26 %t_27
+    store %t_28 %t_7 %t_17 1 0
+    jump main_for_merge_1
 
 main_for_merge_1:
     %tmp_2 = phi main_for_cond_1 %tmp_3 main_lhs_then_1 %tmp_3 main_if_then_2 %t_12 
@@ -107,16 +114,9 @@ main_for_merge_1:
     %i_4 = add %i_3 1
     jump main_for_body_1
 
-main_for_merge_2:
-    store %t_1 @N_1 null 0 0
-    store %t_4 @check_1 null 0 0
-    store %M_3 @M_1 null 0 0
-    ret 0
-
-main_while_body_1:
-    %i_2 = add %i_1 1
-    store 1 %t_4 %i_1 8 8
-    jump main_while_cond_1
+main_for_step_1:
+    %i_6 = add %i_5 1
+    jump main_for_cond_1
 
 }
 

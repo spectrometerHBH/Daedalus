@@ -32,11 +32,12 @@ public class Main {
 
         //for text-ir output
         PrintStream ir_out_raw = new PrintStream("ir_raw.ll");
+        PrintStream ir_out_after_inline = new PrintStream("ir_after_inlining.ll");
         PrintStream ir_out_afterSSAConstruction = new PrintStream("ir_out_ssa_construct.ll");
         PrintStream ir_out_afterOptimization = new PrintStream("ir_out_after_optim.ll");
         PrintStream ir_out_afterX86Transformation = new PrintStream("ir_out_after_X86.ll");
-        PrintStream ir_codegen = test ? new PrintStream(System.out) : new PrintStream("ir_out_after_codegen.ll");
         PrintStream ir_codegen_without_color = new PrintStream("ir_out_after_codegen_no_color.ll");
+        PrintStream ir_codegen = test ? new PrintStream(System.out) : new PrintStream("ir_out_after_codegen.ll");
 
         //for IR interpreter test use
         FileInputStream ir_test_in = new FileInputStream("ir_out_after_codegen.ll");
@@ -65,18 +66,19 @@ public class Main {
             IRRoot irRoot = irBuilder.getIrRoot();
             new GlobalVariableResolver(irRoot).run();
             new IRPrinter(ir_out_raw).visit(irRoot);
+            new FunctionInliner(irRoot).run();
 
             //LIR Optimization based on SSA
             Optimizer optimizer = new Optimizer(irRoot);
             optimizer.simplifyCFG(true);
             optimizer.SSAConstruction();
             new IRPrinter(ir_out_afterSSAConstruction).visit(irRoot);
-            for (int rounds = 0; rounds < 8; rounds++) {
-                optimizer.CommonSubexpressionElimination();
-                optimizer.ConstantAndCopyPropagation();
-                optimizer.simplifyCFG();
-                optimizer.DeadCodeElimination();
-                optimizer.simplifyCFG();
+            for (boolean changed = true; changed; ) {
+                changed = optimizer.CommonSubexpressionElimination();
+                changed |= optimizer.ConstantAndCopyPropagation();
+                changed |= optimizer.simplifyCFG();
+                changed |= optimizer.DeadCodeElimination();
+                changed |= optimizer.simplifyCFG();
             }
             optimizer.InstructionCombination();
             new IRPrinter(ir_out_afterOptimization).visit(irRoot);

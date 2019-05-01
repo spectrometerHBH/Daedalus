@@ -12,12 +12,13 @@ public abstract class Pass {
     protected Map<Register, IRInstruction> def;
     protected Map<Register, Set<IRInstruction>> use;
     protected LinkedList<IRInstruction> allStatements;
+    protected boolean changed;
 
     Pass(IRRoot irRoot) {
         this.irRoot = irRoot;
     }
 
-    abstract void run();
+    abstract boolean run();
 
     void calcDefUseChain(Function function) {
         def = new HashMap<>();

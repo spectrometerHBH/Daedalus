@@ -19,12 +19,13 @@ class SSADestructor extends Pass {
     }
 
     @Override
-    void run() {
+    boolean run() {
         irRoot.getFunctionMap().values().forEach(function -> {
             removePhiFunction(function);
             function.recalcReversePostOrderDFSBBList();
             sequentializationParallelCopy(function);
         });
+        return true;
     }
 
     private void removePhiFunction(Function function) {

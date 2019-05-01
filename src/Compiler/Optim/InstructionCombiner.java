@@ -19,7 +19,7 @@ class InstructionCombiner extends Pass {
     }
 
     @Override
-    void run() {
+    boolean run() {
         irRoot.getFunctionMap().values().forEach(function -> {
             calcDefUseChain(function);
             //generate Lea for single-used temporary if possible
@@ -29,6 +29,7 @@ class InstructionCombiner extends Pass {
             //merge cmp with branch for code generation
             mergeCmpWithBranch(function);
         });
+        return true;
     }
 
     private boolean checkOperandToCombine(Operand operand) {

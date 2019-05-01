@@ -23,11 +23,13 @@ class DeadCodeEliminator extends Pass {
     }
 
     @Override
-    void run() {
+    boolean run() {
+        changed = false;
         irRoot.getFunctionMap().values().forEach(function -> {
             calcDefUseChain(function);
             naiveDeadCodeElimination();
         });
+        return changed;
     }
 
     private boolean hasSideEffects(IRInstruction irInstruction) {
@@ -43,6 +45,7 @@ class DeadCodeEliminator extends Pass {
             if (use.get(v).isEmpty()) {
                 IRInstruction S = def.get(v);
                 if (S != null && !hasSideEffects(S)) {
+                    changed = true;
                     S.removeSelf();
                     for (Register useRegister : S.getUseRegisters()) {
                         use.get(useRegister).remove(S);

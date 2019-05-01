@@ -23,7 +23,8 @@ class CommonSubexpressionEliminator extends Pass {
     }
 
     @Override
-    void run() {
+    boolean run() {
+        changed = false;
         irRoot.getFunctionMap().values().forEach(function -> {
             visit.clear();
             function.getReversePostOrderDFSBBList().forEach(basicBlock -> {
@@ -33,6 +34,7 @@ class CommonSubexpressionEliminator extends Pass {
                 }
             });
         });
+        return changed;
     }
 
     private void commonSubexpressionElimination(BasicBlock basicBlock) {
@@ -42,6 +44,7 @@ class CommonSubexpressionEliminator extends Pass {
                 BinaryHash binaryHash = new BinaryHash((Binary) irInstruction);
                 Operand dst = binaryHashMap.get(binaryHash);
                 if (dst != null) {
+                    changed = true;
                     ((Binary) irInstruction).previousResult = dst;
                     irInstruction.replaceInstruction(new Move(basicBlock, dst, ((Binary) irInstruction).getDst()));
                 } else {
