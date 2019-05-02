@@ -41,6 +41,12 @@ public class Cmp extends IRInstruction {
     }
 
     @Override
+    public IRInstruction getFakeInstruction(Map<BasicBlock, BasicBlock> fakeBBMap, Map<Operand, Operand> fakeRegMap) {
+        return new Cmp(fakeBBMap.getOrDefault(currentBB, currentBB), op, fakeRegMap.getOrDefault(src1, src1),
+                fakeRegMap.getOrDefault(src2, src2), fakeRegMap.getOrDefault(dst, dst));
+    }
+
+    @Override
     public void accept(IRVisitor irVisitor) {
         irVisitor.visit(this);
     }

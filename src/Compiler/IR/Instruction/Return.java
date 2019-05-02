@@ -73,6 +73,11 @@ public class Return extends IRInstruction {
     }
 
     @Override
+    public IRInstruction getFakeInstruction(Map<BasicBlock, BasicBlock> fakeBBMap, Map<Operand, Operand> fakeRegMap) {
+        return new Return(fakeBBMap.getOrDefault(currentBB, currentBB), fakeRegMap.getOrDefault(returnValue, returnValue));
+    }
+
+    @Override
     public void calcUseAndDef() {
         use.clear();
         def.clear();

@@ -91,6 +91,11 @@ public class Load extends IRInstruction {
     }
 
     @Override
+    public IRInstruction getFakeInstruction(Map<BasicBlock, BasicBlock> fakeBBMap, Map<Operand, Operand> fakeRegMap) {
+        return new Load(fakeBBMap.getOrDefault(currentBB, currentBB), fakeRegMap.getOrDefault(src, src), fakeRegMap.getOrDefault(dst, dst));
+    }
+
+    @Override
     public void calcUseAndDef() {
         use.clear();
         def.clear();

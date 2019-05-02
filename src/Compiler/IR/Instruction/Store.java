@@ -84,6 +84,11 @@ public class Store extends IRInstruction {
     }
 
     @Override
+    public IRInstruction getFakeInstruction(Map<BasicBlock, BasicBlock> fakeBBMap, Map<Operand, Operand> fakeRegMap) {
+        return new Store(fakeBBMap.getOrDefault(currentBB, currentBB), fakeRegMap.getOrDefault(src, src), fakeRegMap.getOrDefault(dst, dst));
+    }
+
+    @Override
     public void replaceUseRegister(Operand oldOperand, Operand newOperand) {
         if (src == oldOperand) src = newOperand;
         if (dst instanceof Register) {

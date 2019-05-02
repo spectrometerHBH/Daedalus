@@ -22,6 +22,7 @@ public class Function {
     private List<Return> returnInstList = new ArrayList<>();
     private Register referenceForClassMethod = null;
     private List<Register> parameterList = new ArrayList<>();
+    private List<Register> allParamterList = new ArrayList<>();
     private List<BasicBlock> postOrderDFSBBList = null;
     private List<BasicBlock> reversePostOrderDFSBBList = null;
     private Set<BasicBlock> visit = null;
@@ -43,6 +44,10 @@ public class Function {
 
     public void appendGlobals(VirtualRegister virtualRegister) {
         globals.add(virtualRegister);
+    }
+
+    public void setParameterList(List<Register> parameterList) {
+        this.parameterList = parameterList;
     }
 
     public String getName() {
@@ -83,6 +88,13 @@ public class Function {
 
     public List<Register> getParameterList() {
         return parameterList;
+    }
+
+    public List<Register> getAllParamterList() {
+        allParamterList.clear();
+        if (referenceForClassMethod != null) allParamterList.add(referenceForClassMethod);
+        allParamterList.addAll(parameterList);
+        return allParamterList;
     }
 
     public List<BasicBlock> getReversePostOrderDFSBBList() {

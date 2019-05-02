@@ -40,6 +40,11 @@ public class Alloc extends IRInstruction {
     }
 
     @Override
+    public IRInstruction getFakeInstruction(Map<BasicBlock, BasicBlock> fakeBBMap, Map<Operand, Operand> fakeRegMap) {
+        return new Alloc(fakeBBMap.getOrDefault(currentBB, currentBB), fakeRegMap.getOrDefault(size, size), fakeRegMap.getOrDefault(pointer, pointer));
+    }
+
+    @Override
     public void accept(IRVisitor irVisitor) {
         irVisitor.visit(this);
     }

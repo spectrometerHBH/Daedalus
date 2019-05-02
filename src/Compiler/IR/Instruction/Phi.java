@@ -96,6 +96,11 @@ public class Phi extends IRInstruction {
     }
 
     @Override
+    public IRInstruction getFakeInstruction(Map<BasicBlock, BasicBlock> fakeBBMap, Map<Operand, Operand> fakeRegMap) {
+        return null;
+    }
+
+    @Override
     public void calcUseAndDef() {
         use.clear();
         def.clear();

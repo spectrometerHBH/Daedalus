@@ -168,7 +168,7 @@ class ConstantAndCopyPropagator extends Pass {
                 if (callee == irRoot.builtinStringAdd) {
                     if (check1 && check2) {
                         changed = true;
-                        String res = irRoot.staticStringMap.get(lhs) + irRoot.staticStringMap.get(rhs);
+                        String res = irRoot.staticStringValMap.get(lhs) + irRoot.staticStringValMap.get(rhs);
                         StaticString staticString = new StaticString(new GlobalI64Value("__str_const", true), res);
                         irRoot.addStaticString(staticString);
                         S.replaceInstruction(new Move(S.getCurrentBB(), staticString.getBase(), ((Call) S).getResult()));
@@ -176,37 +176,37 @@ class ConstantAndCopyPropagator extends Pass {
                 } else if (callee == irRoot.builtinStringLT) {
                     if (check1 && check2) {
                         changed = true;
-                        int res = irRoot.staticStringMap.get(lhs).compareTo(irRoot.staticStringMap.get(rhs)) < 0 ? 1 : 0;
+                        int res = irRoot.staticStringValMap.get(lhs).compareTo(irRoot.staticStringValMap.get(rhs)) < 0 ? 1 : 0;
                         S.replaceInstruction(new Move(S.getCurrentBB(), new Immediate(res), ((Call) S).getResult()));
                     }
                 } else if (callee == irRoot.builtinStringLEQ) {
                     if (check1 && check2) {
                         changed = true;
-                        int res = irRoot.staticStringMap.get(lhs).compareTo(irRoot.staticStringMap.get(rhs)) <= 0 ? 1 : 0;
+                        int res = irRoot.staticStringValMap.get(lhs).compareTo(irRoot.staticStringValMap.get(rhs)) <= 0 ? 1 : 0;
                         S.replaceInstruction(new Move(S.getCurrentBB(), new Immediate(res), ((Call) S).getResult()));
                     }
                 } else if (callee == irRoot.builtinStringEQ) {
                     if (check1 && check2) {
                         changed = true;
-                        int res = irRoot.staticStringMap.get(lhs).compareTo(irRoot.staticStringMap.get(rhs)) == 0 ? 1 : 0;
+                        int res = irRoot.staticStringValMap.get(lhs).compareTo(irRoot.staticStringValMap.get(rhs)) == 0 ? 1 : 0;
                         S.replaceInstruction(new Move(S.getCurrentBB(), new Immediate(res), ((Call) S).getResult()));
                     }
                 } else if (callee == irRoot.builtinStringGEQ) {
                     if (check1 && check2) {
                         changed = true;
-                        int res = irRoot.staticStringMap.get(lhs).compareTo(irRoot.staticStringMap.get(rhs)) >= 0 ? 1 : 0;
+                        int res = irRoot.staticStringValMap.get(lhs).compareTo(irRoot.staticStringValMap.get(rhs)) >= 0 ? 1 : 0;
                         S.replaceInstruction(new Move(S.getCurrentBB(), new Immediate(res), ((Call) S).getResult()));
                     }
                 } else if (callee == irRoot.builtinStringGT) {
                     if (check1 && check2) {
                         changed = true;
-                        int res = irRoot.staticStringMap.get(lhs).compareTo(irRoot.staticStringMap.get(rhs)) > 0 ? 1 : 0;
+                        int res = irRoot.staticStringValMap.get(lhs).compareTo(irRoot.staticStringValMap.get(rhs)) > 0 ? 1 : 0;
                         S.replaceInstruction(new Move(S.getCurrentBB(), new Immediate(res), ((Call) S).getResult()));
                     }
                 } else if (callee == irRoot.builtinStringNEQ) {
                     if (check1 && check2) {
                         changed = true;
-                        int res = irRoot.staticStringMap.get(lhs).compareTo(irRoot.staticStringMap.get(rhs)) != 0 ? 1 : 0;
+                        int res = irRoot.staticStringValMap.get(lhs).compareTo(irRoot.staticStringValMap.get(rhs)) != 0 ? 1 : 0;
                         S.replaceInstruction(new Move(S.getCurrentBB(), new Immediate(res), ((Call) S).getResult()));
                     }
                 } else if (callee == irRoot.builtinToString) {
@@ -220,7 +220,7 @@ class ConstantAndCopyPropagator extends Pass {
                 } else if (callee == irRoot.builtinStringLength) {
                     if (check0) {
                         changed = true;
-                        int res = irRoot.staticStringMap.get(_this).length();
+                        int res = irRoot.staticStringValMap.get(_this).length();
                         S.replaceInstruction(new Move(S.getCurrentBB(), new Immediate(res), ((Call) S).getResult()));
                     }
                 } else if (callee == irRoot.builtinSubstring) {
@@ -229,7 +229,7 @@ class ConstantAndCopyPropagator extends Pass {
                             changed = true;
                             int left = ((Immediate) ((Call) S).getParameterList().get(0)).getImmediate();
                             int right = ((Immediate) ((Call) S).getParameterList().get(1)).getImmediate();
-                            String res = irRoot.staticStringMap.get(_this).substring(left, right);
+                            String res = irRoot.staticStringValMap.get(_this).substring(left, right);
                             StaticString staticString = new StaticString(new GlobalI64Value("__str__const", true), res);
                             irRoot.addStaticString(staticString);
                             S.replaceInstruction(new Move(S.getCurrentBB(), staticString.getBase(), ((Call) S).getResult()));
@@ -238,7 +238,7 @@ class ConstantAndCopyPropagator extends Pass {
                 } else if (callee == irRoot.builtinParseInt) {
                     if (check0) {
                         changed = true;
-                        String str = irRoot.staticStringMap.get(_this);
+                        String str = irRoot.staticStringValMap.get(_this);
                         char[] charArray = str.toCharArray();
                         int res = 0;
                         for (char ch : charArray) {
@@ -252,7 +252,7 @@ class ConstantAndCopyPropagator extends Pass {
                         if (((Call) S).getParameterList().get(0) instanceof Immediate) {
                             changed = true;
                             int pos = ((Immediate) ((Call) S).getParameterList().get(0)).getImmediate();
-                            int res = (int) irRoot.staticStringMap.get(_this).charAt(pos);
+                            int res = (int) irRoot.staticStringValMap.get(_this).charAt(pos);
                             S.replaceInstruction(new Move(S.getCurrentBB(), new Immediate(res), ((Call) S).getResult()));
                         }
                     }

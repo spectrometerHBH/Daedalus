@@ -26,6 +26,11 @@ public class Jump extends IRInstruction {
     }
 
     @Override
+    public IRInstruction getFakeInstruction(Map<BasicBlock, BasicBlock> fakeBBMap, Map<Operand, Operand> fakeRegMap) {
+        return new Jump(fakeBBMap.getOrDefault(currentBB, currentBB), fakeBBMap.getOrDefault(targetBB, targetBB));
+    }
+
+    @Override
     public void accept(IRVisitor irVisitor) {
         irVisitor.visit(this);
     }

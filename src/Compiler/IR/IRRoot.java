@@ -27,7 +27,7 @@ public class IRRoot {
     private List<StaticString> staticStringList = new ArrayList<>();
     private List<GlobalVariable> globalVariableList = new ArrayList<>();
 
-    public Map<GlobalVariable, String> staticStringMap = new HashMap<>();
+    public Map<GlobalVariable, String> staticStringValMap = new HashMap<>();
     public Set<Function> stringConstantFunctions = new HashSet<>();
 
     public IRRoot() {
@@ -49,9 +49,13 @@ public class IRRoot {
         functionMap.put(function.getName(), function);
     }
 
+    public void removeFunction(Function function) {
+        functionMap.remove(function.getName());
+    }
+
     public void addStaticString(StaticString staticString) {
         staticStringList.add(staticString);
-        staticStringMap.put((GlobalVariable) staticString.getBase(), staticString.getVal());
+        staticStringValMap.put((GlobalVariable) staticString.getBase(), staticString.getVal());
     }
 
     public void addGlobalVariable(GlobalVariable globalVariable) {

@@ -62,6 +62,11 @@ public class Unary extends IRInstruction {
     }
 
     @Override
+    public IRInstruction getFakeInstruction(Map<BasicBlock, BasicBlock> fakeBBMap, Map<Operand, Operand> fakeRegMap) {
+        return new Unary(fakeBBMap.getOrDefault(currentBB, currentBB), op, fakeRegMap.getOrDefault(src, src), fakeRegMap.getOrDefault(dst, dst));
+    }
+
+    @Override
     public void renameDefRegisterForSSA() {
         if (dst instanceof VirtualRegister && !(dst instanceof GlobalVariable))
             dst = ((VirtualRegister) dst).getSSARenameRegister(((VirtualRegister) dst).getNewId());

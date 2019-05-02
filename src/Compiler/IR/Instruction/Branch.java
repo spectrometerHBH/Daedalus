@@ -47,6 +47,11 @@ public class Branch extends IRInstruction {
     }
 
     @Override
+    public IRInstruction getFakeInstruction(Map<BasicBlock, BasicBlock> fakeBBMap, Map<Operand, Operand> fakeRegMap) {
+        return new Branch(fakeBBMap.getOrDefault(currentBB, currentBB), fakeRegMap.getOrDefault(cond, cond), fakeBBMap.getOrDefault(thenBB, thenBB), fakeBBMap.getOrDefault(elseBB, elseBB));
+    }
+
+    @Override
     public void accept(IRVisitor irVisitor) {
         irVisitor.visit(this);
     }

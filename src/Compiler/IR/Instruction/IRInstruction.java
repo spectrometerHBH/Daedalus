@@ -99,6 +99,8 @@ public abstract class IRInstruction {
 
     public abstract void setUseRegisters(Map<Register, Register> renameMap);
 
+    public abstract IRInstruction getFakeInstruction(Map<BasicBlock, BasicBlock> fakeBBMap, Map<Operand, Operand> fakeRegMap);
+
     //for Liveness Analysis during Register Allocation
     protected Set<VirtualRegister> use = new HashSet<>();
     protected Set<VirtualRegister> def = new HashSet<>();

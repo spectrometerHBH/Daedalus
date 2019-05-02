@@ -33,9 +33,10 @@ public class Main {
         //for text-ir output
         PrintStream ir_out_raw = new PrintStream("ir_raw.ll");
         PrintStream ir_out_after_inline = new PrintStream("ir_after_inlining.ll");
+        PrintStream ir_out_after_gvResolve = new PrintStream("ir_after_gvResolve.ll");
         PrintStream ir_out_afterSSAConstruction = new PrintStream("ir_out_ssa_construct.ll");
         PrintStream ir_out_afterOptimization = new PrintStream("ir_out_after_optim.ll");
-        PrintStream ir_out_afterX86Transformation = new PrintStream("ir_out_after_X86.ll");
+        PrintStream ir_out_afterX86Transform = new PrintStream("ir_out_after_X86.ll");
         PrintStream ir_codegen_without_color = new PrintStream("ir_out_after_codegen_no_color.ll");
         PrintStream ir_codegen = test ? new PrintStream(System.out) : new PrintStream("ir_out_after_codegen.ll");
 
@@ -64,9 +65,11 @@ public class Main {
             IRBuilder irBuilder = new IRBuilder(globalScope);
             irBuilder.visit(ast);
             IRRoot irRoot = irBuilder.getIrRoot();
-            new GlobalVariableResolver(irRoot).run();
             new IRPrinter(ir_out_raw).visit(irRoot);
             new FunctionInliner(irRoot).run();
+            new IRPrinter(ir_out_after_inline).visit(irRoot);
+            new GlobalVariableResolver(irRoot).run();
+            new IRPrinter(ir_out_after_gvResolve).visit(irRoot);
 
             //LIR Optimization based on SSA
             Optimizer optimizer = new Optimizer(irRoot);
@@ -87,13 +90,12 @@ public class Main {
 
             //Codegen
             new X86ConstraintResolver(irRoot).run();
-            new IRPrinter(ir_out_afterX86Transformation, false, false).visit(irRoot);
+            new IRPrinter(ir_out_afterX86Transform).visit(irRoot);
             new RegisterAllocator(irRoot).run();
             optimizer.simplifyCFG(true);
             new X86CodeEmitter(irRoot).run();
             new IRPrinter(ir_codegen_without_color).visit(irRoot);
             new IRPrinter(ir_codegen, true).visit(irRoot);
-
             //new IRInterpreter_codegen(ir_test_in, false, ir_data_in, ir_data_out).run();
         } catch (Exception e) {
             e.printStackTrace();

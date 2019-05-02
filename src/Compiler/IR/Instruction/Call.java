@@ -59,6 +59,14 @@ public class Call extends IRInstruction {
     }
 
     @Override
+    public IRInstruction getFakeInstruction(Map<BasicBlock, BasicBlock> fakeBBMap, Map<Operand, Operand> fakeRegMap) {
+        Call newCall = new Call(fakeBBMap.getOrDefault(currentBB, currentBB), callee, fakeRegMap.getOrDefault(result, result));
+        parameterList.forEach(operand -> newCall.appendParameterList(fakeRegMap.getOrDefault(operand, operand)));
+        newCall.setObjectPointer(fakeRegMap.getOrDefault(objectPointer, objectPointer));
+        return newCall;
+    }
+
+    @Override
     public void accept(IRVisitor irVisitor) {
         irVisitor.visit(this);
     }

@@ -6,6 +6,7 @@ import Compiler.IR.IRRoot;
 import Compiler.IR.IRVisitor;
 import Compiler.IR.Instruction.*;
 import Compiler.IR.Operand.*;
+import org.apache.commons.text.StringEscapeUtils;
 
 import java.io.PrintStream;
 import java.util.HashMap;
@@ -38,7 +39,7 @@ public class IRPrinter implements IRVisitor {
     @Override
     public void visit(IRRoot irRoot) {
         irRoot.getGlobalVariableList().forEach(globalVariable -> out.println("@" + getName((Storage) globalVariable)));
-        irRoot.getStaticStringList().forEach(staticString -> out.println("@" + getName(staticString.getBase()) + " = \"" + staticString.getVal() + "\""));
+        irRoot.getStaticStringList().forEach(staticString -> out.println("@" + getName(staticString.getBase()) + " = \"" + StringEscapeUtils.escapeJava(staticString.getVal()) + "\""));
         if (!irRoot.getGlobalVariableList().isEmpty() || !irRoot.getStaticStringList().isEmpty()) out.println();
         for (Map.Entry<String, Function> entry : irRoot.getFunctionMap().entrySet()) entry.getValue().accept(this);
     }

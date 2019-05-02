@@ -29,6 +29,10 @@ public class BasicBlock {
         return currentFunction.getName() + "_" + name;
     }
 
+    public Function getCurrentFunction() {
+        return currentFunction;
+    }
+
     public Set<BasicBlock> getPredecessors() {
         return predecessors;
     }
@@ -59,7 +63,7 @@ public class BasicBlock {
         predecessors.remove(BB);
     }
 
-    private void replacePredecessor(BasicBlock oldBB, BasicBlock newBB) {
+    public void replacePredecessor(BasicBlock oldBB, BasicBlock newBB) {
         predecessors.remove(oldBB);
         predecessors.add(newBB);
         newBB.successors.add(this);

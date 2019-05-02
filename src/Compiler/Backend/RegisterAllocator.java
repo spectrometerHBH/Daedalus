@@ -88,6 +88,8 @@ public class RegisterAllocator {
                 debug_out.println();
                 debug_out.print("Alias ：" + irPrinter.getName(u.alias));
                 debug_out.println();
+                debug_out.print("Color : " + (u.color == null ? "null" : irPrinter.getName(u.color)));
+                debug_out.println();
                 debug_out.println("------");
             });
             debug_out.println("========" + function.getName() + " Move List Info ========");
@@ -208,6 +210,10 @@ public class RegisterAllocator {
                 if (DEBUG) dumpDebugInfo(function);
             } while (!(simplifyWorklist.isEmpty() && worklistMoves.isEmpty() && freezeWorklist.isEmpty() && spillWorklist.isEmpty()));
             assignColors();
+            if (DEBUG) {
+                debug_out.println("===================== after ASSIGN =====================");
+                dumpDebugInfo(function);
+            }
             if (!spilledNodes.isEmpty()) {
                 finish = false;
                 rewriteProgram(function);
@@ -483,6 +489,7 @@ public class RegisterAllocator {
         while (!selectStack.isEmpty()) {
             VirtualRegister n = selectStack.pop();
             selectStackNodes.remove(n);
+            if (n.degree == 0) continue;
             Set<PhysicalRegister> okColors = new HashSet<>(colors);
             for (VirtualRegister w : n.adjList)
                 if (coloredNodes.contains(getAlias(w)) || precolored.contains(getAlias(w))) {
