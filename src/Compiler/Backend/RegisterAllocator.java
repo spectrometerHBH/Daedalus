@@ -86,7 +86,7 @@ public class RegisterAllocator {
                 debug_out.println();
                 debug_out.print("degree : " + u.degree);
                 debug_out.println();
-                debug_out.print("Alias ：" + irPrinter.getName(u.alias));
+                debug_out.print("Alias :" + irPrinter.getName(u.alias));
                 debug_out.println();
                 debug_out.print("Color : " + (u.color == null ? "null" : irPrinter.getName(u.color)));
                 debug_out.println();
