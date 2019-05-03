@@ -22,7 +22,7 @@ public class Function {
     private List<Return> returnInstList = new ArrayList<>();
     private Register referenceForClassMethod = null;
     private List<Register> parameterList = new ArrayList<>();
-    private List<Register> allParamterList = new ArrayList<>();
+    private List<Register> allParameterList = new ArrayList<>();
     private List<BasicBlock> postOrderDFSBBList = null;
     private List<BasicBlock> reversePostOrderDFSBBList = null;
     private Set<BasicBlock> visit = null;
@@ -90,11 +90,11 @@ public class Function {
         return parameterList;
     }
 
-    public List<Register> getAllParamterList() {
-        allParamterList.clear();
-        if (referenceForClassMethod != null) allParamterList.add(referenceForClassMethod);
-        allParamterList.addAll(parameterList);
-        return allParamterList;
+    public List<Register> getAllParameterList() {
+        allParameterList.clear();
+        if (referenceForClassMethod != null) allParameterList.add(referenceForClassMethod);
+        allParameterList.addAll(parameterList);
+        return allParameterList;
     }
 
     public List<BasicBlock> getReversePostOrderDFSBBList() {

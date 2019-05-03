@@ -3,6 +3,7 @@ package Compiler.IRInterpreter;
 import org.apache.commons.text.StringEscapeUtils;
 
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 /**
@@ -45,7 +46,6 @@ public class IRInterpreter_codegen {
     private boolean allowPhi;
     private Map<String, Register> registers = new HashMap<>();
     private Map<String, Register> globalRegisters = new HashMap<>();
-    private Map<Long, String> stringObjects = new HashMap<>();
     private Map<String, Long> tmpRegister = new HashMap<>(); // for phi node
     private Map<Long, Byte> memory = new HashMap<>();
     private Map<Long, Byte> stackMemory = new HashMap<>();
@@ -277,10 +277,10 @@ public class IRInterpreter_codegen {
             String tmp = words[1].substring(1, words[1].length() - 1);
             String val = StringEscapeUtils.unescapeJava(tmp);
             Register reg = new Register();
-            reg.value = staticStringCnt;
+            reg.value = heapTop;
             reg.timestamp = 0;
             globalRegisters.put(name, reg);
-            stringObjects.put(staticStringCnt++, val);
+            new StringPair(val.length(), val);
         } else {
             //other, just alloc some space on heap for convenience
             String name = line.trim();
@@ -464,21 +464,24 @@ public class IRInterpreter_codegen {
                 Function func = functions.get(curInst.op1);
                 switch (curInst.op1) {
                     case "string.length": {
-                        String str = stringObjects.get(readSrc(curInst.args.get(0)));
+                        StringPair stringPair = new StringPair(readSrc(curInst.args.get(0)));
+                        String str = stringPair.val;
                         registerWrite(curInst.dest, str.length());
                         return;
                     }
                     case "string.substring": {
-                        String str = stringObjects.get(readSrc(curInst.args.get(0)));
+                        StringPair stringPair = new StringPair(readSrc(curInst.args.get(0)));
+                        String str = stringPair.val;
                         long left = readSrc(curInst.args.get(1));
                         long right = readSrc(curInst.args.get(2));
                         String resStr = str.substring((int) left, (int) right);
-                        registerWrite(curInst.dest, staticStringCnt);
-                        stringObjects.put(staticStringCnt++, resStr);
+                        registerWrite(curInst.dest, heapTop);
+                        new StringPair(resStr.length(), resStr);
                         return;
                     }
                     case "string.parseInt": {
-                        String str = stringObjects.get(readSrc(curInst.args.get(0)));
+                        StringPair stringPair = new StringPair(readSrc(curInst.args.get(0)));
+                        String str = stringPair.val;
                         char[] charArray = str.toCharArray();
                         long result = 0;
                         for (char ch : charArray) {
@@ -489,70 +492,87 @@ public class IRInterpreter_codegen {
                         return;
                     }
                     case "string.ord": {
-                        String str = stringObjects.get(readSrc(curInst.args.get(0)));
+                        StringPair stringPair = new StringPair(readSrc(curInst.args.get(0)));
+                        String str = stringPair.val;
                         long pos = readSrc(curInst.args.get(1));
                         registerWrite(curInst.dest, (int) str.charAt((int) pos));
                         return;
                     }
                     case "string.add": {
-                        String str1 = stringObjects.get(readSrc(curInst.args.get(0)));
-                        String str2 = stringObjects.get(readSrc(curInst.args.get(1)));
+                        StringPair stringPair0 = new StringPair(readSrc(curInst.args.get(0)));
+                        StringPair stringPair1 = new StringPair(readSrc(curInst.args.get(1)));
+                        String str1 = stringPair0.val;
+                        String str2 = stringPair1.val;
                         String resStr = str1 + str2;
-                        registerWrite(curInst.dest, staticStringCnt);
-                        stringObjects.put(staticStringCnt++, resStr);
+                        registerWrite(curInst.dest, heapTop);
+                        new StringPair(resStr.length(), resStr);
                         return;
                     }
                     case "string.lt": {
-                        String str1 = stringObjects.get(readSrc(curInst.args.get(0)));
-                        String str2 = stringObjects.get(readSrc(curInst.args.get(1)));
+                        StringPair stringPair0 = new StringPair(readSrc(curInst.args.get(0)));
+                        StringPair stringPair1 = new StringPair(readSrc(curInst.args.get(1)));
+                        String str1 = stringPair0.val;
+                        String str2 = stringPair1.val;
                         registerWrite(curInst.dest, str1.compareTo(str2) < 0 ? 1 : 0);
                         return;
                     }
                     case "string.leq": {
-                        String str1 = stringObjects.get(readSrc(curInst.args.get(0)));
-                        String str2 = stringObjects.get(readSrc(curInst.args.get(1)));
+                        StringPair stringPair0 = new StringPair(readSrc(curInst.args.get(0)));
+                        StringPair stringPair1 = new StringPair(readSrc(curInst.args.get(1)));
+                        String str1 = stringPair0.val;
+                        String str2 = stringPair1.val;
                         registerWrite(curInst.dest, str1.compareTo(str2) <= 0 ? 1 : 0);
                         return;
                     }
                     case "string.eq": {
-                        String str1 = stringObjects.get(readSrc(curInst.args.get(0)));
-                        String str2 = stringObjects.get(readSrc(curInst.args.get(1)));
+                        StringPair stringPair0 = new StringPair(readSrc(curInst.args.get(0)));
+                        StringPair stringPair1 = new StringPair(readSrc(curInst.args.get(1)));
+                        String str1 = stringPair0.val;
+                        String str2 = stringPair1.val;
                         registerWrite(curInst.dest, str1.compareTo(str2) == 0 ? 1 : 0);
                         return;
                     }
                     case "string.geq": {
-                        String str1 = stringObjects.get(readSrc(curInst.args.get(0)));
-                        String str2 = stringObjects.get(readSrc(curInst.args.get(1)));
+                        StringPair stringPair0 = new StringPair(readSrc(curInst.args.get(0)));
+                        StringPair stringPair1 = new StringPair(readSrc(curInst.args.get(1)));
+                        String str1 = stringPair0.val;
+                        String str2 = stringPair1.val;
                         registerWrite(curInst.dest, str1.compareTo(str2) >= 0 ? 1 : 0);
                         return;
                     }
                     case "string.gt": {
-                        String str1 = stringObjects.get(readSrc(curInst.args.get(0)));
-                        String str2 = stringObjects.get(readSrc(curInst.args.get(1)));
+                        StringPair stringPair0 = new StringPair(readSrc(curInst.args.get(0)));
+                        StringPair stringPair1 = new StringPair(readSrc(curInst.args.get(1)));
+                        String str1 = stringPair0.val;
+                        String str2 = stringPair1.val;
                         registerWrite(curInst.dest, str1.compareTo(str2) > 0 ? 1 : 0);
                         return;
                     }
                     case "string.neq": {
-                        String str1 = stringObjects.get(readSrc(curInst.args.get(0)));
-                        String str2 = stringObjects.get(readSrc(curInst.args.get(1)));
+                        StringPair stringPair0 = new StringPair(readSrc(curInst.args.get(0)));
+                        StringPair stringPair1 = new StringPair(readSrc(curInst.args.get(1)));
+                        String str1 = stringPair0.val;
+                        String str2 = stringPair1.val;
                         registerWrite(curInst.dest, str1.compareTo(str2) != 0 ? 1 : 0);
                         return;
                     }
                     case "print": {
-                        String str = stringObjects.get(readSrc(curInst.args.get(0)));
+                        StringPair stringPair = new StringPair(readSrc(curInst.args.get(0)));
+                        String str = stringPair.val;
                         data_out.print(str);
                         return;
                     }
                     case "println": {
-                        String str = stringObjects.get(readSrc(curInst.args.get(0)));
+                        StringPair stringPair = new StringPair(readSrc(curInst.args.get(0)));
+                        String str = stringPair.val;
                         data_out.print(str);
                         data_out.print('\n');
                         return;
                     }
                     case "getString": {
                         String resStr = scanner.next();
-                        registerWrite(curInst.dest, staticStringCnt);
-                        stringObjects.put(staticStringCnt++, resStr);
+                        registerWrite(curInst.dest, heapTop);
+                        new StringPair(resStr.length(), resStr);
                         return;
                     }
                     case "getInt": {
@@ -563,8 +583,8 @@ public class IRInterpreter_codegen {
                     case "toString": {
                         long i = readSrc(curInst.args.get(0));
                         String resStr = String.valueOf(i);
-                        registerWrite(curInst.dest, staticStringCnt);
-                        stringObjects.put(staticStringCnt++, resStr);
+                        registerWrite(curInst.dest, heapTop);
+                        new StringPair(resStr.length(), resStr);
                         return;
                     }
                     default:
@@ -751,6 +771,34 @@ public class IRInterpreter_codegen {
 
         int lineno;
         String text;
+    }
+
+    private class StringPair {
+        long length;
+        String val;
+
+        StringPair(long addr) throws RuntimeError {
+            for (int i = 0; i < 8; ++i) length = (length << 8) | memoryRead(addr + i);
+            byte[] bytes = new byte[(int) length];
+            for (int i = 0; i < length; ++i) bytes[i] = (byte) memoryRead(addr + 8 + i);
+            val = new String(bytes, StandardCharsets.ISO_8859_1);
+        }
+
+        StringPair(long length, String val) throws RuntimeError {
+            this.length = length;
+            this.val = val;
+            long size = 8 + length;
+            for (long i = 8 - 1; i >= 0; --i) {
+                memory.put(heapTop + i, (byte) (length & 0xFF));
+                length >>= 8;
+            }
+            byte[] bytes = val.getBytes(StandardCharsets.ISO_8859_1);
+            for (long i = 0; i < this.length; i++) {
+                memory.put(heapTop + 8 + i, bytes[(int) i]);
+            }
+            heapTop += size;
+            heapTop += (int) (Math.random() * 4096);
+        }
     }
 
     private static class PhiNode extends Instruction {

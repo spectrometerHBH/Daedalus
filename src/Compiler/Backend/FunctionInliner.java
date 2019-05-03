@@ -135,7 +135,7 @@ public class FunctionInliner {
         basicBlockFakerMap.put(callee.getExitBlock(), splitter);
         if (caller.getExitBlock() == callInst.getCurrentBB()) caller.setExitBlock(splitter);
         for (int i = 0; i < callInst.getParameterList().size(); i++) {
-            Register oldParameter = callee.getAllParamterList().get(i);
+            Register oldParameter = callee.getAllParameterList().get(i);
             VirtualRegister newParameter = new I64Value(oldParameter.getName());
             callInst.prependInstruction(new Move(callInst.getCurrentBB(), callInst.getParameterList().get(i), newParameter));
             registerFakerMap.put(oldParameter, newParameter);

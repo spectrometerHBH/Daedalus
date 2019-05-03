@@ -86,6 +86,12 @@ public class X86ConstraintResolver {
         function.getReversePostOrderDFSBBList().forEach(basicBlock -> {
             for (IRInstruction irInstruction = basicBlock.head; irInstruction != null; irInstruction = irInstruction.getNextInstruction())
                 if (irInstruction instanceof Call) {
+                    if (((Call) irInstruction).getCallee() == irRoot.builtinStringLength) {
+                        irInstruction.replaceInstruction(new Load(basicBlock,
+                                new DynamicData((Register) ((Call) irInstruction).getObjectPointer(), null, new Immediate(0), new Immediate(0)),
+                                ((Call) irInstruction).getResult()));
+                        continue;
+                    }
                     Call inst = (Call) irInstruction;
                     function.argumentLimit = Math.max(function.argumentLimit, inst.getObjectPointer() == null ? inst.getParameterList().size() : inst.getParameterList().size() + 1);
                     //pass arguments

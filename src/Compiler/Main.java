@@ -28,7 +28,8 @@ public class Main {
     public static void main(String... args) throws Exception {
         //for program to be compiled
         InputStream in = new FileInputStream("test.txt");
-        boolean test = true;
+        boolean test_ir = false;
+        boolean test_nasm = false;
 
         //for text-ir output
         PrintStream ir_out_raw = new PrintStream("ir_raw.ll");
@@ -38,8 +39,8 @@ public class Main {
         PrintStream ir_out_afterOptimization = new PrintStream("ir_out_after_optim.ll");
         PrintStream ir_out_afterX86Transform = new PrintStream("ir_out_after_X86.ll");
         PrintStream ir_codegen_without_color = new PrintStream("ir_out_after_codegen_no_color.ll");
-        PrintStream ir_codegen = test ? new PrintStream(System.out) : new PrintStream("ir_out_after_codegen.ll");
-
+        PrintStream ir_codegen = test_ir ? new PrintStream(System.out) : new PrintStream("ir_out_after_codegen.ll");
+        PrintStream nasm = test_nasm ? new PrintStream(System.out) : new PrintStream("out.asm");
         //for IR interpreter test use
         FileInputStream ir_test_in = new FileInputStream("ir_out_after_codegen.ll");
         DataInputStream ir_data_in = new DataInputStream(System.in);
@@ -93,9 +94,10 @@ public class Main {
             new IRPrinter(ir_out_afterX86Transform).visit(irRoot);
             new RegisterAllocator(irRoot).run();
             optimizer.simplifyCFG(true);
-            new X86CodeEmitter(irRoot).run();
+            new X86CodeEmitter(irRoot, nasm).run();
             new IRPrinter(ir_codegen_without_color).visit(irRoot);
             new IRPrinter(ir_codegen, true).visit(irRoot);
+
             //new IRInterpreter_codegen(ir_test_in, false, ir_data_in, ir_data_out).run();
         } catch (Exception e) {
             e.printStackTrace();
