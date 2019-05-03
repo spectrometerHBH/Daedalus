@@ -15,10 +15,16 @@ import java.util.Map;
 import static Compiler.IR.Operand.PhysicalRegister.rbp;
 import static Compiler.IR.Operand.PhysicalRegister.rsp;
 
+//Instruction Format Changed:
+//unary
+//cmp & branch
+
 public class X86CodeEmitter implements IRVisitor {
     private IRRoot irRoot;
     private PrintStream out;
     private String indent = "        ";
+    private boolean inLea = false;
+    private boolean swapCmp = false;
     private Map<Storage, String> storageStringMap = new HashMap<>();
     private Map<BasicBlock, String> basicBlockStringMap = new HashMap<>();
     private Map<String, Integer> nameCountMap = new HashMap<>();
@@ -105,16 +111,14 @@ public class X86CodeEmitter implements IRVisitor {
         printLabel("extern strcmp");
         printLabel("extern malloc");
         printLabel("extern _GLOBAL_OFFSET_TABLE_");
-        if (!irRoot.getGlobalVariableList().isEmpty()) {
+        if (!irRoot.getGlobalVariableList().isEmpty() || !irRoot.getStaticStringList().isEmpty()) {
             printLabel("");
-            printLabel("SECTION .DATA_common");
+            printLabel("section .data");
             printLabel("");
-            irRoot.getGlobalVariableList().forEach(globalVariable -> printLabel(getName((GlobalI64Value) globalVariable) + ": dq 0"));
-        }
-        if (!irRoot.getStaticStringList().isEmpty()) {
-            printLabel("");
-            printLabel("SECTION .DATA_cstring");
-            printLabel("");
+            irRoot.getGlobalVariableList().forEach(globalVariable -> {
+                printLabel(getName((GlobalI64Value) globalVariable) + ":");
+                printInstruction("dq 0");
+            });
             irRoot.getStaticStringList().forEach(staticString -> {
                 printLabel(getName(staticString.getBase()) + ":");
                 printInstruction("dq " + staticString.getVal().length());
@@ -122,7 +126,7 @@ public class X86CodeEmitter implements IRVisitor {
             });
         }
         printLabel("");
-        printLabel("SECTION .TEXT");
+        printLabel("section .text");
         printLabel("");
         for (Map.Entry<String, Function> entry : irRoot.getFunctionMap().entrySet()) {
             entry.getValue().accept(this);
@@ -211,31 +215,45 @@ public class X86CodeEmitter implements IRVisitor {
 
     @Override
     public void visit(Branch inst) {
-        String op = null;
+        String op = null, contrastOp = null, inverseOp = null, contrastInverseOp = null;
         switch (inst.defOfCond.getOp()) {
             case LT:
-                op = "jl";
+                op = "jl"; contrastOp = "jge"; inverseOp = "jg"; contrastInverseOp = "jle";
                 break;
             case LEQ:
-                op = "jle";
+                op = "jle"; contrastOp = "jg"; inverseOp = "jge"; contrastInverseOp = "jl";
                 break;
             case EQ:
-                op = "jeq";
+                op = "je"; contrastOp = "jne"; inverseOp = "je"; contrastInverseOp = "jne";
                 break;
             case GEQ:
-                op = "jge";
+                op = "jge"; contrastOp = "jl"; inverseOp = "jle"; contrastInverseOp = "jg";
                 break;
             case GT:
-                op = "jg";
+                op = "jg"; contrastOp = "jle"; inverseOp = "jl"; contrastInverseOp = "jge";
                 break;
             case NEQ:
-                op = "jne";
+                op = "jne"; contrastOp = "je"; inverseOp = "jne"; contrastInverseOp = "je";
                 break;
         }
-        out.print(indent + op);
-        if (inst.getThenBB().postOrderNumber == inst.getCurrentBB().postOrderNumber + 1)
-            out.println(" " + getLabel(inst.getElseBB()));
-        else out.println(" " + getLabel(inst.getThenBB()));
+        if (swapCmp) {
+            swapCmp = false;
+            if (inst.getThenBB().postOrderNumber == inst.getCurrentBB().postOrderNumber - 1) {
+                out.print(indent + contrastInverseOp);
+                out.println(" " + getLabel(inst.getElseBB()));
+            } else {
+                out.print(indent + inverseOp);
+                out.println(" " + getLabel(inst.getThenBB()));
+            }
+        } else {
+            if (inst.getThenBB().postOrderNumber == inst.getCurrentBB().postOrderNumber - 1) {
+                out.print(indent + contrastOp);
+                out.println(" " + getLabel(inst.getElseBB()));
+            } else {
+                out.print(indent + op);
+                out.println(" " + getLabel(inst.getThenBB()));
+            }
+        }
     }
 
     @Override
@@ -247,10 +265,18 @@ public class X86CodeEmitter implements IRVisitor {
     @Override
     public void visit(Cmp inst) {
         out.print(indent + "cmp ");
-        inst.getSrc1().accept(this);
-        out.print(", ");
-        inst.getSrc2().accept(this);
-        out.println();
+        if (inst.getSrc1() instanceof Immediate) {
+            swapCmp = true;
+            inst.getSrc2().accept(this);
+            out.print(", ");
+            inst.getSrc1().accept(this);
+            out.println();
+        } else {
+            inst.getSrc1().accept(this);
+            out.print(", ");
+            inst.getSrc2().accept(this);
+            out.println();
+        }
     }
 
     @Override
@@ -310,10 +336,13 @@ public class X86CodeEmitter implements IRVisitor {
             case NOTL:
                 throw new RuntimeException();
         }
+        out.print(indent + "mov ");
+        inst.getDst().accept(this);
+        out.print(", ");
+        inst.getSrc().accept(this);
+        out.println();
         out.print(indent + op + " ");
         inst.getDst().accept(this);
-        out.print(" ");
-        inst.getSrc().accept(this);
         out.println();
     }
 
@@ -327,7 +356,9 @@ public class X86CodeEmitter implements IRVisitor {
         out.print(indent + "lea ");
         inst.getDst().accept(this);
         out.print(", ");
+        inLea = true;
         inst.getSrc().accept(this);
+        inLea = false;
         out.println();
     }
 
@@ -347,7 +378,8 @@ public class X86CodeEmitter implements IRVisitor {
     public void visit(Storage storage) {
         if (storage instanceof Register) out.print(getName(storage));
         else if (storage instanceof Memory) {
-            out.print("qword [");
+            if (!inLea) out.print("qword [");
+            else out.print("[");
             if (((Memory) storage).getBase() != null) {
                 visit(((Memory) storage).getBase());
                 if (((Memory) storage).getIndex() != null) out.print("+");

@@ -41,7 +41,7 @@ public class X86ConstraintResolver {
                             ((Binary) nowIRInstruction).setSrc1(((Binary) nowIRInstruction).getDst());
                         } else {
                             //z = y op z
-                            //-->u
+                            //-->
                             //z' = z
                             //z = y
                             //z = z op z'

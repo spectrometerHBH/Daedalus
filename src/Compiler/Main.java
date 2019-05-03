@@ -4,6 +4,7 @@ import Compiler.AST.ProgramNode;
 import Compiler.Backend.*;
 import Compiler.Frontend.*;
 import Compiler.IR.IRRoot;
+import Compiler.IRInterpreter.IRInterpreter_codegen;
 import Compiler.Optim.Optimizer;
 import Compiler.Parser.MxstarErrorListener;
 import Compiler.Parser.MxstarLexer;
