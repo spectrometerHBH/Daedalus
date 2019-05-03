@@ -101,7 +101,7 @@ public class Store extends IRInstruction {
     public void calcUseAndDef() {
         use.clear();
         def.clear();
-        if (src instanceof VirtualRegister) use.add((VirtualRegister) src);
+        if (src instanceof VirtualRegister && !(src instanceof GlobalVariable)) use.add((VirtualRegister) src);
         if (dst instanceof VirtualRegister && !(dst instanceof GlobalVariable)) use.add((VirtualRegister) dst);
         else if (dst instanceof Memory) use.addAll(((Memory) dst).useRegisters());
     }

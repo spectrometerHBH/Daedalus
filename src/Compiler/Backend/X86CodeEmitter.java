@@ -46,6 +46,7 @@ public class X86CodeEmitter implements IRVisitor {
         BasicBlock entryBB = function.getEntryBlock();
         BasicBlock exitBB = function.getExitBlock();
         int stackFrameSize = (Math.max(function.argumentLimit - 6, 0) + function.temporaryCnt) * 8;
+        if (stackFrameSize % 16 != 0) stackFrameSize += 8;
 
         if (stackFrameSize != 0)
             entryBB.head.prependInstruction(new Binary(entryBB, Binary.Op.SUB, rsp, new Immediate(stackFrameSize), rsp));

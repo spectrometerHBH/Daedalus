@@ -471,31 +471,31 @@ L_026:  leave
 __builtin_toString:
         push    rbp
         mov     rbp, rsp
-        sub     rsp, 96
-        mov     dword [rbp-54H], edi
+        sub     rsp, 112
+        mov     dword [rbp-64H], edi
 
 
         mov     rax, qword [fs:abs 28H]
         mov     qword [rbp-8H], rax
         xor     eax, eax
-        mov     dword [rbp-44H], 0
-        mov     dword [rbp-40H], 0
-        cmp     dword [rbp-54H], 0
+        mov     dword [rbp-54H], 0
+        mov     dword [rbp-50H], 0
+        cmp     dword [rbp-64H], 0
         jns     L_027
-        mov     dword [rbp-44H], 1
-        neg     dword [rbp-54H]
-L_027:  cmp     dword [rbp-54H], 0
+        mov     dword [rbp-54H], 1
+        neg     dword [rbp-64H]
+L_027:  cmp     dword [rbp-64H], 0
         jnz     L_028
-        add     dword [rbp-40H], 1
-        mov     eax, dword [rbp-40H]
+        add     dword [rbp-50H], 1
+        mov     eax, dword [rbp-50H]
         cdqe
-        mov     dword [rbp+rax*4-30H], 0
+        mov     dword [rbp+rax*4-40H], 0
         jmp     L_029
 
-L_028:  cmp     dword [rbp-54H], 0
+L_028:  cmp     dword [rbp-64H], 0
         jz      L_029
-        add     dword [rbp-40H], 1
-        mov     ecx, dword [rbp-54H]
+        add     dword [rbp-50H], 1
+        mov     ecx, dword [rbp-64H]
         mov     edx, 1717986919
         mov     eax, ecx
         imul    edx
@@ -509,10 +509,10 @@ L_028:  cmp     dword [rbp-54H], 0
         add     eax, eax
         sub     ecx, eax
         mov     edx, ecx
-        mov     eax, dword [rbp-40H]
+        mov     eax, dword [rbp-50H]
         cdqe
-        mov     dword [rbp+rax*4-30H], edx
-        mov     ecx, dword [rbp-54H]
+        mov     dword [rbp+rax*4-40H], edx
+        mov     ecx, dword [rbp-64H]
         mov     edx, 1717986919
         mov     eax, ecx
         imul    edx
@@ -521,59 +521,59 @@ L_028:  cmp     dword [rbp-54H], 0
         sar     eax, 31
         sub     edx, eax
         mov     eax, edx
-        mov     dword [rbp-54H], eax
+        mov     dword [rbp-64H], eax
         jmp     L_028
 
 
 L_029:
-        mov     edx, dword [rbp-40H]
-        mov     eax, dword [rbp-44H]
+        mov     edx, dword [rbp-50H]
+        mov     eax, dword [rbp-54H]
         add     eax, edx
         add     eax, 9
         cdqe
         mov     rdi, rax
         call    malloc
-        mov     qword [rbp-38H], rax
-        mov     edx, dword [rbp-40H]
-        mov     eax, dword [rbp-44H]
+        mov     qword [rbp-48H], rax
+        mov     edx, dword [rbp-50H]
+        mov     eax, dword [rbp-54H]
         add     eax, edx
         movsxd  rdx, eax
-        mov     rax, qword [rbp-38H]
+        mov     rax, qword [rbp-48H]
         mov     qword [rax], rdx
-        add     qword [rbp-38H], 8
-        mov     edx, dword [rbp-40H]
-        mov     eax, dword [rbp-44H]
+        add     qword [rbp-48H], 8
+        mov     edx, dword [rbp-50H]
+        mov     eax, dword [rbp-54H]
         add     eax, edx
         movsxd  rdx, eax
-        mov     rax, qword [rbp-38H]
+        mov     rax, qword [rbp-48H]
         add     rax, rdx
         mov     byte [rax], 0
-        cmp     dword [rbp-44H], 0
+        cmp     dword [rbp-54H], 0
         jz      L_030
-        mov     rax, qword [rbp-38H]
+        mov     rax, qword [rbp-48H]
         mov     byte [rax], 45
-L_030:  mov     dword [rbp-3CH], 0
-L_031:  mov     eax, dword [rbp-3CH]
-        cmp     eax, dword [rbp-40H]
+L_030:  mov     dword [rbp-4CH], 0
+L_031:  mov     eax, dword [rbp-4CH]
+        cmp     eax, dword [rbp-50H]
         jge     L_032
-        mov     eax, dword [rbp-40H]
-        sub     eax, dword [rbp-3CH]
+        mov     eax, dword [rbp-50H]
+        sub     eax, dword [rbp-4CH]
         cdqe
-        mov     eax, dword [rbp+rax*4-30H]
+        mov     eax, dword [rbp+rax*4-40H]
         lea     ecx, [rax+30H]
-        mov     edx, dword [rbp-3CH]
-        mov     eax, dword [rbp-44H]
+        mov     edx, dword [rbp-4CH]
+        mov     eax, dword [rbp-54H]
         add     eax, edx
         movsxd  rdx, eax
-        mov     rax, qword [rbp-38H]
+        mov     rax, qword [rbp-48H]
         add     rax, rdx
         mov     edx, ecx
         mov     byte [rax], dl
-        add     dword [rbp-3CH], 1
+        add     dword [rbp-4CH], 1
         jmp     L_031
 
 L_032:
-        mov     rax, qword [rbp-38H]
+        mov     rax, qword [rbp-48H]
         sub     rax, 8
         mov     rsi, qword [rbp-8H]
 
@@ -593,7 +593,6 @@ __builtin_string_substring:
         mov     dword [rbp-20H], edx
         mov     eax, dword [rbp-20H]
         sub     eax, dword [rbp-1CH]
-        add     eax, 1
         mov     dword [rbp-0CH], eax
         mov     eax, dword [rbp-0CH]
         add     eax, 9
