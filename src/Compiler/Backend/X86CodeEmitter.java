@@ -8,7 +8,7 @@ import Compiler.IR.Instruction.*;
 import Compiler.IR.Operand.*;
 import org.apache.commons.text.StringEscapeUtils;
 
-import java.io.PrintStream;
+import java.io.*;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -28,9 +28,12 @@ public class X86CodeEmitter implements IRVisitor {
         this.out = out;
     }
 
-    public void run() {
+    public void run() throws IOException {
         irRoot.getFunctionMap().values().forEach(this::constructStackFrame);
         visit(irRoot);
+        BufferedReader bufferedReader = new BufferedReader(new FileReader("lib/builtin_lib.asm"));
+        for (String line = bufferedReader.readLine(); line != null; line = bufferedReader.readLine())
+            out.println(line);
     }
 
     private void constructStackFrame(Function function) {
@@ -56,7 +59,7 @@ public class X86CodeEmitter implements IRVisitor {
         out.println(indent + msg);
     }
 
-    private String staticStringSequntialize(String str) {
+    private String staticStringSequentialize(String str) {
         StringBuilder stringBuilder = new StringBuilder();
         for (int i = 0, n = str.length(); i < n; ++i) {
             char c = str.charAt(i);
@@ -71,29 +74,55 @@ public class X86CodeEmitter implements IRVisitor {
     public void visit(IRRoot irRoot) {
         printLabel("default rel");
         printLabel("");
-        printLabel("global __init_entry_1");
+        printLabel("global main");
+        printLabel("global __builtin_string_add");
+        printLabel("global __builtin_string_equal");
+        printLabel("global __builtin_string_inequal");
+        printLabel("global __builtin_string_less");
+        printLabel("global __builtin_string_less_equal");
+        printLabel("global __builtin_string_great");
+        printLabel("global __builtin_string_great_equal");
+        printLabel("global __builtin_print");
+        printLabel("global __builtin_println");
+        printLabel("global __builtin_printInt");
+        printLabel("global __builtin_printlnInt");
+        printLabel("global __builtin_getString");
+        printLabel("global __builtin_getInt");
+        printLabel("global __builtin_toString");
+        printLabel("global __builtin_string_substring");
+        printLabel("global __builtin_string_parseInt");
+        printLabel("global __builtin_string_ord");
         irRoot.getGlobalVariableList().forEach(globalVariable -> printLabel("global " + getName((GlobalI64Value) globalVariable)));
-        irRoot.getStaticStringList().forEach(staticString -> printLabel("global" + getName(staticString.getBase())));
+        irRoot.getStaticStringList().forEach(staticString -> printLabel("global " + getName(staticString.getBase())));
         printLabel("");
-        printLabel("extern printf, scanf, puts, gets, sprintf, sscanf, getchar, strlen, strcmp, strcpy, strncpy, malloc");
+        printLabel("extern getchar");
+        printLabel("extern strlen");
+        printLabel("extern scanf");
+        printLabel("extern __stack_chk_fail");
+        printLabel("extern putchar");
+        printLabel("extern puts");
+        printLabel("extern printf");
+        printLabel("extern strcmp");
+        printLabel("extern malloc");
+        printLabel("extern _GLOBAL_OFFSET_TABLE_");
         if (!irRoot.getGlobalVariableList().isEmpty()) {
             printLabel("");
-            printLabel("SECTION .DATA_common align=8 noexecute");
+            printLabel("SECTION .DATA_common");
             printLabel("");
             irRoot.getGlobalVariableList().forEach(globalVariable -> printLabel(getName((GlobalI64Value) globalVariable) + ": dq 0"));
         }
-        if (!irRoot.getGlobalVariableList().isEmpty()) {
+        if (!irRoot.getStaticStringList().isEmpty()) {
             printLabel("");
-            printLabel("SECTION .DATA_cstring align=1 noexecute");
+            printLabel("SECTION .DATA_cstring");
             printLabel("");
             irRoot.getStaticStringList().forEach(staticString -> {
                 printLabel(getName(staticString.getBase()) + ":");
                 printInstruction("dq " + staticString.getVal().length());
-                printInstruction("db " + staticStringSequntialize(staticString.getVal()) + " ; " + StringEscapeUtils.escapeJava(staticString.getVal()));
+                printInstruction("db " + staticStringSequentialize(staticString.getVal()) + " ; " + StringEscapeUtils.escapeJava(staticString.getVal()));
             });
         }
         printLabel("");
-        printLabel("SECTION .TEXT align=16 execute");
+        printLabel("SECTION .TEXT");
         printLabel("");
         for (Map.Entry<String, Function> entry : irRoot.getFunctionMap().entrySet()) {
             entry.getValue().accept(this);
@@ -211,7 +240,8 @@ public class X86CodeEmitter implements IRVisitor {
 
     @Override
     public void visit(Call inst) {
-        printInstruction("call " + getLabel(inst.getCallee().getEntryBlock()));
+        if (irRoot.builtinFunctions.contains(inst.getCallee())) printInstruction("call " + inst.getCallee().builtinFunctionName);
+        else printInstruction("call " + getLabel(inst.getCallee().getEntryBlock()));
     }
 
     @Override
@@ -310,7 +340,7 @@ public class X86CodeEmitter implements IRVisitor {
 
     @Override
     public void visit(Pop inst) {
-        printInstruction("pop");
+        printInstruction("pop rbp");
     }
 
     @Override
@@ -361,6 +391,11 @@ public class X86CodeEmitter implements IRVisitor {
     }
 
     private String createLabel(BasicBlock basicBlock, String name) {
+        if (basicBlock.getName().equals("__init_entry")) {
+            String newName = "main";
+            basicBlockStringMap.put(basicBlock, newName);
+            return newName;
+        }
         int cnt = nameCountMap.getOrDefault(name, 0) + 1;
         nameCountMap.put(name, cnt);
         String newName = name + "_" + cnt;

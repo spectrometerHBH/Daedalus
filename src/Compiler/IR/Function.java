@@ -29,8 +29,16 @@ public class Function {
     private Set<VirtualRegister> globals = new HashSet<>();
     private String name;
 
+    public String builtinFunctionName;
+
     public Function(String name) {
         this.name = name;
+        this.functionInfo = new FunctionInfo();
+    }
+
+    public Function(String name, String builtinFunctionName) {
+        this.name = name;
+        this.builtinFunctionName = builtinFunctionName;
         this.functionInfo = new FunctionInfo();
     }
 
