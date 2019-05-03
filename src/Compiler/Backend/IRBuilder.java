@@ -59,8 +59,7 @@ public class IRBuilder implements ASTVisitor {
             if (currentFunction != null && node.isParameterVariable())
                 currentFunction.appendParameterList(virtualRegister);
             variableSymbol.setVariableStorage(virtualRegister);
-            if (node.getExpr() != null) assign(virtualRegister, node.getExpr());
-        }
+            if (node.getExpr() != null) assign(virtualRegister, node.getExpr()); }
     }
 
     @Override

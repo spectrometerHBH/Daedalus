@@ -250,10 +250,12 @@ class ConstantAndCopyPropagator extends Pass {
                 } else if (callee == irRoot.builtinOrd) {
                     if (check0) {
                         if (((Call) S).getParameterList().get(0) instanceof Immediate) {
-                            changed = true;
                             int pos = ((Immediate) ((Call) S).getParameterList().get(0)).getImmediate();
-                            int res = (int) irRoot.staticStringValMap.get(_this).charAt(pos);
-                            S.replaceInstruction(new Move(S.getCurrentBB(), new Immediate(res), ((Call) S).getResult()));
+                            if (pos < irRoot.staticStringValMap.get(_this).length()) {
+                                changed = true;
+                                int res = (int) irRoot.staticStringValMap.get(_this).charAt(pos);
+                                S.replaceInstruction(new Move(S.getCurrentBB(), new Immediate(res), ((Call) S).getResult()));
+                            }
                         }
                     }
                 }

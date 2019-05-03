@@ -30,6 +30,23 @@ public class SemanticChecker implements ASTVisitor {
         if (node.getExpr() != null) {
             node.getExpr().accept(this);
             node.getTypeAfterResolve().compatible(node.getExpr().getType(), node.getPosition());
+        } else {
+            Type type = node.getTypeAfterResolve();
+            if (type.isPrimitiveType()) {
+                if (type.getTypeName().equals("int")) {
+                    node.setExpr(new IntLiteralNode(0, null));
+                } else {
+                    node.setExpr(new BoolLiteralNode(false, null));
+                }
+                node.getExpr().accept(this);
+            } else if (type.isArrayType() || type.isClassType() || type.isNullType()) {
+                if (!type.getTypeName().equals("string")) {
+                    node.setExpr(new NullLiteralNode(null));
+                } else {
+                    node.setExpr(new StringLiteralNode("ACM", null));
+                }
+                node.getExpr().accept(this);
+            }
         }
     }
 
@@ -348,7 +365,7 @@ public class SemanticChecker implements ASTVisitor {
         switch (node.getOp()) {
             case PRE_INC:
             case PRE_DEC: {
-                if (node.getExpression().isIntegerVaribale()) {
+                if (node.getExpression().isIntegerVariable()) {
                     node.setCategory(ExprNode.Category.LVALUE);
                     node.setType(intTypeSymbol);
                 } else throw new SemanticError("Non-int variable", node.getPosition());
@@ -356,7 +373,7 @@ public class SemanticChecker implements ASTVisitor {
             }
             case SUF_INC:
             case SUF_DEC: {
-                if (node.getExpression().isIntegerVaribale()) {
+                if (node.getExpression().isIntegerVariable()) {
                     node.setCategory(ExprNode.Category.RVALUE);
                     node.setType(intTypeSymbol);
                 } else throw new SemanticError("Non-int variable", node.getPosition());

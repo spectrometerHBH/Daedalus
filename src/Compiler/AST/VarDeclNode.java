@@ -63,6 +63,10 @@ public class VarDeclNode extends DeclNode {
         return expr;
     }
 
+    public void setExpr(ExprNode expr)  {
+        this.expr = expr;
+    }
+
     public Type getTypeAfterResolve() {
         return typeAfterResolve;
     }

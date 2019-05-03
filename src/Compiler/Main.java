@@ -77,7 +77,6 @@ public class Main {
             Optimizer optimizer = new Optimizer(irRoot);
             optimizer.simplifyCFG(true);
             optimizer.SSAConstruction();
-            //new IRPrinter(ir_out_afterSSAConstruction).visit(irRoot);
             for (boolean changed = true; changed; ) {
                 changed = optimizer.CommonSubexpressionElimination();
                 changed |= optimizer.ConstantAndCopyPropagation();
@@ -86,8 +85,9 @@ public class Main {
                 changed |= optimizer.simplifyCFG();
             }
             optimizer.InstructionCombination();
-            //new IRPrinter(ir_out_afterOptimization).visit(irRoot);
+            //new IRPrinter(ir_out_afterSSAConstruction).visit(irRoot);
             optimizer.SSADestruction();
+            //new IRPrinter(ir_out_afterOptimization).visit(irRoot);
             optimizer.simplifyCFG(true);
 
             //Codegen
@@ -95,9 +95,9 @@ public class Main {
             //new IRPrinter(ir_out_afterX86Transform).visit(irRoot);
             new RegisterAllocator(irRoot).run();
             optimizer.simplifyCFG(true);
-            new X86CodeEmitter(irRoot, nasm).run();
             //new IRPrinter(ir_codegen_without_color).visit(irRoot);
             //new IRPrinter(ir_codegen, true).visit(irRoot);
+            new X86CodeEmitter(irRoot, nasm).run();
             //new IRInterpreter_codegen(ir_test_in, false, ir_data_in, ir_data_out).run();
         } catch (Exception e) {
             e.printStackTrace();

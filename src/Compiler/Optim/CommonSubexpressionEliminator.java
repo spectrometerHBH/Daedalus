@@ -57,7 +57,7 @@ class CommonSubexpressionEliminator extends Pass {
                 }
             }
         basicBlock.getSuccessors().forEach(successor -> {
-            if (successor.getPredecessors().size() == 1)
+            if (successor.getPredecessors().size() == 1 && successor != basicBlock)
                 commonSubexpressionElimination(successor);
         });
         for (IRInstruction irInstruction = basicBlock.head; irInstruction != null; irInstruction = irInstruction.getNextInstruction())

@@ -19,7 +19,7 @@ public abstract class ExprNode extends ASTNode {
         super(position);
     }
 
-    public boolean isIntegerVaribale() {
+    public boolean isIntegerVariable() {
         return (category == Category.LVALUE && type.getTypeName().equals("int"));
     }
 

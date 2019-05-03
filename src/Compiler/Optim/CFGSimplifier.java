@@ -89,7 +89,7 @@ class CFGSimplifier extends Pass {
             BasicBlock basicBlock = function.getReversePostOrderDFSBBList().get(i);
             if (basicBlock.getSuccessors().size() == 1) {
                 BasicBlock successor = basicBlock.getSuccessors().iterator().next();
-                if (successor != function.getEntryBlock() && successor.getPredecessors().size() == 1) {
+                if (successor != function.getEntryBlock() && successor.getPredecessors().size() == 1 && successor != basicBlock) {
                     changed = true;
                     successor.mergeBB(basicBlock);
                     if (successor == function.getExitBlock())
