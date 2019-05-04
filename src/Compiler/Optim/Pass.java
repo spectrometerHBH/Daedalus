@@ -50,4 +50,8 @@ public abstract class Pass {
     void calcControlDependeceGraph(Function function) {
 
     }
+
+    void loopDetection(Function function) {
+
+    }
 }
