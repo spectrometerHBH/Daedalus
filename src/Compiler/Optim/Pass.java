@@ -46,4 +46,8 @@ public abstract class Pass {
         });
         return allStatements;
     }
+
+    void calcControlDependeceGraph(Function function) {
+
+    }
 }
