@@ -28,6 +28,8 @@ public class Main {
     public static void main(String... args) throws Exception {
         //for program to be compiled
         InputStream in = new FileInputStream("test.txt");
+
+        //compile config
         boolean test_ir = false;
         boolean test_nasm = true;
         boolean DEBUG_IR = false;
@@ -35,13 +37,15 @@ public class Main {
         //for text-ir output
         PrintStream ir_out_raw = new PrintStream("ir_raw.ll");
         PrintStream ir_out_after_inline = new PrintStream("ir_after_inlining.ll");
-        PrintStream ir_out_after_gvResolve = new PrintStream("ir_after_gvResolve.ll");
+        PrintStream ir_out_after_memorize = new PrintStream("ir_after_memorization.ll");
+        PrintStream ir_out_after_globalVariableResolve = new PrintStream("ir_after_gvResolve.ll");
         PrintStream ir_out_afterSSAConstruction = new PrintStream("ir_out_ssa_construct.ll");
         PrintStream ir_out_afterOptimization = new PrintStream("ir_out_after_optim.ll");
         PrintStream ir_out_afterX86Transform = new PrintStream("ir_out_after_X86.ll");
         PrintStream ir_codegen_without_color = new PrintStream("ir_out_after_codegen_no_color.ll");
         PrintStream ir_codegen = test_ir ? new PrintStream(System.out) : new PrintStream("ir_out_after_codegen.ll");
         PrintStream nasm = test_nasm ? new PrintStream(System.out) : new PrintStream("out.asm");
+
         //for IR interpreter test use
         FileInputStream ir_test_in = new FileInputStream("ir_out_after_codegen.ll");
         DataInputStream ir_data_in = new DataInputStream(System.in);
@@ -70,8 +74,10 @@ public class Main {
             if (DEBUG_IR) new IRPrinter(ir_out_raw).visit(irRoot);
             new FunctionInliner(irRoot).run();
             if (DEBUG_IR) new IRPrinter(ir_out_after_inline).visit(irRoot);
+            new MemorizationSeeker(irRoot).run();
+            if (DEBUG_IR) new IRPrinter(ir_out_after_memorize).visit(irRoot);
             new GlobalVariableResolver(irRoot).run();
-            if (DEBUG_IR) new IRPrinter(ir_out_after_gvResolve).visit(irRoot);
+            if (DEBUG_IR) new IRPrinter(ir_out_after_globalVariableResolve).visit(irRoot);
 
             //LIR Optimization based on SSA
             Optimizer optimizer = new Optimizer(irRoot);
@@ -98,6 +104,7 @@ public class Main {
             if (DEBUG_IR) new IRPrinter(ir_codegen_without_color).visit(irRoot);
             if (DEBUG_IR) new IRPrinter(ir_codegen, true).visit(irRoot);
             new X86CodeEmitter(irRoot, nasm).run();
+
             //new IRInterpreter_codegen(ir_test_in, false, ir_data_in, ir_data_out).run();
         } catch (Exception e) {
             e.printStackTrace();

@@ -3,7 +3,6 @@ package Compiler.Backend;
 //-inline: Function Integration/Inlining
 //Bottom-up inlining of functions into callees.
 //LLVM Pass
-//TODO
 
 import Compiler.IR.BasicBlock;
 import Compiler.IR.Function;

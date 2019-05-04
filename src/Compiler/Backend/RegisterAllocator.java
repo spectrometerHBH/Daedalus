@@ -489,7 +489,7 @@ public class RegisterAllocator {
         while (!selectStack.isEmpty()) {
             VirtualRegister n = selectStack.pop();
             selectStackNodes.remove(n);
-            if (n.degree == 0) continue;
+            //if (n.degree == 0) continue;
             Set<PhysicalRegister> okColors = new HashSet<>(colors);
             for (VirtualRegister w : n.adjList)
                 if (coloredNodes.contains(getAlias(w)) || precolored.contains(getAlias(w))) {
