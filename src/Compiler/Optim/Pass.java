@@ -121,7 +121,7 @@ public abstract class Pass {
 
     //Natural Loop Information
     //This analysis is used to identify natural loops and determine the loop depth of various nodes of the CFG.
-    //Note that the loops identified may actually be several natural loops that share the same header node… not just a single natural loop.
+    //Note that the loops identified may actually be several natural loops that share the same header node not just a single natural loop.
     //LLVM Pass
     void calcLoopInformation(Function function) {
         computeDominateTree(function);
