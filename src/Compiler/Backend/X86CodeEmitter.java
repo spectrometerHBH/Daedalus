@@ -8,7 +8,10 @@ import Compiler.IR.Instruction.*;
 import Compiler.IR.Operand.*;
 import org.apache.commons.text.StringEscapeUtils;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.PrintStream;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -180,7 +183,7 @@ public class X86CodeEmitter implements IRVisitor {
             case DIV:
             case MOD: {
                 printInstruction("cdq");
-                printInstruction("idiv rcx");
+                printInstruction("idiv ecx");
                 return;
             }
             case MUL:

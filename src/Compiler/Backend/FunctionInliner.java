@@ -17,8 +17,8 @@ import java.util.Map;
 
 public class FunctionInliner {
     private IRRoot irRoot;
-    private int inlineCalleeInstructionLimit = 100;
-    private int inlineMaxDepth = 2;
+    private int inlineCalleeInstructionLimit = 300;
+    private int inlineMaxDepth = 5;
 
     private Map<Function, Integer> functionInstructionCountMap = new HashMap<>();
     private Map<Function, Integer> functionCalledCountMap = new HashMap<>();
