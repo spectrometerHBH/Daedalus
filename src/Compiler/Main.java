@@ -85,8 +85,8 @@ public class Main {
             optimizer.SSAConstruction();
             if (DEBUG_IR) new IRPrinter(ir_out_afterSSAConstruction).visit(irRoot);
             for (boolean changed = true; changed; ) {
-                changed = optimizer.LoopUnswitching();
-                changed |= optimizer.CommonSubexpressionElimination();
+                //changed = optimizer.LoopUnswitching();
+                changed = optimizer.CommonSubexpressionElimination();
                 changed |= optimizer.ConstantAndCopyPropagation();
                 changed |= optimizer.SimplifyCFG();
                 changed |= optimizer.DeadCodeElimination();
