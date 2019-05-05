@@ -31,7 +31,7 @@ public class Main {
 
         //compile config
         boolean test_ir = false;
-        boolean test_nasm = false;
+        boolean test_nasm = true;
         boolean DEBUG_IR = false;
 
         //for text-ir output
