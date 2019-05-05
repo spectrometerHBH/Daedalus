@@ -10,6 +10,7 @@ public class Optimizer {
     private ConstantAndCopyPropagator constantAndCopyPropagator;
     private InstructionCombiner instructionCombiner;
     private CommonSubexpressionEliminator commonSubexpressionEliminator;
+    private LoopUnswitcher loopUnswitcher;
 
     public Optimizer(IRRoot irRoot) {
         ssaConstructor = new SSAConstructor(irRoot);
@@ -19,22 +20,23 @@ public class Optimizer {
         constantAndCopyPropagator = new ConstantAndCopyPropagator(irRoot);
         instructionCombiner = new InstructionCombiner(irRoot);
         commonSubexpressionEliminator = new CommonSubexpressionEliminator(irRoot);
+        loopUnswitcher = new LoopUnswitcher(irRoot);
     }
 
-    public boolean simplifyCFG() {
+    public boolean SimplifyCFG() {
         return cfgSimplifier.run();
     }
 
-    public boolean simplifyCFG(boolean eliminateOK) {
-        return cfgSimplifier.runMore();
+    public void SimplifyCFG(boolean eliminateOK) {
+        cfgSimplifier.runMore();
     }
 
-    public boolean SSAConstruction() {
-        return ssaConstructor.run();
+    public void SSAConstruction() {
+        ssaConstructor.run();
     }
 
-    public boolean SSADestruction() {
-        return ssaDestructor.run();
+    public void SSADestruction() {
+        ssaDestructor.run();
     }
 
     public boolean DeadCodeElimination() {
@@ -45,11 +47,15 @@ public class Optimizer {
         return constantAndCopyPropagator.run();
     }
 
-    public boolean InstructionCombination() {
-        return instructionCombiner.run();
+    public void InstructionCombination() {
+        instructionCombiner.run();
     }
 
     public boolean CommonSubexpressionElimination() {
         return commonSubexpressionEliminator.run();
+    }
+
+    public boolean LoopUnswitching() {
+        return loopUnswitcher.run();
     }
 }

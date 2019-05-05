@@ -1,5 +1,6 @@
 package Compiler.Optim;
 
+import Compiler.IR.Function;
 import Compiler.IR.IRRoot;
 
 //This pass transforms loops that contain branches on loop-invariant conditions to have multiple loops. For example, it turns the left into the right code:
@@ -16,14 +17,17 @@ import Compiler.IR.IRRoot;
 //LLVM Pass
 //TODO
 
-public class LoopUnswitching extends Pass {
-    public LoopUnswitching(IRRoot irRoot) {
+class LoopUnswitcher extends Pass {
+    LoopUnswitcher(IRRoot irRoot) {
         super(irRoot);
     }
 
     @Override
     boolean run() {
         changed = false;
+        for (Function function : irRoot.getFunctionMap().values()) {
+            calcLoopInformation(function);
+        }
         return changed;
     }
 }

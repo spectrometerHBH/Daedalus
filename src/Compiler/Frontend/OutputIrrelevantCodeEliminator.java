@@ -459,6 +459,9 @@ public class OutputIrrelevantCodeEliminator implements ASTVisitor {
                 updateDefAndUse(node, node.getLhs());
                 node.getRhs().accept(this);
                 updateDefAndUse(node, node.getRhs());
+                if (defs.get(node.getRhs()) != null) {
+                    uses.get(node).addAll(defs.get(node.getLhs()));
+                }
                 if (node.getRhs().getType() instanceof ArrayType) {
                     //Alias of array
                     defs.get(node).addAll(uses.get(node.getRhs()));
@@ -548,13 +551,14 @@ public class OutputIrrelevantCodeEliminator implements ASTVisitor {
     public void visit(IDExprNode node) {
         if (collectMode) {
             init(node);
-            if (node.getSymbol().getScope() == globalScope) {
-                defs.get(node).add(globalVariableNotifier);
-            } else if (isAssign.peek()) {
-                defs.get(node).add((VariableSymbol) node.getSymbol());
-                uses.get(node).add((VariableSymbol) node.getSymbol());
-            } else {
-                uses.get(node).add((VariableSymbol) node.getSymbol());
+            if (node.getSymbol() instanceof VariableSymbol) {
+                if (node.getSymbol().getScope() == globalScope) {
+                    defs.get(node).add(globalVariableNotifier);
+                } else if (isAssign.peek()) {
+                    defs.get(node).add((VariableSymbol) node.getSymbol());
+                } else {
+                    uses.get(node).add((VariableSymbol) node.getSymbol());
+                }
             }
         } else if (solveMode) {
 
@@ -608,10 +612,12 @@ public class OutputIrrelevantCodeEliminator implements ASTVisitor {
     public void visit(UnaryExprNode node) {
         if (collectMode) {
             init(node);
-            isAssign.push(true);
             node.getExpression().accept(this);
-            isAssign.pop();
             updateDefAndUse(node, node.getExpression());
+            if (node.getOp() == UnaryExprNode.Op.PRE_INC || node.getOp() == UnaryExprNode.Op.PRE_DEC
+                    || node.getOp() == UnaryExprNode.Op.SUF_INC || node.getOp() == UnaryExprNode.Op.SUF_DEC) {
+                defs.get(node).addAll(uses.get(node.getExpression()));
+            }
         } else if (solveMode) {
             propagate(node, node.getExpression());
             node.getExpression().accept(this);

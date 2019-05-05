@@ -31,7 +31,7 @@ public class Main {
 
         //compile config
         boolean test_ir = false;
-        boolean test_nasm = true;
+        boolean test_nasm = false;
         boolean DEBUG_IR = false;
 
         //for text-ir output
@@ -81,26 +81,27 @@ public class Main {
 
             //LIR Optimization based on SSA
             Optimizer optimizer = new Optimizer(irRoot);
-            optimizer.simplifyCFG(true);
+            optimizer.SimplifyCFG(true);
             optimizer.SSAConstruction();
             if (DEBUG_IR) new IRPrinter(ir_out_afterSSAConstruction).visit(irRoot);
             for (boolean changed = true; changed; ) {
-                changed = optimizer.CommonSubexpressionElimination();
+                changed = optimizer.LoopUnswitching();
+                changed |= optimizer.CommonSubexpressionElimination();
                 changed |= optimizer.ConstantAndCopyPropagation();
-                changed |= optimizer.simplifyCFG();
+                changed |= optimizer.SimplifyCFG();
                 changed |= optimizer.DeadCodeElimination();
-                changed |= optimizer.simplifyCFG();
+                changed |= optimizer.SimplifyCFG();
             }
             optimizer.InstructionCombination();
             if (DEBUG_IR) new IRPrinter(ir_out_afterOptimization).visit(irRoot);
             optimizer.SSADestruction();
-            optimizer.simplifyCFG(true);
+            optimizer.SimplifyCFG(true);
 
             //Codegen
             new X86ConstraintResolver(irRoot).run();
             if (DEBUG_IR) new IRPrinter(ir_out_afterX86Transform).visit(irRoot);
             new RegisterAllocator(irRoot).run();
-            optimizer.simplifyCFG(true);
+            optimizer.SimplifyCFG(true);
             if (DEBUG_IR) new IRPrinter(ir_codegen_without_color).visit(irRoot);
             if (DEBUG_IR) new IRPrinter(ir_codegen, true).visit(irRoot);
             new X86CodeEmitter(irRoot, nasm).run();

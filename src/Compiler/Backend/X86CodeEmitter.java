@@ -105,17 +105,6 @@ public class X86CodeEmitter implements IRVisitor {
         irRoot.getGlobalVariableList().forEach(globalVariable -> printLabel("global " + getName((GlobalI64Value) globalVariable)));
         irRoot.getStaticStringList().forEach(staticString -> printLabel("global " + getName(staticString.getBase())));
         printLabel("");
-        /*
-        printLabel("extern getchar");
-        printLabel("extern strlen");
-        printLabel("extern scanf");
-        printLabel("extern __stack_chk_fail");
-        printLabel("extern putchar");
-        printLabel("extern puts");
-        printLabel("extern printf");
-        printLabel("extern strcmp");
-        printLabel("extern malloc");
-        printLabel("extern _GLOBAL_OFFSET_TABLE_");*/
         printLabel("extern _IO_getc");
         printLabel("extern stdin");
         printLabel("extern scanf");
