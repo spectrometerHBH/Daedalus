@@ -67,7 +67,7 @@ public class Main {
             new SideEffectSolver(globalScope).visit(ast);
             new OutputIrrelevantCodeEliminator(globalScope).visit(ast);
 
-            //LIR Construction (Explicit CFG with Quad & Explicit Variables without SSA form)
+            //LIR Construction (Explicit CFG with Quad & Explicit Variables without SSA form )
             IRBuilder irBuilder = new IRBuilder(globalScope);
             irBuilder.visit(ast);
             IRRoot irRoot = irBuilder.getIrRoot();
