@@ -1173,35 +1173,40 @@ L_056:
 ALIGN   16
 
 __builtin_string_substring:
+        push    r15
         push    r14
         push    r13
-        mov     r13, rdi
+        movsxd  r13, esi
         push    r12
-        movsxd  r12, esi
         push    rbp
         push    rbx
         mov     ebx, edx
-        sub     ebx, r12d
-        lea     edi, [rbx+9H]
-        movsxd  r14, ebx
+        sub     ebx, r13d
+        mov     r12, rdi
+        lea     edi, [rbx+0AH]
+        lea     r15d, [rbx+1H]
+        sub     rsp, 8
         movsxd  rdi, edi
+        movsxd  r14, r15d
         call    malloc
-        test    ebx, ebx
+        test    r15d, r15d
         mov     rbp, rax
         mov     qword [rax], r14
         jle     L_057
-        lea     edx, [rbx-1H]
+        mov     edx, ebx
         lea     rdi, [rax+8H]
-        lea     rsi, [r13+r12+8H]
+        lea     rsi, [r12+r13+8H]
         add     rdx, 1
         call    memcpy
 L_057:  mov     byte [rbp+r14+8H], 0
+        add     rsp, 8
         mov     rax, rbp
         pop     rbx
         pop     rbp
         pop     r12
         pop     r13
         pop     r14
+        pop     r15
         ret
 
 

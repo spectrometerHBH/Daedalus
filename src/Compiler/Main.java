@@ -31,8 +31,8 @@ public class Main {
 
         //compile config
         boolean test_ir = false;
-        boolean test_nasm = true;
-        boolean DEBUG_IR = false;
+        boolean test_nasm = false;
+        boolean DEBUG_IR = true;
 
         //for text-ir output
         PrintStream ir_out_raw = new PrintStream("ir_raw.ll");
@@ -99,7 +99,7 @@ public class Main {
             //Codegen
             new X86ConstraintResolver(irRoot).run();
             if (DEBUG_IR) new IRPrinter(ir_out_afterX86Transform).visit(irRoot);
-            optimizer.SpillPriorityCalculation();
+            //optimizer.SpillPriorityCalculation();
             new RegisterAllocator(irRoot).run();
             optimizer.SimplifyCFG(true);
             if (DEBUG_IR) new IRPrinter(ir_codegen_without_color).visit(irRoot);
