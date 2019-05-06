@@ -509,7 +509,11 @@ public class RegisterAllocator {
                 spilledNodes.add(n);
             } else {
                 coloredNodes.add(n);
-                n.color = okColors.iterator().next();
+                //select callee saved first
+                PhysicalRegister color1 = okColors.iterator().next(), color2 = null;
+                okColors.retainAll(calleeSaveRegisters);
+                if (!okColors.isEmpty()) color2 = okColors.iterator().next();
+                n.color = color2 != null ? color2 : color1;
             }
         }
         for (VirtualRegister n : coalescedNodes)
