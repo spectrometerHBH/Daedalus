@@ -73,7 +73,7 @@ public class RegisterAllocator {
     }
 
     private void dumpNode(VirtualRegister virtualRegister) {
-        debug_out.print(irPrinter.getName(virtualRegister) + " ");
+        debug_out.print(irPrinter.getName(virtualRegister) + "(" + virtualRegister.spillPriority + ") ");
     }
 
     private void dumpDebugInfo(Function function) {
@@ -89,6 +89,8 @@ public class RegisterAllocator {
                 debug_out.print("Alias :" + irPrinter.getName(u.alias));
                 debug_out.println();
                 debug_out.print("Color : " + (u.color == null ? "null" : irPrinter.getName(u.color)));
+                debug_out.println();
+                debug_out.print("Priority : " + u.spillPriority);
                 debug_out.println();
                 debug_out.println("------");
             });
@@ -478,8 +480,17 @@ public class RegisterAllocator {
 
     private void selectSpill() {
         Iterator<VirtualRegister> iterator = spillWorklist.iterator();
-        VirtualRegister m = iterator.next(), now;
+        //Heuristic
+        VirtualRegister m = iterator.next();
         for (; m.addForSpill && iterator.hasNext(); m = iterator.next()) ;
+
+        iterator = spillWorklist.iterator();
+        for (VirtualRegister now; iterator.hasNext(); ) {
+            now = iterator.next();
+            if (!now.addForSpill && now.spillPriority < m.spillPriority)
+                m = now;
+        }
+
         spillWorklist.remove(m);
         simplifyWorklist.add(m);
         freezeMoves(m);
@@ -489,7 +500,6 @@ public class RegisterAllocator {
         while (!selectStack.isEmpty()) {
             VirtualRegister n = selectStack.pop();
             selectStackNodes.remove(n);
-            //if (n.degree == 0) continue;
             Set<PhysicalRegister> okColors = new HashSet<>(colors);
             for (VirtualRegister w : n.adjList)
                 if (coloredNodes.contains(getAlias(w)) || precolored.contains(getAlias(w))) {

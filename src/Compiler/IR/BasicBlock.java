@@ -13,6 +13,7 @@ public class BasicBlock {
     public int postOrderNumber;
     public Set<BasicBlock> DF;
     public Set<BasicBlock> DTSuccessors;
+    public Set<BasicBlock> DTAllSuccessors;
 
     private Function currentFunction;
     private String name;

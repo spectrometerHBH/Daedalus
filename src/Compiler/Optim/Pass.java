@@ -63,6 +63,13 @@ public abstract class Pass {
     //Dominator Tree Construction
     //This pass is a simple dominator construction algorithm for finding forward dominators.
     //LLVM Pass
+    private void computeDominateTreeAllSuccessors(BasicBlock basicBlock) {
+        basicBlock.DTAllSuccessors = new HashSet<>();
+        basicBlock.DTAllSuccessors.add(basicBlock);
+        basicBlock.DTSuccessors.forEach(this::computeDominateTreeAllSuccessors);
+        basicBlock.DTSuccessors.forEach(successor -> basicBlock.DTAllSuccessors.addAll(successor.DTAllSuccessors));
+    }
+
     void computeDominateTree(Function function) {
         List<BasicBlock> RPO = function.getReversePostOrderDFSBBList();
         List<BasicBlock> basicBlockList = RPO.subList(1, RPO.size());
@@ -88,6 +95,7 @@ public abstract class Pass {
         }
         RPO.forEach(basicBlock -> basicBlock.DTSuccessors = new HashSet<>());
         basicBlockList.forEach(basicBlock -> basicBlock.IDOM.DTSuccessors.add(basicBlock));
+        computeDominateTreeAllSuccessors(function.getEntryBlock());
     }
 
     private BasicBlock intersect(BasicBlock basicBlock1, BasicBlock basicBlock2) {
@@ -132,7 +140,7 @@ public abstract class Pass {
         loopGroups = new HashMap<>();
         for (BasicBlock basicBlock : function.getReversePostOrderDFSBBList()) {
             for (BasicBlock successor : basicBlock.getSuccessors()) {
-                if (successor.DTSuccessors.contains(basicBlock)) {
+                if (successor.DTAllSuccessors.contains(basicBlock)) {
                     loopHeaders.add(successor);
                     loopBackers.computeIfAbsent(successor, k -> new HashSet<>());
                     loopBackers.get(successor).add(basicBlock);

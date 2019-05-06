@@ -21,9 +21,10 @@ class SpillInstructor extends Pass {
 
     private void markSpillPriority(Function function) {
         function.getReversePostOrderDFSBBList().forEach(basicBlock -> {
-            int loopLevel = belongingLoopHeaders.get(basicBlock).size();
+            int loopLevel = belongingLoopHeaders.get(basicBlock) == null ? 0 : belongingLoopHeaders.get(basicBlock).size();
             int loopContribution = (int) Math.pow(10, loopLevel);
             for (IRInstruction irInstruction = basicBlock.head; irInstruction != null; irInstruction = irInstruction.getNextInstruction()) {
+                irInstruction.calcUseAndDef();
                 for (VirtualRegister def : irInstruction.getDef())
                     def.spillPriority += loopContribution;
                 for (VirtualRegister use : irInstruction.getUse())

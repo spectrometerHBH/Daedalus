@@ -22,6 +22,7 @@ public class Optimizer {
         instructionCombiner = new InstructionCombiner(irRoot);
         commonSubexpressionEliminator = new CommonSubexpressionEliminator(irRoot);
         loopUnswitcher = new LoopUnswitcher(irRoot);
+        spillInstructor = new SpillInstructor(irRoot);
     }
 
     public boolean SimplifyCFG() {
