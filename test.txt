@@ -1,11 +1,46 @@
-int a(int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9, int a10, int a11, int a12, int a13, int a14, int a15)
-{
-    return a1 + a2 + a3 + a4 + a5 + a6 + a7 + a8 + a9 + a10 + a11 + a12 + a13 + a14 + a15;
+int[][] a = new int[4][];
+int i;
+int j;
+
+class rec {
+    int num;
+    int c;
 }
 
-int main()
-{
-    println(toString(a(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15)));
+rec[] b = new rec[5];
+
+int printNum(int num) {
+    println(toString(num));
+}
+int main() {
+    for (i = 0; i < 4; i++) {
+        a[i] = new int[11];
+    }
+
+
+    for (i = 0; i < 4; i ++) {
+        for (j = 0; j < 10; j ++)
+            a[i][j] = 888;
+    }
+    for (i = 0; i < 5; i ++) {
+	b[i] = new rec;
+        b[i].num = -1;
+    }
+
+    printNum(a[3][9]);
+    for (i = 0; i <= 3; i ++)
+        for (j = 0; j <= 9; j ++)
+            a[i][j] = i * 10 + j;
+
+    for (i = 0; i <= 3; i ++)
+        for (j = 0; j <= 9; j ++)
+            printNum(a[i][j]);
+    a[2][10]=0;
+    printNum(a[2][10]);
+    b[0].num = -2;
+    b[a[2][10]].num = -10;
+    printNum(b[0].num);
+    printNum(b[1].num);
     return 0;
 }
 
