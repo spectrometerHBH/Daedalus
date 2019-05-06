@@ -15,8 +15,7 @@ import java.io.PrintStream;
 import java.util.HashMap;
 import java.util.Map;
 
-import static Compiler.IR.Operand.PhysicalRegister.rbp;
-import static Compiler.IR.Operand.PhysicalRegister.rsp;
+import static Compiler.IR.Operand.PhysicalRegister.*;
 
 //Instruction Format Changed:
 //unary
@@ -49,16 +48,26 @@ public class X86CodeEmitter implements IRVisitor {
         BasicBlock entryBB = function.getEntryBlock();
         BasicBlock exitBB = function.getExitBlock();
         int stackFrameSize = (Math.max(function.argumentLimit - 6, 0) + function.temporaryCnt) * 8;
-        if (stackFrameSize % 16 != 0) stackFrameSize += 8;
+        if (stackFrameSize % 16 == 0) stackFrameSize += 8;
 
         if (stackFrameSize != 0)
             entryBB.head.prependInstruction(new Binary(entryBB, Binary.Op.SUB, rsp, new Immediate(stackFrameSize), rsp));
         entryBB.head.prependInstruction(new Move(entryBB, rsp, rbp));
         entryBB.head.prependInstruction(new Push(entryBB, rbp));
+        entryBB.head.prependInstruction(new Push(entryBB, rbx));
+        entryBB.head.prependInstruction(new Push(entryBB, r12));
+        entryBB.head.prependInstruction(new Push(entryBB, r13));
+        entryBB.head.prependInstruction(new Push(entryBB, r14));
+        entryBB.head.prependInstruction(new Push(entryBB, r15));
 
         if (stackFrameSize != 0)
             exitBB.tail.prependInstruction(new Binary(exitBB, Binary.Op.ADD, rsp, new Immediate(stackFrameSize), rsp));
         exitBB.tail.prependInstruction(new Pop(exitBB, rbp));
+        exitBB.tail.prependInstruction(new Pop(exitBB, rbx));
+        exitBB.tail.prependInstruction(new Pop(exitBB, r12));
+        exitBB.tail.prependInstruction(new Pop(exitBB, r13));
+        exitBB.tail.prependInstruction(new Pop(exitBB, r14));
+        exitBB.tail.prependInstruction(new Pop(exitBB, r15));
     }
 
     private void printLabel(String msg) {
@@ -377,7 +386,9 @@ public class X86CodeEmitter implements IRVisitor {
 
     @Override
     public void visit(Pop inst) {
-        printInstruction("pop rbp");
+        out.print(indent + "pop ");
+        inst.getDst().accept(this);
+        out.println();
     }
 
     @Override

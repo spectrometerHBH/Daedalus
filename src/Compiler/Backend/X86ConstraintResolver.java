@@ -5,7 +5,9 @@ import Compiler.IR.IRRoot;
 import Compiler.IR.Instruction.*;
 import Compiler.IR.Operand.*;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.Map;
 
 import static Compiler.IR.Operand.PhysicalRegister.*;
 
@@ -13,6 +15,7 @@ public class X86ConstraintResolver {
     private IRRoot irRoot;
     private LinkedList<Register> parameterList = new LinkedList<>();
     private Map<VirtualRegister, VirtualRegister> calleeSaveVRTemporaryMap = new HashMap<>();
+
     public X86ConstraintResolver(IRRoot irRoot) {
         this.irRoot = irRoot;
     }
@@ -157,7 +160,7 @@ public class X86ConstraintResolver {
         });
 
         //make temporaries for calleeSaveVRs
-
+        /*
         List<VirtualRegister> calleeList = new ArrayList<>(calleeSaveVRegisters);
         for (int i = 0; i < calleeSaveVRegisters.size(); i++) {
             VirtualRegister virtualRegister = calleeList.get(i);
@@ -172,6 +175,6 @@ public class X86ConstraintResolver {
             if (virtualRegister != vrbp && virtualRegister != vrsp) {
                 function.getExitBlock().tail.prependInstruction(new Move(function.getExitBlock(), calleeSaveVRTemporaryMap.get(virtualRegister), virtualRegister));
             }
-        }
+        }*/
     }
 }

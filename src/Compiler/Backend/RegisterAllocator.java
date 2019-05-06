@@ -279,11 +279,11 @@ public class RegisterAllocator {
         });
         function.getReversePostOrderDFSBBList().forEach(basicBlock -> {
             Set<VirtualRegister> live = new HashSet<>(basicBlock.getLiveOut());
-            if (basicBlock == function.getExitBlock()) {
+            /*if (basicBlock == function.getExitBlock()) {
                 live.addAll(calleeSaveVRegisters);
                 live.remove(vrbp);
                 live.remove(vrsp);
-            }
+            }*/
             for (IRInstruction irInstruction = basicBlock.tail; irInstruction != null; irInstruction = irInstruction.getLastInstruction()) {
                 if (irInstruction instanceof Move && ((Move) irInstruction).getDst() instanceof VirtualRegister && !(((Move) irInstruction).getSrc() instanceof PhysicalRegister)) {
                     //Dead Move Elimination
