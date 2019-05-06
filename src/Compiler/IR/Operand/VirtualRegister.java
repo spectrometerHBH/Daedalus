@@ -20,6 +20,7 @@ public abstract class VirtualRegister extends Register {
     public Set<Move> moveList = new HashSet<>();
     public VirtualRegister alias;
     public boolean addForSpill = false;
+    public int spillPriority = 0;
 
     public VirtualRegister() {
     }

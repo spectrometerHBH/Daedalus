@@ -11,6 +11,7 @@ public class Optimizer {
     private InstructionCombiner instructionCombiner;
     private CommonSubexpressionEliminator commonSubexpressionEliminator;
     private LoopUnswitcher loopUnswitcher;
+    private SpillInstructor spillInstructor;
 
     public Optimizer(IRRoot irRoot) {
         ssaConstructor = new SSAConstructor(irRoot);
@@ -57,5 +58,9 @@ public class Optimizer {
 
     public boolean LoopUnswitching() {
         return loopUnswitcher.run();
+    }
+
+    public void SpillPriorityCalculation() {
+        spillInstructor.run();
     }
 }

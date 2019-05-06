@@ -80,9 +80,11 @@ public class GlobalVariableResolver {
         });
 
         irRoot.getFunctionMap().forEach((name, function) -> {
-            Return ret = function.getReturnInstList().get(0);
-            for (GlobalVariable globalVariable : function.functionInfo.defGlobalVariable) {
-                ret.prependInstruction(new Store(ret.getCurrentBB(), function.functionInfo.globalTemporal.get(globalVariable), (GlobalI64Value) globalVariable, true));
+            if (function != irRoot.getFunctionMap().get("__init")) {
+                Return ret = function.getReturnInstList().get(0);
+                for (GlobalVariable globalVariable : function.functionInfo.defGlobalVariable) {
+                    ret.prependInstruction(new Store(ret.getCurrentBB(), function.functionInfo.globalTemporal.get(globalVariable), (GlobalI64Value) globalVariable, true));
+                }
             }
         });
     }

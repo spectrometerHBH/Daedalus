@@ -100,6 +100,7 @@ public class Main {
             //Codegen
             new X86ConstraintResolver(irRoot).run();
             if (DEBUG_IR) new IRPrinter(ir_out_afterX86Transform).visit(irRoot);
+            //optimizer.SpillPriorityCalculation();
             new RegisterAllocator(irRoot).run();
             optimizer.SimplifyCFG(true);
             if (DEBUG_IR) new IRPrinter(ir_codegen_without_color).visit(irRoot);

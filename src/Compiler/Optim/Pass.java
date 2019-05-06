@@ -128,6 +128,8 @@ public abstract class Pass {
         //mark loop headers and record loop backers
         loopHeaders = new HashSet<>();
         loopBackers = new HashMap<>();
+        belongingLoopHeaders = new HashMap<>();
+        loopGroups = new HashMap<>();
         for (BasicBlock basicBlock : function.getReversePostOrderDFSBBList()) {
             for (BasicBlock successor : basicBlock.getSuccessors()) {
                 if (successor.DTSuccessors.contains(basicBlock)) {
@@ -141,7 +143,22 @@ public abstract class Pass {
         Stack<BasicBlock> workList = new Stack<>();
         for (BasicBlock loopHeader : loopHeaders) {
             workList.clear();
-
+            loopGroups.put(loopHeader, new HashSet<>());
+            loopGroups.get(loopHeader).add(loopHeader);
+            for (BasicBlock backer : loopBackers.get(loopHeader)) {
+                workList.add(backer);
+                loopGroups.get(loopHeader).add(backer);
+                for (; !workList.isEmpty(); ) {
+                    BasicBlock nowBlock = workList.pop();
+                    for (BasicBlock predecessor : nowBlock.getPredecessors())
+                        if (!loopGroups.get(loopHeader).contains(predecessor)) {
+                            loopGroups.get(loopHeader).add(predecessor);
+                            workList.add(predecessor);
+                            belongingLoopHeaders.computeIfAbsent(predecessor, k -> new HashSet<>());
+                            belongingLoopHeaders.get(predecessor).add(loopHeader);
+                        }
+                }
+            }
         }
     }
 }
