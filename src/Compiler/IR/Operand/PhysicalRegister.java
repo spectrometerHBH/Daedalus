@@ -7,22 +7,22 @@ import java.util.LinkedList;
 import java.util.Set;
 
 public class PhysicalRegister extends Register {
-    public static final PhysicalRegister rax = new PhysicalRegister("rax", true);
-    public static final PhysicalRegister rcx = new PhysicalRegister("rcx", true);
-    public static final PhysicalRegister rdx = new PhysicalRegister("rdx", true);
-    public static final PhysicalRegister rbx = new PhysicalRegister("rbx", false);
-    public static final PhysicalRegister rsi = new PhysicalRegister("rsi", true);
-    public static final PhysicalRegister rdi = new PhysicalRegister("rdi", true);
-    public static final PhysicalRegister rsp = new PhysicalRegister("rsp", true);
-    public static final PhysicalRegister rbp = new PhysicalRegister("rbp", false);
-    public static final PhysicalRegister r8 = new PhysicalRegister("r8", true);
-    public static final PhysicalRegister r9 = new PhysicalRegister("r9", true);
-    public static final PhysicalRegister r10 = new PhysicalRegister("r10", true);
-    public static final PhysicalRegister r11 = new PhysicalRegister("r11", true);
-    public static final PhysicalRegister r12 = new PhysicalRegister("r12", false);
-    public static final PhysicalRegister r13 = new PhysicalRegister("r13", false);
-    public static final PhysicalRegister r14 = new PhysicalRegister("r14", false);
-    public static final PhysicalRegister r15 = new PhysicalRegister("r15", false);
+    public static final PhysicalRegister rax = new PhysicalRegister("rax", "al", true);
+    public static final PhysicalRegister rcx = new PhysicalRegister("rcx", "cl", true);
+    public static final PhysicalRegister rdx = new PhysicalRegister("rdx", "dl", true);
+    public static final PhysicalRegister rbx = new PhysicalRegister("rbx", "bl", false);
+    public static final PhysicalRegister rsi = new PhysicalRegister("rsi", "sil", true);
+    public static final PhysicalRegister rdi = new PhysicalRegister("rdi", "dil", true);
+    public static final PhysicalRegister rsp = new PhysicalRegister("rsp", "spl", true);
+    public static final PhysicalRegister rbp = new PhysicalRegister("rbp", "bpl", false);
+    public static final PhysicalRegister r8 = new PhysicalRegister("r8", "r8b", true);
+    public static final PhysicalRegister r9 = new PhysicalRegister("r9", "r9b", true);
+    public static final PhysicalRegister r10 = new PhysicalRegister("r10", "r10b", true);
+    public static final PhysicalRegister r11 = new PhysicalRegister("r11", "r11b", true);
+    public static final PhysicalRegister r12 = new PhysicalRegister("r12", "r12b", false);
+    public static final PhysicalRegister r13 = new PhysicalRegister("r13", "r13b", false);
+    public static final PhysicalRegister r14 = new PhysicalRegister("r14", "r14b", false);
+    public static final PhysicalRegister r15 = new PhysicalRegister("r15", "r15b", false);
 
     public static final Set<PhysicalRegister> callerSaveRegisters = new HashSet<>();
     public static final Set<PhysicalRegister> calleeSaveRegisters = new HashSet<>();
@@ -90,9 +90,11 @@ public class PhysicalRegister extends Register {
 
     boolean isCallerSave;
     boolean isCalleeSave;
+    public String lowByteName;
 
-    private PhysicalRegister(String name, boolean callerSave) {
+    private PhysicalRegister(String name, String lowByteName, boolean callerSave) {
         super(name);
+        this.lowByteName = lowByteName;
         this.isCallerSave = callerSave;
         this.isCalleeSave = !callerSave;
     }
@@ -108,5 +110,9 @@ public class PhysicalRegister extends Register {
 
     public boolean isCallerSave() {
         return isCallerSave;
+    }
+
+    public String getLowByteName() {
+        return lowByteName;
     }
 }

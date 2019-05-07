@@ -15,6 +15,9 @@ public class Cmp extends IRInstruction {
     private Operand src2;
     private Operand dst;
 
+    //for CSE use
+    public Operand previousResult = null;
+
     public Cmp(BasicBlock currentBB, Op op, Operand src1, Operand src2, Operand dst) {
         super(currentBB);
         this.op = op;
@@ -103,6 +106,7 @@ public class Cmp extends IRInstruction {
         def.clear();
         if (src1 instanceof VirtualRegister && !(src1 instanceof GlobalVariable)) use.add((VirtualRegister) src1);
         if (src2 instanceof VirtualRegister && !(src2 instanceof GlobalVariable)) use.add((VirtualRegister) src2);
+        if (dst instanceof VirtualRegister && !(dst instanceof GlobalVariable)) def.add((VirtualRegister) dst);
     }
 
     @Override
@@ -113,7 +117,36 @@ public class Cmp extends IRInstruction {
 
     @Override
     public void replaceDef(VirtualRegister oldVR, VirtualRegister newVR) {
+        if (dst == oldVR) dst = newVR;
+    }
 
+    public boolean isCommutative() {
+        return op == Op.NEQ || op == Op.EQ;
+    }
+
+    public Cmp inverseInstruction() {
+        Cmp.Op newOp = null;
+        switch (this.op) {
+            case LT:
+                newOp = Op.GT;
+                break;
+            case LEQ:
+                newOp = Op.GEQ;
+                break;
+            case EQ:
+                newOp = Op.EQ;
+                break;
+            case GT:
+                newOp = Op.LT;
+                break;
+            case GEQ:
+                newOp = Op.LEQ;
+                break;
+            case NEQ:
+                newOp = Op.NEQ;
+                break;
+        }
+        return new Cmp(currentBB, newOp, src2, src1, dst);
     }
 
     public enum Op {

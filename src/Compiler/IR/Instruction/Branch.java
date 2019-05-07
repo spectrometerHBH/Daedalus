@@ -99,11 +99,20 @@ public class Branch extends IRInstruction {
     public void calcUseAndDef() {
         use.clear();
         def.clear();
+        if (defOfCond != null) {
+            defOfCond.calcUseAndDef();
+            use.addAll(defOfCond.use);
+        } else {
+            if (cond instanceof VirtualRegister && !(cond instanceof GlobalVariable)) use.add((VirtualRegister) cond);
+        }
     }
 
     @Override
     public void replaceUse(VirtualRegister oldVR, VirtualRegister newVR) {
-
+        if (defOfCond != null) defOfCond.replaceUse(oldVR, newVR);
+        else {
+            if (cond == oldVR) cond = newVR;
+        }
     }
 
     @Override

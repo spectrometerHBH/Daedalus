@@ -20,13 +20,14 @@ class InstructionCombiner extends Pass {
 
     @Override
     boolean run() {
+        irRoot.getFunctionMap().values().forEach(this::adjustCmpOperands);
         irRoot.getFunctionMap().values().forEach(function -> {
             calcDefUseChain(function);
             //generate Lea for single-used temporary if possible
             generateLea(function);
             //merge address calculation for single-used temporary into Load/Store
             mergeAddrCalcWithLoadAndStore(function);
-            //merge cmp with branch for code generation
+            //merge cmp with single-used compare
             mergeCmpWithBranch(function);
         });
         return true;
@@ -137,22 +138,32 @@ class InstructionCombiner extends Pass {
         });
     }
 
+    private void adjustCmpOperands(Function function) {
+        function.getReversePostOrderDFSBBList().forEach(basicBlock -> {
+            for (IRInstruction irInstruction = basicBlock.head; irInstruction != null; irInstruction = irInstruction.getNextInstruction())
+                if (irInstruction instanceof Cmp) {
+                    if (((Cmp) irInstruction).getSrc1() instanceof Immediate) {
+                        irInstruction.replaceInstruction(((Cmp) irInstruction).inverseInstruction());
+                    }
+                }
+        });
+    }
     private void mergeCmpWithBranch(Function function) {
         function.getReversePostOrderDFSBBList().forEach(basicBlock -> {
             if (basicBlock.tail instanceof Branch) {
                 if (((Branch) basicBlock.tail).getCond() instanceof VirtualRegister) {
                     VirtualRegister cond = (VirtualRegister) ((Branch) basicBlock.tail).getCond();
-                    if (def.get(cond) instanceof Cmp) {
+                    if (def.get(cond) instanceof Cmp && use.get(cond).size() == 1) {
+                        //combine single-used cond
                         Cmp defOfCond = (Cmp) def.get(cond);
+                        defOfCond.removeSelf();
                         defOfCond.setDefRegister(null);
+                        ((Branch) basicBlock.tail).setCond(null);
                         ((Branch) basicBlock.tail).defOfCond = defOfCond;
-                        ((Branch) basicBlock.tail).setCond(null);
                     } else {
-                        IRInstruction defOfCond = def.get(cond);
                         Cmp newCmp = new Cmp(basicBlock, Cmp.Op.EQ, cond, new Immediate(1), null);
-                        basicBlock.tail.prependInstruction(newCmp);
-                        ((Branch) basicBlock.tail).defOfCond = newCmp;
                         ((Branch) basicBlock.tail).setCond(null);
+                        ((Branch) basicBlock.tail).defOfCond = newCmp;
                     }
                 }
             }

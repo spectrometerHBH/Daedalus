@@ -64,7 +64,7 @@ public class Main {
             new SemanticChecker(globalScope).visit(ast);
 
             //HIR optimization
-            new boolExpressionTransformer(globalScope).visit(ast);
+            new boolExpressionTransformer().visit(ast);
             new SideEffectSolver(globalScope).visit(ast);
             new OutputIrrelevantCodeEliminator(globalScope).visit(ast);
 

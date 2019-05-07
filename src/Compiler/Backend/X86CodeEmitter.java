@@ -26,7 +26,7 @@ public class X86CodeEmitter implements IRVisitor {
     private PrintStream out;
     private String indent = "        ";
     private boolean inLea = false;
-    private boolean swapCmp = false;
+    private boolean lowByte = false;
     private Map<Storage, String> storageStringMap = new HashMap<>();
     private Map<BasicBlock, String> basicBlockStringMap = new HashMap<>();
     private Map<String, Integer> nameCountMap = new HashMap<>();
@@ -230,44 +230,40 @@ public class X86CodeEmitter implements IRVisitor {
 
     @Override
     public void visit(Branch inst) {
-        String op = null, contrastOp = null, inverseOp = null, contrastInverseOp = null;
+        inst.defOfCond.accept(this);
+        String op = null, contrastOp = null;
         switch (inst.defOfCond.getOp()) {
             case LT:
-                op = "jl"; contrastOp = "jge"; inverseOp = "jg"; contrastInverseOp = "jle";
+                op = "jl";
+                contrastOp = "jge";
                 break;
             case LEQ:
-                op = "jle"; contrastOp = "jg"; inverseOp = "jge"; contrastInverseOp = "jl";
+                op = "jle";
+                contrastOp = "jg";
                 break;
             case EQ:
-                op = "je"; contrastOp = "jne"; inverseOp = "je"; contrastInverseOp = "jne";
+                op = "je";
+                contrastOp = "jne";
                 break;
             case GEQ:
-                op = "jge"; contrastOp = "jl"; inverseOp = "jle"; contrastInverseOp = "jg";
+                op = "jge";
+                contrastOp = "jl";
                 break;
             case GT:
-                op = "jg"; contrastOp = "jle"; inverseOp = "jl"; contrastInverseOp = "jge";
+                op = "jg";
+                contrastOp = "jle";
                 break;
             case NEQ:
-                op = "jne"; contrastOp = "je"; inverseOp = "jne"; contrastInverseOp = "je";
+                op = "jne";
+                contrastOp = "je";
                 break;
         }
-        if (swapCmp) {
-            swapCmp = false;
-            if (inst.getThenBB().postOrderNumber == inst.getCurrentBB().postOrderNumber - 1) {
-                out.print(indent + contrastInverseOp);
-                out.println(" " + getLabel(inst.getElseBB()));
-            } else {
-                out.print(indent + inverseOp);
-                out.println(" " + getLabel(inst.getThenBB()));
-            }
+        if (inst.getThenBB().postOrderNumber == inst.getCurrentBB().postOrderNumber - 1) {
+            out.print(indent + contrastOp);
+            out.println(" " + getLabel(inst.getElseBB()));
         } else {
-            if (inst.getThenBB().postOrderNumber == inst.getCurrentBB().postOrderNumber - 1) {
-                out.print(indent + contrastOp);
-                out.println(" " + getLabel(inst.getElseBB()));
-            } else {
-                out.print(indent + op);
-                out.println(" " + getLabel(inst.getThenBB()));
-            }
+            out.print(indent + op);
+            out.println(" " + getLabel(inst.getThenBB()));
         }
     }
 
@@ -280,16 +276,54 @@ public class X86CodeEmitter implements IRVisitor {
     @Override
     public void visit(Cmp inst) {
         out.print(indent + "cmp ");
-        if (inst.getSrc1() instanceof Immediate) {
-            swapCmp = true;
-            inst.getSrc2().accept(this);
-            out.print(", ");
-            inst.getSrc1().accept(this);
+        inst.getSrc1().accept(this);
+        out.print(", ");
+        inst.getSrc2().accept(this);
+        out.println();
+        if (inst.getDst() != null) {
+            String setOp = null, setInverseOp = null;
+            switch (inst.getOp()) {
+                case NEQ:
+                    setOp = "setne";
+                    setInverseOp = "setne";
+                    break;
+                case GEQ:
+                    setOp = "setge";
+                    setInverseOp = "setle";
+                    break;
+                case GT:
+                    setOp = "setg";
+                    setInverseOp = "setl";
+                    break;
+                case EQ:
+                    setOp = "sete";
+                    setInverseOp = "sete";
+                    break;
+                case LEQ:
+                    setOp = "setle";
+                    setInverseOp = "setge";
+                    break;
+                case LT:
+                    setOp = "setl";
+                    setInverseOp = "setg";
+                    break;
+            }
+            if (inst.getSrc1() instanceof Immediate) {
+                out.print(indent + setInverseOp);
+            } else {
+                out.print(indent + setOp);
+            }
+            out.print(" ");
+            lowByte = true;
+            inst.getDst().accept(this);
+            lowByte = false;
             out.println();
-        } else {
-            inst.getSrc1().accept(this);
+            out.print(indent + "movzx ");
+            inst.getDst().accept(this);
             out.print(", ");
-            inst.getSrc2().accept(this);
+            lowByte = true;
+            inst.getDst().accept(this);
+            lowByte = false;
             out.println();
         }
     }
@@ -429,7 +463,8 @@ public class X86CodeEmitter implements IRVisitor {
 
     public String getName(Storage storage) {
         if (storage instanceof VirtualRegister) {
-            if (!(storage instanceof GlobalVariable)) return ((VirtualRegister) storage).color.getName();
+            if (!(storage instanceof GlobalVariable))
+                return lowByte ? ((VirtualRegister) storage).color.getLowByteName() : ((VirtualRegister) storage).color.getName();
             else {
                 String name = storageStringMap.get(storage);
                 name = name != null ? name : createName(storage, storage.getName() == null ? "t" : storage.getName());

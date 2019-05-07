@@ -2,6 +2,7 @@ package Compiler.Backend;
 
 import Compiler.AST.*;
 import Compiler.Configuration;
+import Compiler.Frontend.boolExpressionTransformer;
 import Compiler.IR.BasicBlock;
 import Compiler.IR.Function;
 import Compiler.IR.IRRoot;
@@ -694,7 +695,7 @@ public class IRBuilder implements ASTVisitor {
 
     //lhs(Register/Memory) = rhsExpr(Register/Memory/Immediate)
     private void assign(Operand lhs, ExprNode rhsExpr) {
-        if (rhsExpr.isBoolean()) {
+        if (rhsExpr.isBoolean() && !boolExpressionTransformer.trivialNodeMap.get(rhsExpr)) {
             BasicBlock thenBB = new BasicBlock(currentFunction, "thenBB");
             BasicBlock elseBB = new BasicBlock(currentFunction, "elseBB");
             BasicBlock mergeBB = new BasicBlock(currentFunction, "mergeBB");

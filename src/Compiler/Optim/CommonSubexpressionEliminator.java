@@ -3,6 +3,7 @@ package Compiler.Optim;
 import Compiler.IR.BasicBlock;
 import Compiler.IR.IRRoot;
 import Compiler.IR.Instruction.Binary;
+import Compiler.IR.Instruction.Cmp;
 import Compiler.IR.Instruction.IRInstruction;
 import Compiler.IR.Instruction.Move;
 import Compiler.IR.Operand.Immediate;
@@ -16,7 +17,7 @@ import java.util.Set;
 
 class CommonSubexpressionEliminator extends Pass {
     private Set<BasicBlock> visit = new HashSet<>();
-    private HashMap<BinaryHash, Operand> binaryHashMap = new HashMap<>();
+    private HashMap<BinaryCmpHash, Operand> binaryHashMap = new HashMap<>();
 
     CommonSubexpressionEliminator(IRRoot irRoot) {
         super(irRoot);
@@ -41,18 +42,33 @@ class CommonSubexpressionEliminator extends Pass {
         visit.add(basicBlock);
         for (IRInstruction irInstruction = basicBlock.head; irInstruction != null; irInstruction = irInstruction.getNextInstruction())
             if (irInstruction instanceof Binary) {
-                BinaryHash binaryHash = new BinaryHash((Binary) irInstruction);
-                Operand dst = binaryHashMap.get(binaryHash);
+                BinaryCmpHash binaryCmpHash = new BinaryCmpHash((Binary) irInstruction);
+                Operand dst = binaryHashMap.get(binaryCmpHash);
                 if (dst != null) {
                     changed = true;
                     ((Binary) irInstruction).previousResult = dst;
                     irInstruction.replaceInstruction(new Move(basicBlock, dst, ((Binary) irInstruction).getDst()));
                 } else {
                     ((Binary) irInstruction).previousResult = null;
-                    binaryHashMap.put(binaryHash, ((Binary) irInstruction).getDst());
+                    binaryHashMap.put(binaryCmpHash, ((Binary) irInstruction).getDst());
                     if (((Binary) irInstruction).isCommutative()) {
-                        BinaryHash binaryHashComm = new BinaryHash((Binary) irInstruction);
-                        binaryHashMap.put(binaryHashComm, ((Binary) irInstruction).getDst());
+                        BinaryCmpHash binaryCmpHashComm = new BinaryCmpHash((Binary) irInstruction);
+                        binaryHashMap.put(binaryCmpHashComm, ((Binary) irInstruction).getDst());
+                    }
+                }
+            } else if (irInstruction instanceof Cmp) {
+                BinaryCmpHash binaryCmpHash = new BinaryCmpHash((Cmp) irInstruction);
+                Operand dst = binaryHashMap.get(binaryCmpHash);
+                if (dst != null) {
+                    changed = true;
+                    ((Cmp) irInstruction).previousResult = dst;
+                    irInstruction.replaceInstruction(new Move(basicBlock, dst, ((Cmp) irInstruction).getDst()));
+                } else {
+                    ((Cmp) irInstruction).previousResult = null;
+                    binaryHashMap.put(binaryCmpHash, ((Cmp) irInstruction).getDst());
+                    if (((Cmp) irInstruction).isCommutative()) {
+                        BinaryCmpHash binaryCmpHashComm = new BinaryCmpHash((Cmp) irInstruction);
+                        binaryHashMap.put(binaryCmpHashComm, ((Cmp) irInstruction).getDst());
                     }
                 }
             }
@@ -62,19 +78,32 @@ class CommonSubexpressionEliminator extends Pass {
         });
         for (IRInstruction irInstruction = basicBlock.head; irInstruction != null; irInstruction = irInstruction.getNextInstruction())
             if (irInstruction instanceof Binary && ((Binary) irInstruction).previousResult == null) {
-                BinaryHash binaryHash = new BinaryHash((Binary) irInstruction);
-                binaryHashMap.remove(binaryHash);
+                BinaryCmpHash binaryCmpHash = new BinaryCmpHash((Binary) irInstruction);
+                binaryHashMap.remove(binaryCmpHash);
                 if (((Binary) irInstruction).isCommutative()) {
-                    BinaryHash binaryHashComm = new BinaryHash((Binary) irInstruction);
-                    binaryHashMap.remove(binaryHashComm);
+                    BinaryCmpHash binaryCmpHashComm = new BinaryCmpHash((Binary) irInstruction);
+                    binaryHashMap.remove(binaryCmpHashComm);
+                }
+            } else if (irInstruction instanceof Cmp && ((Cmp) irInstruction).previousResult == null) {
+                BinaryCmpHash binaryCmpHash = new BinaryCmpHash((Cmp) irInstruction);
+                binaryHashMap.remove(binaryCmpHash);
+                if (((Cmp) irInstruction).isCommutative()) {
+                    BinaryCmpHash binaryCmpHashComm = new BinaryCmpHash((Cmp) irInstruction);
+                    binaryHashMap.remove(binaryCmpHashComm);
                 }
             }
     }
 
-    static class BinaryHash {
+    static class BinaryCmpHash {
         String op, src1, src2;
 
-        BinaryHash(Binary inst) {
+        BinaryCmpHash(Binary inst) {
+            this.op = inst.getOp().toString();
+            this.src1 = inst.getSrc1() instanceof Immediate ? String.valueOf(((Immediate) inst.getSrc1()).getImmediate()) : inst.getSrc1().toString();
+            this.src2 = inst.getSrc2() instanceof Immediate ? String.valueOf(((Immediate) inst.getSrc2()).getImmediate()) : inst.getSrc2().toString();
+        }
+
+        BinaryCmpHash(Cmp inst) {
             this.op = inst.getOp().toString();
             this.src1 = inst.getSrc1() instanceof Immediate ? String.valueOf(((Immediate) inst.getSrc1()).getImmediate()) : inst.getSrc1().toString();
             this.src2 = inst.getSrc2() instanceof Immediate ? String.valueOf(((Immediate) inst.getSrc2()).getImmediate()) : inst.getSrc2().toString();
@@ -82,8 +111,8 @@ class CommonSubexpressionEliminator extends Pass {
 
         @Override
         public boolean equals(Object object) {
-            if (object instanceof BinaryHash)
-                return op.equals(((BinaryHash) object).op) && src1.equals(((BinaryHash) object).src1) && src2.equals(((BinaryHash) object).src2);
+            if (object instanceof BinaryCmpHash)
+                return op.equals(((BinaryCmpHash) object).op) && src1.equals(((BinaryCmpHash) object).src1) && src2.equals(((BinaryCmpHash) object).src2);
             else
                 return false;
         }

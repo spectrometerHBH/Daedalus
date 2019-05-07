@@ -16,6 +16,10 @@ public class UnaryExprNode extends ExprNode {
         return expression;
     }
 
+    public void setOp(Op op) {
+        this.op = op;
+    }
+
     public Op getOp() {
         return op;
     }
