@@ -11,6 +11,7 @@ public class Optimizer {
     private InstructionCombiner instructionCombiner;
     private CommonSubexpressionEliminator commonSubexpressionEliminator;
     private SpillInstructor spillInstructor;
+    private DivisionModularTransformer divisionModularTransformer;
 
     public Optimizer(IRRoot irRoot) {
         ssaConstructor = new SSAConstructor(irRoot);
@@ -21,6 +22,7 @@ public class Optimizer {
         instructionCombiner = new InstructionCombiner(irRoot);
         commonSubexpressionEliminator = new CommonSubexpressionEliminator(irRoot);
         spillInstructor = new SpillInstructor(irRoot);
+        divisionModularTransformer = new DivisionModularTransformer(irRoot);
     }
 
     public boolean SimplifyCFG() {
@@ -55,8 +57,11 @@ public class Optimizer {
         return commonSubexpressionEliminator.run();
     }
 
-
     public void SpillPriorityCalculation() {
         spillInstructor.run();
+    }
+
+    public void DivisionModularTransformation() {
+        divisionModularTransformer.run();
     }
 }

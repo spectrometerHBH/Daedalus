@@ -145,7 +145,6 @@ public class X86ConstraintResolver {
                             irInstruction.postpendInstruction(new Move(basicBlock, rdx, vrdx));
                             irInstruction.postpendInstruction(new Move(basicBlock, rax, vrax));
                             ((Binary) irInstruction).setDst(vrax);
-                            break;
                         }
                         default: {
                             break;

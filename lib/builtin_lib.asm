@@ -776,6 +776,7 @@ L_036:  mov     rdi, qword [rel stdin]
         cmp     al, 9
         ja      L_036
         sub     ebx, 48
+        movsxd  rbx, ebx
         jmp     L_038
 
 
@@ -783,19 +784,19 @@ L_036:  mov     rdi, qword [rel stdin]
 
 
 ALIGN   8
-L_037:  lea     eax, [rbx+rbx*4]
-        lea     ebx, [rdx+rax*2-30H]
+L_037:  lea     rax, [rbx+rbx*4]
+        lea     rbx, [rdx+rax*2-30H]
 L_038:  mov     rdi, qword [rel stdin]
         call    _IO_getc
-        movsx   edx, al
+        movsx   rdx, al
         sub     eax, 48
         cmp     al, 9
         jbe     L_037
-        mov     eax, ebx
-        neg     eax
+        mov     rax, rbx
+        neg     rax
         test    bpl, bpl
-        cmovne  ebx, eax
-L_039:  mov     eax, ebx
+        cmovne  rbx, rax
+L_039:  mov     rax, rbx
         pop     rbx
         pop     rbp
         pop     r12
@@ -807,16 +808,23 @@ L_039:  mov     eax, ebx
 
 ALIGN   8
 L_040:  mov     rdi, qword [rel stdin]
-        movsx   eax, al
-        lea     ebx, [rax-30H]
+        movsx   ebx, al
+        sub     ebx, 48
+        movsxd  rbx, ebx
         call    _IO_getc
-        movsx   edx, al
+        movsx   rdx, al
         sub     eax, 48
         cmp     al, 9
         ja      L_039
         xor     ebp, ebp
         jmp     L_037
 
+
+
+
+
+
+ALIGN   8
 
 __builtin_toString:
         push    r12

@@ -31,7 +31,7 @@ public class Main {
 
         //compile config
         boolean test_ir = false;
-        boolean test_nasm = true;
+        boolean test_nasm = false;
         boolean DEBUG_IR = false;
 
         //for text-ir output
@@ -64,6 +64,7 @@ public class Main {
             new SemanticChecker(globalScope).visit(ast);
 
             //HIR optimization
+            new boolExpressionTransformer(globalScope).visit(ast);
             new SideEffectSolver(globalScope).visit(ast);
             new OutputIrrelevantCodeEliminator(globalScope).visit(ast);
 
@@ -78,7 +79,6 @@ public class Main {
             if (DEBUG_IR) new IRPrinter(ir_out_after_memorize).visit(irRoot);
             new GlobalVariableResolver(irRoot).run();
             if (DEBUG_IR) new IRPrinter(ir_out_after_globalVariableResolve).visit(irRoot);
-
             //LIR Optimization based on SSA
             Optimizer optimizer = new Optimizer(irRoot);
             optimizer.SimplifyCFG(true);
@@ -97,6 +97,7 @@ public class Main {
             optimizer.SimplifyCFG(true);
 
             //Codegen
+            optimizer.DivisionModularTransformation();
             new X86ConstraintResolver(irRoot).run();
             if (DEBUG_IR) new IRPrinter(ir_out_afterX86Transform).visit(irRoot);
             optimizer.SpillPriorityCalculation();
