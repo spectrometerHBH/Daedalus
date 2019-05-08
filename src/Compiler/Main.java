@@ -31,7 +31,7 @@ public class Main {
 
         //compile config
         boolean test_ir = false;
-        boolean test_nasm = true;
+        boolean test_nasm = false;
         boolean DEBUG_IR = false;
 
         //for text-ir output
@@ -73,8 +73,8 @@ public class Main {
             irBuilder.visit(ast);
             IRRoot irRoot = irBuilder.getIrRoot();
             if (DEBUG_IR) new IRPrinter(ir_out_raw).visit(irRoot);
-            new FunctionInliner(irRoot).run();
-            if (DEBUG_IR) new IRPrinter(ir_out_after_inline).visit(irRoot);
+            //new FunctionInliner(irRoot).run();
+            //if (DEBUG_IR) new IRPrinter(ir_out_after_inline).visit(irRoot);
             new MemorizationSeeker(irRoot).run();
             if (DEBUG_IR) new IRPrinter(ir_out_after_memorize).visit(irRoot);
             new GlobalVariableResolver(irRoot).run();
@@ -85,6 +85,7 @@ public class Main {
             optimizer.SSAConstruction();
             if (DEBUG_IR) new IRPrinter(ir_out_afterSSAConstruction).visit(irRoot);
             for (boolean changed = true; changed; ) {
+                //changed = optimizer.LoopInvariantCodeMotion();
                 changed = optimizer.CommonSubexpressionElimination();
                 changed |= optimizer.ConstantAndCopyPropagation();
                 changed |= optimizer.SimplifyCFG();

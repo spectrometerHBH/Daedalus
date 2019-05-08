@@ -25,6 +25,7 @@ public class Function {
     private List<Register> allParameterList = new ArrayList<>();
     private List<BasicBlock> postOrderDFSBBList = null;
     private List<BasicBlock> reversePostOrderDFSBBList = null;
+    private List<BasicBlock> reverseCFGPostOrderDFSBBList = null;
     private Set<BasicBlock> visit = null;
     private Set<VirtualRegister> globals = new HashSet<>();
     private String name;
@@ -139,6 +140,23 @@ public class Function {
             if (!visit.contains(x)) postOrderDFS(x);
         });
         reversePostOrderDFSBBList.add(nowBB);
+    }
+
+    public void calcReverseCFGPostOrderNumber() {
+        visit = new HashSet<>();
+        reverseCFGPostOrderDFSBBList = new LinkedList<>();
+        reverseCFGPostOrderDFS(exitBlock);
+        for (int i = 0; i < reverseCFGPostOrderDFSBBList.size(); i++) {
+            reverseCFGPostOrderDFSBBList.get(i).reversePostOrderNumber = i;
+        }
+    }
+
+    private void reverseCFGPostOrderDFS(BasicBlock nowBB) {
+        visit.add(nowBB);
+        nowBB.getPredecessors().forEach(x -> {
+            if (!visit.contains(x)) reverseCFGPostOrderDFS(x);
+        });
+        reverseCFGPostOrderDFSBBList.add(nowBB);
     }
 
     public boolean reachable(BasicBlock basicBlock) {

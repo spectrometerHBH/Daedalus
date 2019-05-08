@@ -12,6 +12,7 @@ public class Optimizer {
     private CommonSubexpressionEliminator commonSubexpressionEliminator;
     private SpillInstructor spillInstructor;
     private DivisionModularTransformer divisionModularTransformer;
+    private LoopInvariantCodeMover loopInvariantCodeMover;
 
     public Optimizer(IRRoot irRoot) {
         ssaConstructor = new SSAConstructor(irRoot);
@@ -63,5 +64,9 @@ public class Optimizer {
 
     public void DivisionModularTransformation() {
         divisionModularTransformer.run();
+    }
+
+    public boolean LoopInvariantCodeMotion() {
+        return loopInvariantCodeMover.run();
     }
 }

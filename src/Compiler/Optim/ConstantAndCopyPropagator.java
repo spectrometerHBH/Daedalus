@@ -228,7 +228,7 @@ class ConstantAndCopyPropagator extends Pass {
                         if (((Call) S).getParameterList().get(0) instanceof Immediate && ((Call) S).getParameterList().get(1) instanceof Immediate) {
                             changed = true;
                             int left = ((Immediate) ((Call) S).getParameterList().get(0)).getImmediate();
-                            int right = ((Immediate) ((Call) S).getParameterList().get(1)).getImmediate();
+                            int right = ((Immediate) ((Call) S).getParameterList().get(1)).getImmediate() + 1;
                             String res = irRoot.staticStringValMap.get(_this).substring(left, right);
                             StaticString staticString = new StaticString(new GlobalI64Value("__str__const", true), res);
                             irRoot.addStaticString(staticString);
@@ -265,34 +265,42 @@ class ConstantAndCopyPropagator extends Pass {
 
     private void substituteOperand(LinkedList<IRInstruction> workList, Set<IRInstruction> inQueue, IRInstruction irInstruction, Operand oldOperand, Operand newOperand) {
         if (newOperand instanceof Immediate) {
-            Set<IRInstruction> oldUses = use.get(oldOperand);
+            boolean hasPhi = false;
+            Set<IRInstruction> oldUses = new HashSet<>(use.get(oldOperand));
             for (IRInstruction user : oldUses)
                 if (user != irInstruction) {
-                    changed = true;
-                    user.replaceUseRegister(oldOperand, newOperand);
-                    if (!inQueue.contains(user)) {
-                        workList.add(user);
-                        inQueue.add(user);
-                    }
+                    if (!(user instanceof Phi)) {
+                        changed = true;
+                        use.get(oldOperand).remove(user);
+                        user.replaceUseRegister(oldOperand, newOperand);
+                        if (!inQueue.contains(user)) {
+                            workList.add(user);
+                            inQueue.add(user);
+                        }
+                    } else hasPhi = true;
                 }
-            oldUses.clear();
-            irInstruction.removeSelf();
+            if (!hasPhi) irInstruction.removeSelf();
         } else if (newOperand instanceof VirtualRegister) {
-            Set<IRInstruction> oldUses = use.get(oldOperand);
+            boolean hasPhi = false;
+            Set<IRInstruction> oldUses = new HashSet<>(use.get(oldOperand));
             Set<IRInstruction> newUses = use.get(newOperand);
             for (IRInstruction user : oldUses)
                 if (user != irInstruction) {
-                    changed = true;
-                    user.replaceUseRegister(oldOperand, newOperand);
-                    newUses.add(user);
-                    if (!inQueue.contains(user)) {
-                        workList.add(user);
-                        inQueue.add(user);
-                    }
+                    if (!(user instanceof Phi)) {
+                        changed = true;
+                        use.get(oldOperand).remove(user);
+                        user.replaceUseRegister(oldOperand, newOperand);
+                        newUses.add(user);
+                        if (!inQueue.contains(user)) {
+                            workList.add(user);
+                            inQueue.add(user);
+                        }
+                    } else hasPhi = true;
                 }
-            oldUses.clear();
-            newUses.remove(irInstruction);
-            irInstruction.removeSelf();
+            if (!hasPhi) {
+                newUses.remove(irInstruction);
+                irInstruction.removeSelf();
+            }
         }
     }
 }

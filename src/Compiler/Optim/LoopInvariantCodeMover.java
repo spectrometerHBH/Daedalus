@@ -1,5 +1,6 @@
 package Compiler.Optim;
 
+import Compiler.IR.Function;
 import Compiler.IR.IRRoot;
 
 //This pass performs loop invariant code motion, attempting to remove as much code from the body of a loop as possible.
@@ -8,14 +9,22 @@ import Compiler.IR.IRRoot;
 //LLVM Pass
 //TODO
 
-public class LoopInvariantCodeMotion extends Pass {
-    public LoopInvariantCodeMotion(IRRoot irRoot) {
+public class LoopInvariantCodeMover extends Pass {
+    public LoopInvariantCodeMover(IRRoot irRoot) {
         super(irRoot);
     }
 
     @Override
     boolean run() {
         changed = false;
+        irRoot.getFunctionMap().values().forEach(function -> {
+            calcLoopInformation(function);
+            insertPreheader(function);
+        });
         return changed;
+    }
+
+    private void insertPreheader(Function function) {
+
     }
 }

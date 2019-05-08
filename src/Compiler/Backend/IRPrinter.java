@@ -141,6 +141,7 @@ public class IRPrinter implements IRVisitor {
     @Override
     public void visit(Branch inst) {
         if (inst.defOfCond != null) {
+            inst.defOfCond.accept(this);
             String op = null;
             switch (inst.defOfCond.getOp()) {
                 case LT:
@@ -162,6 +163,7 @@ public class IRPrinter implements IRVisitor {
                     op = "sne";
                     break;
             }
+            out.print("    ");
             out.print("br " + op);
             out.println(" " + getLabel(inst.getThenBB()) + " " + getLabel(inst.getElseBB()));
         } else {

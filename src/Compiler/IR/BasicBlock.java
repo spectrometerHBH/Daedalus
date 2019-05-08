@@ -9,11 +9,17 @@ import java.util.Set;
 public class BasicBlock {
     public IRInstruction head;
     public IRInstruction tail;
+
     public BasicBlock IDOM;
     public int postOrderNumber;
+    public int reversePostOrderNumber;
     public Set<BasicBlock> DF;
     public Set<BasicBlock> DTSuccessors;
     public Set<BasicBlock> DTAllSuccessors;
+
+    public BasicBlock postIDOM;
+    public Set<BasicBlock> RDF;
+    public Set<BasicBlock> RDFSuccessors;
 
     private Function currentFunction;
     private String name;
