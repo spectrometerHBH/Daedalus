@@ -163,7 +163,7 @@ public abstract class Pass {
         return finger1;
     }
 
-    //Post-Dominance Frontier Construction¶
+    //Post-Dominance Frontier Construction
     //This pass is a simple post-dominator construction algorithm for finding post-dominator frontiers.
     //LLVM Pass
     void computeReverseDominantFrontier(Function function) {
