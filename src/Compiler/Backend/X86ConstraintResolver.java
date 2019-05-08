@@ -76,7 +76,7 @@ public class X86ConstraintResolver {
             if (i < 6)
                 function.getEntryBlock().head.prependInstruction(new Move(function.getEntryBlock(), argumentPassVRegisters.get(i), parameterList.get(i)));
             else {
-                function.getEntryBlock().head.prependInstruction(new Load(function.getEntryBlock(), new StackData(vrbp, null, new Immediate(0), new Immediate(16 + (i - 6) * 8)), parameterList.get(i)));
+                function.getEntryBlock().head.prependInstruction(new Load(function.getEntryBlock(), new StackData(vrbp, null, new Immediate(0), new Immediate(8 + i * 8)), parameterList.get(i)));
             }
 
         //modify return
