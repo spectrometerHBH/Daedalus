@@ -23,6 +23,7 @@ class InstructionCombiner extends Pass {
         irRoot.getFunctionMap().values().forEach(this::adjustCmpOperands);
         irRoot.getFunctionMap().values().forEach(function -> {
             calcDefUseChain(function);
+            calcLoopInformation(function);
             //generate Lea for single-used temporary if possible
             generateLea(function);
             //merge address calculation for single-used temporary into Load/Store
@@ -50,6 +51,10 @@ class InstructionCombiner extends Pass {
         } else return false;
     }
 
+    private int loopLevel(IRInstruction irInstruction) {
+        return belongingLoopHeaders.get(irInstruction.getCurrentBB()) == null ? 0 : belongingLoopHeaders.get(irInstruction.getCurrentBB()).size();
+    }
+
     private void generateLea(Function function) {
         function.getReversePostOrderDFSBBList().forEach(basicBlock -> {
             for (IRInstruction irInstruction = basicBlock.head; irInstruction != null; irInstruction = irInstruction.getNextInstruction()) {
@@ -62,7 +67,7 @@ class InstructionCombiner extends Pass {
                             IRInstruction resultInst = null, combineInst = null;
                             if (checkOperandToCombine(inst.getSrc1())) combineInst = def.get(inst.getSrc1());
                             else if (checkOperandToCombine(inst.getSrc2())) combineInst = def.get(inst.getSrc2());
-                            if (combineInst != null) {
+                            if (combineInst != null && loopLevel(combineInst) >= loopLevel(irInstruction)) {
                                 resultInst = ((Binary) irInstruction).combine(combineInst);
                                 if (resultInst != null) {
                                     for (Register useRegister : combineInst.getUseRegisters())

@@ -19,6 +19,7 @@ public abstract class Pass {
     protected Map<BasicBlock, Set<BasicBlock>> loopBackers;
     protected Map<BasicBlock, Set<BasicBlock>> belongingLoopHeaders;
     protected Map<BasicBlock, Set<BasicBlock>> loopGroups;
+    protected Map<BasicBlock, Set<BasicBlock>> loopExits;
     //instruction collection
     private LinkedList<IRInstruction> allStatements;
 
@@ -193,6 +194,7 @@ public abstract class Pass {
         loopBackers = new HashMap<>();
         belongingLoopHeaders = new HashMap<>();
         loopGroups = new HashMap<>();
+        loopExits = new HashMap<>();
         for (BasicBlock basicBlock : function.getReversePostOrderDFSBBList()) {
             for (BasicBlock successor : basicBlock.getSuccessors()) {
                 if (successor.DTAllSuccessors.contains(basicBlock)) {
@@ -222,6 +224,15 @@ public abstract class Pass {
                         }
                 }
             }
+        }
+        //compute loop exits
+        for (BasicBlock loopHeader : loopHeaders) {
+            loopExits.put(loopHeader, new HashSet<>());
+            for (BasicBlock loopMember : loopGroups.get(loopHeader))
+                for (BasicBlock successor : loopMember.getSuccessors())
+                    if (!loopGroups.get(loopHeader).contains(successor)) {
+                        loopExits.get(loopHeader).add(loopMember);
+                    }
         }
     }
 }

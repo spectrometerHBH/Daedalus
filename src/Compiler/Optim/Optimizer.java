@@ -11,8 +11,7 @@ public class Optimizer {
     private InstructionCombiner instructionCombiner;
     private CommonSubexpressionEliminator commonSubexpressionEliminator;
     private SpillInstructor spillInstructor;
-    private DivisionModularTransformer divisionModularTransformer;
-    private LoopInvariantCodeMover loopInvariantCodeMover;
+    private ArithmeticTransformer arithmeticTransformer;
 
     public Optimizer(IRRoot irRoot) {
         ssaConstructor = new SSAConstructor(irRoot);
@@ -23,14 +22,14 @@ public class Optimizer {
         instructionCombiner = new InstructionCombiner(irRoot);
         commonSubexpressionEliminator = new CommonSubexpressionEliminator(irRoot);
         spillInstructor = new SpillInstructor(irRoot);
-        divisionModularTransformer = new DivisionModularTransformer(irRoot);
+        arithmeticTransformer = new ArithmeticTransformer(irRoot);
     }
 
-    public boolean SimplifyCFG() {
+    public boolean CFGSimplification() {
         return cfgSimplifier.run();
     }
 
-    public void SimplifyCFG(boolean eliminateOK) {
+    public void CFGSimplification(boolean eliminateOK) {
         cfgSimplifier.runMore();
     }
 
@@ -62,11 +61,7 @@ public class Optimizer {
         spillInstructor.run();
     }
 
-    public void DivisionModularTransformation() {
-        divisionModularTransformer.run();
-    }
-
-    public boolean LoopInvariantCodeMotion() {
-        return loopInvariantCodeMover.run();
+    public void ArithmeticTransformation() {
+        arithmeticTransformer.run();
     }
 }

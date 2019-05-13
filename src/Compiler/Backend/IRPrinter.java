@@ -49,7 +49,7 @@ public class IRPrinter implements IRVisitor {
         boolean isVoid = function.getReturnInstList().get(0).getReturnValue() == null;
         out.print("define " + (isVoid ? "void " : "i64 ") + "@" + function.getName() + " ");
         //if (function.getReferenceForClassMethod() != null) function.getReferenceForClassMethod().accept(this);
-        out.print(" ");
+        //out.print(" ");
         //function.getParameterList().forEach(x -> {
         //    x.accept(this);
         //    out.print(" ");

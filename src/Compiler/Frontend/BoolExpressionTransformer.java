@@ -11,11 +11,11 @@ import java.util.Map;
 //2. without class member expression
 //3. without division or modular
 
-public class boolExpressionTransformer implements ASTVisitor {
+public class BoolExpressionTransformer implements ASTVisitor {
     public static Map<ASTNode, Boolean> trivialNodeMap = new HashMap<>();
     private boolean collectMode;
 
-    public boolExpressionTransformer() {
+    public BoolExpressionTransformer() {
     }
 
     @Override

@@ -2,7 +2,7 @@ package Compiler.Backend;
 
 import Compiler.AST.*;
 import Compiler.Configuration;
-import Compiler.Frontend.boolExpressionTransformer;
+import Compiler.Frontend.BoolExpressionTransformer;
 import Compiler.IR.BasicBlock;
 import Compiler.IR.Function;
 import Compiler.IR.IRRoot;
@@ -180,7 +180,7 @@ public class IRBuilder implements ASTVisitor {
         BasicBlock condBB = new BasicBlock(currentFunction, "while_cond");
         BasicBlock bodyBB = new BasicBlock(currentFunction, "while_body");
         BasicBlock mergeBB = new BasicBlock(currentFunction, "while_merge");
-        node.setStepBB(bodyBB);
+        node.setStepBB(condBB);
         node.setMergeBB(mergeBB);
         //generate cond
         currentBB.terminate(new Jump(currentBB, condBB));
@@ -695,7 +695,7 @@ public class IRBuilder implements ASTVisitor {
 
     //lhs(Register/Memory) = rhsExpr(Register/Memory/Immediate)
     private void assign(Operand lhs, ExprNode rhsExpr) {
-        if (rhsExpr.isBoolean() && !boolExpressionTransformer.trivialNodeMap.get(rhsExpr)) {
+        if (rhsExpr.isBoolean() && !BoolExpressionTransformer.trivialNodeMap.get(rhsExpr)) {
             BasicBlock thenBB = new BasicBlock(currentFunction, "thenBB");
             BasicBlock elseBB = new BasicBlock(currentFunction, "elseBB");
             BasicBlock mergeBB = new BasicBlock(currentFunction, "mergeBB");
@@ -830,20 +830,4 @@ public class IRBuilder implements ASTVisitor {
             return true;
         } else return false;
     }
-
-    /*
-    private boolean stringLengthOrArraySize(FuncCallExprNode node) {
-        FunctionSymbol functionSymbol = node.getFunction().getFunctionSymbol();
-        String functionName = functionSymbol.getSymbolName();
-        if (functionSymbol.isMemberFunction()) {
-            if ((functionSymbol.getEnclosingScope() == globalScope.getString() && functionName.equals("length"))
-                    || functionName.equals("array.size")) {
-                node.getFunction().accept(this);
-                Operand objectPointer = node.getFunction().getResultOperand();
-                node.setResultOperand(new I64Value());
-                currentBB.appendInst(new Load(currentBB, objectPointer, node.getResultOperand()));
-                return true;
-            } else return false;
-        } else return false;
-    }*/
 }

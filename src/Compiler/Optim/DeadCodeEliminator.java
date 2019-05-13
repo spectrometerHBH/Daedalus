@@ -7,7 +7,6 @@ import Compiler.IR.Instruction.*;
 import Compiler.IR.Operand.Register;
 
 import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.Set;
 
 //Dead Code Elimination
@@ -25,10 +24,6 @@ class DeadCodeEliminator extends Pass {
     @Override
     boolean run() {
         changed = false;
-        /*irRoot.getFunctionMap().values().forEach(function -> {
-            calcDefUseChain(function);
-            naiveDeadCodeElimination();
-        });*/
         irRoot.getFunctionMap().values().forEach(function -> {
             calcDefUseChain(function);
             computePostDominateTree(function);
@@ -36,33 +31,6 @@ class DeadCodeEliminator extends Pass {
             aggressiveDeadCodeElimination(function);
         });
         return changed;
-    }
-
-    private boolean hasSideEffects(IRInstruction irInstruction) {
-        return irInstruction instanceof Call || irInstruction instanceof Alloc;
-    }
-
-    private void naiveDeadCodeElimination() {
-        LinkedList<Register> workList = new LinkedList<>(def.keySet());
-        Set<Register> inQueue = new HashSet<>(def.keySet());
-        while (!workList.isEmpty()) {
-            Register v = workList.poll();
-            inQueue.remove(v);
-            if (use.get(v).isEmpty()) {
-                IRInstruction S = def.get(v);
-                if (S != null && !hasSideEffects(S)) {
-                    changed = true;
-                    S.removeSelf();
-                    for (Register useRegister : S.getUseRegisters()) {
-                        use.get(useRegister).remove(S);
-                        if (!inQueue.contains(useRegister)) {
-                            workList.add(useRegister);
-                            inQueue.add(useRegister);
-                        }
-                    }
-                }
-            }
-        }
     }
 
     private void aggressiveDeadCodeElimination(Function function) {

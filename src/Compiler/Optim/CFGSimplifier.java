@@ -31,7 +31,6 @@ class CFGSimplifier extends Pass {
         irRoot.getFunctionMap().forEach((name, function) -> {
             convertClearBranch(function);
             removeUnreachableBB(function);
-            mergeBB(function);
         });
         return changed;
     }

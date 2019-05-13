@@ -182,6 +182,8 @@ public class X86CodeEmitter implements IRVisitor {
             case MOD: {
                 printInstruction("cdq");
                 printInstruction("idiv ecx");
+                if (inst.getOp() == Binary.Op.DIV) printInstruction("movsx rax, eax");
+                else printInstruction("movsx rdx, edx");
                 return;
             }
             case MUL:
@@ -330,7 +332,8 @@ public class X86CodeEmitter implements IRVisitor {
 
     @Override
     public void visit(Jump inst) {
-        out.println(indent + "jmp " + getLabel(inst.getTargetBB()));
+        if (inst.getTargetBB().postOrderNumber != inst.getCurrentBB().postOrderNumber - 1)
+            out.println(indent + "jmp " + getLabel(inst.getTargetBB()));
     }
 
     @Override

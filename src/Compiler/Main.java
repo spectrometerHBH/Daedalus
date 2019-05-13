@@ -47,7 +47,7 @@ public class Main {
         PrintStream nasm = test_nasm ? new PrintStream(System.out) : new PrintStream("out.asm");
 
         //for IR interpreter test use
-        FileInputStream ir_test_in = new FileInputStream("ir_out_after_codegen.ll");
+        FileInputStream ir_test_in = new FileInputStream("ir_raw.ll");
         DataInputStream ir_data_in = new DataInputStream(System.in);
         PrintStream ir_data_out = new PrintStream(new FileOutputStream("ir_test_out.txt"));
 
@@ -64,7 +64,7 @@ public class Main {
             new SemanticChecker(globalScope).visit(ast);
 
             //HIR optimization
-            new boolExpressionTransformer().visit(ast);
+            new BoolExpressionTransformer().visit(ast);
             new SideEffectSolver(globalScope).visit(ast);
             new OutputIrrelevantCodeEliminator(globalScope).visit(ast);
 
@@ -79,31 +79,31 @@ public class Main {
             if (DEBUG_IR) new IRPrinter(ir_out_after_memorize).visit(irRoot);
             new GlobalVariableResolver(irRoot).run();
             if (DEBUG_IR) new IRPrinter(ir_out_after_globalVariableResolve).visit(irRoot);
+
             //LIR Optimization based on SSA
             Optimizer optimizer = new Optimizer(irRoot);
-            optimizer.SimplifyCFG(true);
+            optimizer.CFGSimplification();
             optimizer.SSAConstruction();
             if (DEBUG_IR) new IRPrinter(ir_out_afterSSAConstruction).visit(irRoot);
             for (boolean changed = true; changed; ) {
-                //changed = optimizer.LoopInvariantCodeMotion();
                 changed = optimizer.CommonSubexpressionElimination();
                 changed |= optimizer.ConstantAndCopyPropagation();
-                changed |= optimizer.SimplifyCFG();
+                changed |= optimizer.CFGSimplification();
                 changed |= optimizer.DeadCodeElimination();
-                changed |= optimizer.SimplifyCFG();
+                changed |= optimizer.CFGSimplification();
             }
             optimizer.InstructionCombination();
             if (DEBUG_IR) new IRPrinter(ir_out_afterOptimization).visit(irRoot);
             optimizer.SSADestruction();
-            optimizer.SimplifyCFG(true);
+            optimizer.CFGSimplification(true);
 
             //Codegen
-            optimizer.DivisionModularTransformation();
+            optimizer.ArithmeticTransformation();
             new X86ConstraintResolver(irRoot).run();
             if (DEBUG_IR) new IRPrinter(ir_out_afterX86Transform).visit(irRoot);
             optimizer.SpillPriorityCalculation();
             new RegisterAllocator(irRoot).run();
-            optimizer.SimplifyCFG(true);
+            optimizer.CFGSimplification(true);
             if (DEBUG_IR) new IRPrinter(ir_codegen_without_color).visit(irRoot);
             if (DEBUG_IR) new IRPrinter(ir_codegen, true).visit(irRoot);
             new X86CodeEmitter(irRoot, nasm).run();

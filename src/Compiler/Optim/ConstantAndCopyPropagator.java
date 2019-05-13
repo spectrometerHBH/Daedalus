@@ -94,6 +94,24 @@ class ConstantAndCopyPropagator extends Pass {
                     S.replaceInstruction(newMove);
                     workList.add(newMove);
                     inQueue.add(newMove);
+                } else if (((Binary) S).getOp() == Binary.Op.ADD) {
+                    if (((Binary) S).getSrc1() instanceof Immediate) {
+                        if (((Immediate) ((Binary) S).getSrc1()).getImmediate() == 0) {
+                            changed = true;
+                            Move newMove = new Move(inst.getCurrentBB(), ((Binary) S).getSrc2(), inst.getDst());
+                            S.replaceInstruction(newMove);
+                            workList.add(newMove);
+                            inQueue.add(newMove);
+                        }
+                    } else if (((Binary) S).getSrc2() instanceof Immediate) {
+                        if (((Immediate) ((Binary) S).getSrc2()).getImmediate() == 0) {
+                            changed = true;
+                            Move newMove = new Move(inst.getCurrentBB(), ((Binary) S).getSrc1(), inst.getDst());
+                            S.replaceInstruction(newMove);
+                            workList.add(newMove);
+                            inQueue.add(newMove);
+                        }
+                    }
                 }
             } else if (S instanceof Unary) {
                 Unary inst = (Unary) S;

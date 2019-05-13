@@ -671,7 +671,7 @@ public class OutputIrrelevantCodeEliminator implements ASTVisitor {
             init(node);
         } else if (solveMode) {
 
-        } else if (cleanMode) {
+        } else if (debugMode) {
             debugln("NullLiteral");
         }
     }
@@ -682,7 +682,7 @@ public class OutputIrrelevantCodeEliminator implements ASTVisitor {
             init(node);
         } else if (solveMode) {
 
-        } else if (cleanMode) {
+        } else if (debugMode) {
             debugln("StringLiteral");
             addIndent();
             debugln(node.getVal());
