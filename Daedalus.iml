@@ -8,5 +8,8 @@
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" name="lib" level="project" />
+    <orderEntry type="library" name="antlr-4.7.1-complete (2)" level="project" />
+    <orderEntry type="library" name="commons-lang3-3.8.1 (2)" level="project" />
+    <orderEntry type="library" name="commons-text-1.6 (2)" level="project" />
   </component>
 </module>
