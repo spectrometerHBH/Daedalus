@@ -52,7 +52,7 @@ public class Main {
             irBuilder.visit(ast);
             IRRoot irRoot = irBuilder.getIrRoot();
             new FunctionInliner(irRoot).run();
-            new MemorizationSeeker(irRoot).run();
+            //new MemorizationSeeker(irRoot).run();
             new GlobalVariableResolver(irRoot).run();
 
             //LIR Optimization based on SSA
