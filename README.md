@@ -25,4 +25,3 @@ Additionally, I implemented an interpreter for IR inherited from Lequn Chen(abcd
 
 - Small optimization
   - Fast division and modular by compile time constants
-  - Memorization for trivial functions
